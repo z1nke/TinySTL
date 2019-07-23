@@ -46,7 +46,8 @@ public:
 
 // operator&
 template <typename T = void>
-struct bit_and {
+struct bit_and 
+{
     using first_argument_type  = T;
     using second_argument_type = T;
     using result_type          = T;
