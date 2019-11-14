@@ -437,14 +437,14 @@ private:
     extra::RCPtr<String_value> value;
 public:                      
     // delete user allocator version
-    cow_basic_string() : value(new String_value()) { }                     // (1)
+    cow_basic_string() : value(new String_value()) { }                      // (1)
 
 
     cow_basic_string(size_type count, CharT ch)                             // (2)
     : value(new String_value(count, ch)) { }
 
 
-    cow_basic_string(const cow_basic_string& rhs, size_type pos,                // (3)
+    cow_basic_string(const cow_basic_string& rhs, size_type pos,            // (3)
         size_type count = npos) 
     : value(new String_value(*rhs.value, pos, count)) { }
 
@@ -457,7 +457,7 @@ public:
     : value(new String_value(s)) { }
 
 
-    template <typename InIter,                                          // (6)
+    template <typename InIter,                                              // (6)
         typename = enable_if_t<is_iterator<InIter>::value>>
     cow_basic_string(InIter first, InIter last) 
     : value(new String_value(first, last)) { }
@@ -465,10 +465,10 @@ public:
 
     // call RCPtr::RCPtr(const RCPtr& rhs);
     // only add reference count
-    cow_basic_string(const cow_basic_string& rhs) = default;                    // (7)
+    cow_basic_string(const cow_basic_string& rhs) = default;                // (7)
     
 
-    cow_basic_string(cow_basic_string&& rhs) noexcept                           // (8)
+    cow_basic_string(cow_basic_string&& rhs) noexcept                       // (8)
     : value(tiny_stl::move(rhs.value)) { }
 
 
