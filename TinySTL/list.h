@@ -122,14 +122,14 @@ struct _List_iterator : _List_const_iterator<T>
     _List_iterator& operator++(int) 
     { 
         _List_const_iterator tmp = *this;
-        ptr = ptr->next;
+        _Base::ptr = _Base::ptr->next;
         return tmp;
     }
 
     _List_iterator& operator--(int) 
     { 
         _List_const_iterator tmp = *this;
-        ptr = ptr->prev;
+        _Base::ptr = _Base::ptr->prev;
         return tmp;
     }
 };  // class _List_iterator

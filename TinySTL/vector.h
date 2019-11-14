@@ -1306,9 +1306,10 @@ private:
 
             size_type newCapacity = (newSize >> 1) + newSize;
 
+            const pointer newFirst = nullptr;
             try
             {
-                const pointer newFirst = this->alloc.allocate(newCapacity);
+                newFirst = this->alloc.allocate(newCapacity);
                 _Move_or_copy(this->first, this->last, newFirst);
             }
             catch (...)
