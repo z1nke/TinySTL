@@ -1874,7 +1874,8 @@ using cow_wstring   = cow_basic_string<wchar_t>;
 using cow_u16string = cow_basic_string<char16_t>;
 using cow_u32string = cow_basic_string<char32_t>;
 
-
+#pragma warning(push)
+#pragma warning(disable: 4455)
 cow_string operator""s(const char* str, std::size_t len)
 {
     return cow_string{ str, len };
@@ -1894,12 +1895,12 @@ cow_u32string operator""s(const char32_t* str, std::size_t len)
 {
     return cow_u32string{ str, len };
 }
+#pragma warning(pop)
 
-
-// const string is effective
-// non-const string as far as possible use operations of const version 
+// const cow_string is effective
+// non-const cow_string as far as possible use operations of const version 
 // e.g.
-// string s;
+// cow_string s;
 // s.begin() -> s.cbegin()
 //
 // moreover, to distinguish between reading and writing
