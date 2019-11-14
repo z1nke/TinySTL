@@ -312,7 +312,7 @@ using _Use_memset_value_construct_t
         is_scalar<_Iterator_value_t<FwdIter>>,
         negation<is_volatile<_Iterator_value_t<FwdIter>>>,
         negation<is_member_pointer<_Iterator_value_t<FwdIter>>>
-    >;
+    >::type;
 
 template <typename FwdIter>
 inline FwdIter __Zero_memset_range(FwdIter first, FwdIter last) 
@@ -815,7 +815,7 @@ struct uses_allocator : _Has_allocator_type<Con, Alloc>::type
 };
 
 template <typename Con, typename Alloc>
-constexpr bool uses_allocator_value = uses_allocator<T, Alloc>::value;
+constexpr bool uses_allocator_value = uses_allocator<Con, Alloc>::value;
 
 
 template <typename T>
@@ -1545,6 +1545,13 @@ struct _Can_enable_shared : false_type
 {
 };
 
+template <typename F, typename Arg, typename = void>
+struct IsFunctionObject : false_type {};
+
+template <typename F, typename Arg>
+struct IsFunctionObject<F, Arg, 
+    void_t<decltype(tiny_stl::declval<F>()(tiny_stl::declval<Arg>()))>> : true_type {};
+
 // derived class is convertible to base class
 template <typename T>
 struct _Can_enable_shared<T, void_t<typename T::_Esft_unique_type>>
@@ -1749,7 +1756,7 @@ public:
     template <typename U, typename D, enable_if_t<conjunction_v<
         std::is_move_constructible<D>, 
         is_convertible<U, T>,
-        void_t<decltype(declval<D&>()(declval<T*&>()))>>, int> = 0>
+        IsFunctionObject<D&, U*&>>, int> = 0>
     shared_ptr(U* ptr, D d)
     {
         _Setpd(ptr, tiny_stl::move(d));
@@ -1757,7 +1764,7 @@ public:
 
     template <typename D, enable_if_t<conjunction_v<
         std::is_move_constructible<D>,
-        void_t<decltype(declval<D&>()(declval<T*&>()))>>, int> = 0>
+        IsFunctionObject<D&, std::nullptr_t&>>, int> = 0>
     shared_ptr(std::nullptr_t, D d)
     {
         _Setpd(nullptr, tiny_stl::move(d));
@@ -1766,7 +1773,7 @@ public:
     template <typename U, typename D, typename Alloc, enable_if_t<conjunction_v<
         std::is_move_constructible<D>,
         is_convertible<U, T>,
-        void_t<decltype(declval<D&>()(declval<U*&>()))>>, int> = 0>
+        IsFunctionObject<D&, U*&>>, int> = 0>
     shared_ptr(U* ptr, D d, Alloc alloc)
     {
         _Setpda(ptr, tiny_stl::move(d), alloc);
@@ -1774,7 +1781,7 @@ public:
 
     template <typename D, typename Alloc, enable_if_t<conjunction_v<
         std::is_move_constructible<D>,
-        void_t<decltype(declval<D&>()(declval<T*&>()))>>, int> = 0>
+        IsFunctionObject<D&, std::nullptr_t*&>>, int> = 0>
     shared_ptr(std::nullptr_t, D d, Alloc alloc)
     {
         _Setpda(nullptr, tiny_stl::move(d), alloc);
@@ -1828,7 +1835,7 @@ public:
         const U* ptr = other.get();
 
         using Deleter = conditional_t<is_reference_v<D>,
-            decltype(std::ref(rhs.get_deleter())),
+            decltype(std::ref(other.get_deleter())),
             D>;
 
         if (ptr)
@@ -1873,7 +1880,7 @@ public:
     template <typename U, typename D>
     shared_ptr& operator=(unique_ptr<U, D>&& other)
     {
-        shared_ptr{ tiny_stl::move(rhs) }.swap(*this);
+        shared_ptr{ tiny_stl::move(other) }.swap(*this);
         return *this;
     }
 

@@ -20,7 +20,7 @@
 #include "stack.h"
 #include "queue.h"
 #include "forward_list.h"
-#include "string.h"
+#include "cow_string.h"
 #include "string_view.h"
 #include "rbtree.h"
 #include "set.h"
@@ -155,10 +155,10 @@ void testMemory()
     buffer[4] = '\0';
     UNIT_TEST(str1, std::string(buffer));
 
-    tiny_stl::wstring wstr = L"abcd";
+    tiny_stl::cow_wstring wstr = L"abcd";
     wchar_t wbuffer[5];
     tiny_stl::uninitialized_copy(wstr.c_str(), wstr.c_str() + wstr.size() + 1, wbuffer);
-    UNIT_TEST(true, is_equal(wstr, tiny_stl::wstring(wbuffer)));
+    UNIT_TEST(true, is_equal(wstr, tiny_stl::cow_wstring(wbuffer)));
 
     using Deleter = void(*)(int*);
     tiny_stl::unique_ptr<int, Deleter> up(new int(42), [](int* p) {delete p; });
@@ -806,23 +806,23 @@ void testString()
     using std::cout;
     using std::endl;
 
-    tiny_stl::string s0;
+    tiny_stl::cow_string s0;
     //UNIT_TEST(true, s0.empty());
 
-    tiny_stl::string s1 = "1234";
+    tiny_stl::cow_string s1 = "1234";
     UNIT_TEST(4, s1.size());
     UNIT_TEST('1', *s1.begin());
     
-    tiny_stl::string s2(s1);
-    tiny_stl::string s3(tiny_stl::move(s2));
+    tiny_stl::cow_string s2(s1);
+    tiny_stl::cow_string s3(tiny_stl::move(s2));
     UNIT_TEST(true, s1 == s3);
 
     s3.front() = 'a';
     UNIT_TEST('1', *s1.begin());    // test implement of reference count
     UNIT_TEST('a', *s3.begin());
 
-    tiny_stl::string s4 = "123";
-    tiny_stl::string s5(s4);
+    tiny_stl::cow_string s4 = "123";
+    tiny_stl::cow_string s5(s4);
    
     s4.resize(1);
     UNIT_TEST(1, s4.size());
@@ -834,8 +834,8 @@ void testString()
 
     s4 = s5;
     UNIT_TEST(3, s4.size());
-    tiny_stl::string s6 = "abcd";
-    tiny_stl::string s7(s6);
+    tiny_stl::cow_string s6 = "abcd";
+    tiny_stl::cow_string s7(s6);
     UNIT_TEST(4, s7.size());
     s4 = s6;
     UNIT_TEST(4, s4.size());
@@ -847,22 +847,22 @@ void testString()
     UNIT_TEST('a', *s4.cbegin());
     UNIT_TEST('a', s7.c_front());
 
-    tiny_stl::wstring ws1 = L"abc";
+    tiny_stl::cow_wstring ws1 = L"abc";
     UNIT_TEST(L'a', *ws1.cbegin());
 
-    tiny_stl::string s9 = "1223442435325324";
-    tiny_stl::string s8 = s9;
+    tiny_stl::cow_string s9 = "1223442435325324";
+    tiny_stl::cow_string s8 = s9;
     s8.push_back('a');
     UNIT_TEST('a', s8.back());
     //cout << s8 << endl;
     s8.push_back('b');
     UNIT_TEST('b', s8.back());
-    tiny_stl::string s10 = "1234567891";
+    tiny_stl::cow_string s10 = "1234567891";
     s10.erase(2, 4);
     UNIT_TEST(6, s10.size());
     s10.erase(1, 10);
     UNIT_TEST(1, s10.size());
-    tiny_stl::string s11 = "123456";
+    tiny_stl::cow_string s11 = "123456";
     auto iter1 = s11.erase(--s11.end());
     UNIT_TEST(5, s11.size());
     UNIT_TEST('5', s11.back());
@@ -881,7 +881,7 @@ void testString()
     iter1 = s11.erase(s11.begin(), s11.end());
     UNIT_TEST(true, iter1 == s11.end());
 
-    tiny_stl::string s12 = "123456";
+    tiny_stl::cow_string s12 = "123456";
     UNIT_TEST(3, s12.find('4', 0));
     UNIT_TEST(static_cast<size_t>(-1), s12.find('a', 0));
     UNIT_TEST(4, s12.substr(2).size());
@@ -893,12 +893,12 @@ void testString()
     UNIT_TEST(2, s12.rfind("is", 3));
     UNIT_TEST(10, s12.rfind('s'));
 
-    tiny_stl::string s13 = "12345";
+    tiny_stl::cow_string s13 = "12345";
     
     // cout << (s13.replace(1, 2, 3, 'a')) << endl;
 
-    tiny_stl::string s14 = "  hello  ";
-    tiny_stl::string s15 = s14;
+    tiny_stl::cow_string s14 = "  hello  ";
+    tiny_stl::cow_string s15 = s14;
     s14.ltrim();
     UNIT_TEST(7, s14.size());
     UNIT_TEST(9, s15.size());

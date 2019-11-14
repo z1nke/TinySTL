@@ -9,19 +9,19 @@ namespace tiny_stl
 {
 
 template <typename T>
-struct _String_const_iterator 
+struct Cow_string_const_iterator 
 {
     using iterator_category = random_access_iterator_tag;
     using value_type        = T;
     using pointer           = const T*;
     using reference         = const T&;
     using difference_type   = ptrdiff_t;
-    using _Self             = _String_const_iterator<T>;
+    using Self             = Cow_string_const_iterator<T>;
 
     T* ptr;
 
-    _String_const_iterator() = default;
-    _String_const_iterator(T* p) : ptr(p) { }
+    Cow_string_const_iterator() = default;
+    Cow_string_const_iterator(T* p) : ptr(p) { }
 
     reference operator*() const 
     {
@@ -33,57 +33,57 @@ struct _String_const_iterator
         return pointer_traits<pointer>::pointer_to(**this);
     }
 
-    _Self& operator++() 
+    Self& operator++() 
     {
         ++ptr;
         return *this;
     }
 
-    _Self operator++(int) 
+    Self operator++(int) 
     {
-        _Self tmp = *this;
+        Self tmp = *this;
         ++*this;
         return tmp;
     }
 
-    _Self& operator--() 
+    Self& operator--() 
     {
         --ptr;
         return *this;
     }
 
-    _Self operator--(int) 
+    Self operator--(int) 
     {
-        _Self tmp = *this;
+        Self tmp = *this;
         --*this;
         return tmp;
     }
 
-    _Self& operator+=(difference_type n) 
+    Self& operator+=(difference_type n) 
     {
         ptr += n;
         return *this;
     }
 
-    _Self operator+(difference_type n) const 
+    Self operator+(difference_type n) const 
     {
-        _Self tmp = *this;
+        Self tmp = *this;
         return tmp += n;
     }
 
-    _Self& operator-=(difference_type n) 
+    Self& operator-=(difference_type n) 
     {
         ptr -= n;
         return *this;
     }
 
-    _Self operator-(difference_type n) const
+    Self operator-(difference_type n) const
     {
-        _Self tmp = *this;
+        Self tmp = *this;
         return tmp += n;
     }
 
-    difference_type operator-(const _Self& rhs) const
+    difference_type operator-(const Self& rhs) const
     {
         return this->ptr - rhs.ptr;
     }
@@ -93,50 +93,50 @@ struct _String_const_iterator
         return *(this->ptr + n);
     }
 
-    bool operator==(const _Self& rhs) const 
+    bool operator==(const Self& rhs) const 
     {
         return this->ptr == rhs.ptr;
     }
 
-    bool operator!=(const _Self& rhs) const
+    bool operator!=(const Self& rhs) const
     {
         return !(*this == rhs);
     }
 
-    bool operator<(const _Self& rhs) const 
+    bool operator<(const Self& rhs) const 
     {
         return this->ptr < rhs.ptr;
     }
 
-    bool operator>(const _Self& rhs) const 
+    bool operator>(const Self& rhs) const 
     {
         return rhs < *this;
     }
 
-    bool operator<=(const _Self& rhs) const 
+    bool operator<=(const Self& rhs) const 
     {
         return !(rhs < *this);
     }
 
-    bool operator>=(const _Self& rhs) const 
+    bool operator>=(const Self& rhs) const 
     {
         return !(*this < rhs);
     }
 };  // _String_const_iterator<T>
 
 template <typename T>
-struct _String_iterator : _String_const_iterator<T>
+struct Cow_String_iterator : Cow_string_const_iterator<T>
 {
     using iterator_category = random_access_iterator_tag;
     using value_type        = T;
     using pointer           = T*;
     using reference         = T&;
     using difference_type   = ptrdiff_t;
-    using _Base             = _String_const_iterator<T>;
-    using _Self             = _String_iterator<T>;
+    using Base             = Cow_string_const_iterator<T>;
+    using Self             = Cow_String_iterator<T>;
 
-    _String_iterator() = default;
-    _String_iterator(T* p) : _Base(p) { }
+    Cow_String_iterator() = default;
+    Cow_String_iterator(T* p) : Base(p) { }
 
     reference operator*() const 
     {
@@ -148,57 +148,57 @@ struct _String_iterator : _String_const_iterator<T>
         return pointer_traits<pointer>::pointer_to(**this);
     }
 
-    _Self& operator++() 
+    Self& operator++() 
     {
-        ++*static_cast<_Base*>(this);
+        ++*static_cast<Base*>(this);
         return *this;
     }
 
-    _Self operator++(int)
+    Self operator++(int)
     {
-        _Self tmp = *this;
+        Self tmp = *this;
         ++*this;
         return tmp;
     }
 
-    _Self& operator--() 
+    Self& operator--() 
     {
-        --*static_cast<_Base*>(this);
+        --*static_cast<Base*>(this);
         return *this;
     }
 
-    _Self operator--(int)
+    Self operator--(int)
     {
-        _Self tmp = *this;
+        Self tmp = *this;
         --*this;
         return tmp;
     }
 
-    _Self& operator+=(difference_type n)
+    Self& operator+=(difference_type n)
     {
-        *static_cast<_Base*>(this) += n;
+        *static_cast<Base*>(this) += n;
         return *this;
     }
 
-    _Self operator+(difference_type n) const 
+    Self operator+(difference_type n) const 
     {
-        _Self tmp = *this;
+        Self tmp = *this;
         return tmp += n;
     }
 
-    _Self& operator-=(difference_type n)
+    Self& operator-=(difference_type n)
     {
-        *static_cast<_Base*>(this) -= n;
+        *static_cast<Base*>(this) -= n;
         return *this;
     }
 
-    _Self operator-(difference_type n) const 
+    Self operator-(difference_type n) const 
     {
-        _Self tmp = *this;
+        Self tmp = *this;
         return tmp -= n;
     }
 
-    difference_type operator-(const _Self& rhs) const
+    difference_type operator-(const Self& rhs) const
     {
         return this->ptr - rhs.ptr;
     }
@@ -326,7 +326,7 @@ public:
 template <typename CharT,
     typename Traits = std::char_traits<CharT>,
     typename Alloc = allocator<CharT>>
-class basic_string 
+class cow_basic_string 
 {
 public:
     static_assert(is_same<typename Traits::char_type, CharT>::value, 
@@ -342,8 +342,8 @@ public:
     using const_reference        = const CharT&;
     using pointer                = CharT*;
     using const_pointer          = const CharT*;
-    using iterator               = _String_iterator<CharT>;
-    using const_iterator         = _String_const_iterator<CharT>;
+    using iterator               = Cow_String_iterator<CharT>;
+    using const_iterator         = Cow_string_const_iterator<CharT>;
     using reverse_iterator       = tiny_stl::reverse_iterator<iterator>;
     using const_reverse_iterator = tiny_stl::reverse_iterator<const_iterator>;
 
@@ -353,7 +353,7 @@ public:
 private:
     // nested struct
     // manage resources
-    struct _String_value : public extra::RCObject 
+    struct String_value : public extra::RCObject 
     {
         size_type size;
         size_type capa;
@@ -380,31 +380,31 @@ private:
             data[size] = traits_type::to_char_type(0);
         }
 
-        explicit _String_value()
+        explicit String_value()
         : size(0), capa(8), alloc()   // 8 is the smallest capacity
         { 
             _Init();
         }
 
-        _String_value(const CharT* s) 
+        String_value(const CharT* s) 
         : size(traits_type::length(s)), capa(size < 8 ? 8 : size + 1), alloc()
         {
             _Init(s);
         }
 
-        _String_value(const CharT* s, size_type count) 
+        String_value(const CharT* s, size_type count) 
         : size(count), capa(size < 8 ? 8 : size + 1), alloc()
         {
             _Init(s);
         }
 
-        _String_value(size_type count, CharT ch) 
+        String_value(size_type count, CharT ch) 
         : size(count), capa(size < 8 ? 8 : size + 1), alloc()
         {
             _Init(count, ch);
         }
 
-        _String_value(const _String_value& rhs, size_type pos, size_type count)
+        String_value(const String_value& rhs, size_type pos, size_type count)
         : size(count < rhs.size - pos ? count : rhs.size - pos), 
             capa(size < 8 ? 8 : size + 1), alloc()
         {
@@ -414,7 +414,7 @@ private:
 
         template <typename InIter, 
             typename = enable_if_t<is_iterator<InIter>::value>>
-        _String_value(InIter first, InIter last)
+        String_value(InIter first, InIter last)
         : size(tiny_stl::distance(first, last)), 
             capa(size < 8 ? 8 : size + 1), alloc()
         {
@@ -426,7 +426,7 @@ private:
             data[size] = traits_type::to_char_type(0);
         }
 
-        ~_String_value() 
+        ~String_value() 
         {
             if (data != nullptr)
                 alloc.deallocate(data, capa);
@@ -434,46 +434,46 @@ private:
     };
 
     // like smart pointer
-    extra::RCPtr<_String_value> value;
+    extra::RCPtr<String_value> value;
 public:                      
     // delete user allocator version
-    basic_string() : value(new _String_value()) { }                     // (1)
+    cow_basic_string() : value(new String_value()) { }                     // (1)
 
 
-    basic_string(size_type count, CharT ch)                             // (2)
-    : value(new _String_value(count, ch)) { }
+    cow_basic_string(size_type count, CharT ch)                             // (2)
+    : value(new String_value(count, ch)) { }
 
 
-    basic_string(const basic_string& rhs, size_type pos,                // (3)
+    cow_basic_string(const cow_basic_string& rhs, size_type pos,                // (3)
         size_type count = npos) 
-    : value(new _String_value(*rhs.value, pos, count)) { }
+    : value(new String_value(*rhs.value, pos, count)) { }
 
 
-    basic_string(const CharT* s, size_type count)                       // (4)
-    : value(new _String_value(s, count)) { }
+    cow_basic_string(const CharT* s, size_type count)                       // (4)
+    : value(new String_value(s, count)) { }
 
 
-    basic_string(const CharT* s)                                        // (5)
-    : value(new _String_value(s)) { }
+    cow_basic_string(const CharT* s)                                        // (5)
+    : value(new String_value(s)) { }
 
 
     template <typename InIter,                                          // (6)
         typename = enable_if_t<is_iterator<InIter>::value>>
-    basic_string(InIter first, InIter last) 
-    : value(new _String_value(first, last)) { }
+    cow_basic_string(InIter first, InIter last) 
+    : value(new String_value(first, last)) { }
 
 
     // call RCPtr::RCPtr(const RCPtr& rhs);
     // only add reference count
-    basic_string(const basic_string& rhs) = default;                    // (7)
+    cow_basic_string(const cow_basic_string& rhs) = default;                    // (7)
     
 
-    basic_string(basic_string&& rhs) noexcept                           // (8)
+    cow_basic_string(cow_basic_string&& rhs) noexcept                           // (8)
     : value(tiny_stl::move(rhs.value)) { }
 
 
-    basic_string(std::initializer_list<CharT> ilist)                    // (9)
-    : value(new _String_value(ilist.begin(), 
+    cow_basic_string(std::initializer_list<CharT> ilist)                    // (9)
+    : value(new String_value(ilist.begin(), 
         ilist.end() - ilist.begin()))  { }
 
     allocator_type get_allocator()
@@ -482,7 +482,7 @@ public:
     }
 
 
-    basic_string& operator=(const basic_string& rhs)
+    cow_basic_string& operator=(const cow_basic_string& rhs)
     {
         assert(this != tiny_stl::addressof(rhs));
         value = rhs.value;
@@ -490,7 +490,7 @@ public:
         return *this;
     }
 
-    basic_string& operator=(basic_string&& rhs) noexcept
+    cow_basic_string& operator=(cow_basic_string&& rhs) noexcept
     {
         assert(this != tiny_stl::addressof(rhs));
         value = tiny_stl::move(rhs.value);
@@ -498,37 +498,37 @@ public:
         return *this;
     }
 
-    basic_string& operator=(const CharT* s)
+    cow_basic_string& operator=(const CharT* s)
     {
         assert(s != nullptr);
-        value = new _String_value(s);
+        value = new String_value(s);
 
         return *this;
     }
 
-    basic_string& operator=(CharT ch)   // the interface....
+    cow_basic_string& operator=(CharT ch)   // the interface....
     {
-        value = new _String_value(1, ch);
+        value = new String_value(1, ch);
 
         return *this;
     }
 
-    basic_string& operator=(std::initializer_list<CharT>& ilist)
+    cow_basic_string& operator=(std::initializer_list<CharT>& ilist)
     {
-        value = new _String_value(ilist.begin(),
+        value = new String_value(ilist.begin(),
                 ilist.end() - ilist.begin());
 
         return *this;
     }
 
-    basic_string& assign(size_type count, CharT ch)
+    cow_basic_string& assign(size_type count, CharT ch)
     {
-        value = new _String_value(count, ch);
+        value = new String_value(count, ch);
 
         return *this;
     }
 
-    basic_string& assign(const basic_string& rhs)
+    cow_basic_string& assign(const cow_basic_string& rhs)
     {
         assert(this != tiny_stl::addressof(rhs));
         
@@ -536,15 +536,15 @@ public:
         return *this;
     }
 
-    basic_string& assign(const basic_string& rhs, 
+    cow_basic_string& assign(const cow_basic_string& rhs, 
                 size_type pos, size_type count = npos)
     {
-        value = new _String_value(*rhs.value, pos, count);
+        value = new String_value(*rhs.value, pos, count);
 
         return *this;
     }
 
-    basic_string& assign(basic_string&& rhs)
+    cow_basic_string& assign(cow_basic_string&& rhs)
     {
         assert(this != tiny_stl::addressof(rhs));
         value = tiny_stl::move(rhs.value);
@@ -552,34 +552,34 @@ public:
         return *this;
     }
 
-    basic_string& assign(const CharT* s, size_type count)
+    cow_basic_string& assign(const CharT* s, size_type count)
     {
         assert(s != nullptr);
 
-        value = new _String_value(s, count);
+        value = new String_value(s, count);
         return *this;
     }
 
-    basic_string& assign(const CharT* s)
+    cow_basic_string& assign(const CharT* s)
     {
         assert(s != nullptr);
-        value = new _String_value(s);
+        value = new String_value(s);
 
         return *this;
     }
 
     template <typename InIter,
         typename = enable_if_t<is_iterator<InIter>::value>>
-    basic_string& assign(InIter first, InIter last)
+    cow_basic_string& assign(InIter first, InIter last)
     {
-        value = new _String_value(first, last - first);
+        value = new String_value(first, last - first);
 
         return *this;
     }
 
-    basic_string& assign(std::initializer_list<CharT> ilist)
+    cow_basic_string& assign(std::initializer_list<CharT> ilist)
     {
-        value = new _String_value(ilist.begin(), 
+        value = new String_value(ilist.begin(), 
                     ilist.end() - ilist.begin());
 
         return *this;
@@ -592,7 +592,7 @@ public:
             _Xrange();
 #endif
         if (value->is_shared())
-            value = new _String_value(value->data); // copy when reference access 
+            value = new String_value(value->data); // copy when reference access 
 
         return *(value->data + pos);
     }
@@ -612,7 +612,7 @@ public:
         assert(pos <= size());
 
         if (value->is_shared())
-            value = new _String_value(value->data); // copy when reference access 
+            value = new String_value(value->data); // copy when reference access 
 
         // ub: modify this->operator[size()] 
         return *(value->data + pos);
@@ -656,7 +656,7 @@ public:
     pointer data() noexcept
     {
         if (value->is_shared())
-            value = new _String_value(value->data);
+            value = new String_value(value->data);
 
         return value->data;
     }
@@ -674,7 +674,7 @@ public:
     iterator begin() noexcept
     {
         if (value->is_shared())
-            value = new _String_value(value->data);
+            value = new String_value(value->data);
 
         return iterator(value->data);
     }
@@ -692,7 +692,7 @@ public:
     iterator end() noexcept
     {
         if (value->is_shared())
-            value = new _String_value(value->data);
+            value = new String_value(value->data);
 
         return iterator(value->data + value->size);
     }
@@ -770,7 +770,7 @@ public:
     void clear() noexcept
     {
         if (this->_Is_shared())
-            value = new _String_value(value->data);
+            value = new String_value(value->data);
 
         value->size = 0;
     }
@@ -801,7 +801,7 @@ private:
         _CheckLength(count);
 
         if (this->_Is_shared())
-            value = new _String_value(value->data);
+            value = new String_value(value->data);
 
         if (count < size()) // count < old size
         {
@@ -848,7 +848,7 @@ public:
     void reserve(size_type new_cap = 0)
     {
         if (this->_Is_shared())
-            value = new _String_value(value->data);
+            value = new String_value(value->data);
 
         _CheckLength(new_cap);
 
@@ -895,7 +895,7 @@ public:
     void push_back(CharT ch)
     {
         if (this->_Is_shared())
-            value = new _String_value(value->data);
+            value = new String_value(value->data);
 
         size_type oldCapacity = capacity();
         if (value->size == oldCapacity - 1) // reallocate
@@ -909,11 +909,11 @@ public:
         value->data[value->size] = traits_type::to_char_type(0);
     }
 
-    basic_string& erase(size_type index = 0, size_type count = npos)
+    cow_basic_string& erase(size_type index = 0, size_type count = npos)
     {
         assert(index < size());
         if (this->_Is_shared())
-            value = new _String_value(value->data);
+            value = new String_value(value->data);
 
         size_type realCount = tiny_stl::min(size() - index, count);
 
@@ -947,7 +947,7 @@ public:
 
 
 public:
-    basic_string& append(size_type count, CharT ch)
+    cow_basic_string& append(size_type count, CharT ch)
     {
         size_type oldSize = size();
         size_type newSize = oldSize + count;
@@ -955,7 +955,7 @@ public:
         _CheckLength(newSize);
 
         if (this->_Is_shared())
-            value = new _String_value(value->data);
+            value = new String_value(value->data);
 
         if (count >= value->capa - oldSize)  // reallocate
             _Reallocte(newSize);
@@ -967,7 +967,7 @@ public:
         return *this;
     }
 
-    basic_string& append(const basic_string& str)
+    cow_basic_string& append(const cow_basic_string& str)
     {
         const size_type count = str.size();
 
@@ -977,7 +977,7 @@ public:
         _CheckLength(newSize);
 
         if (this->_Is_shared())
-            value = new _String_value(value->data);
+            value = new String_value(value->data);
 
         if (count >= value->capa - oldSize)
             _Reallocte(newSize);
@@ -989,14 +989,14 @@ public:
         return *this;
     }
 
-    basic_string& append(const basic_string& str, size_type pos, size_type count = npos)
+    cow_basic_string& append(const cow_basic_string& str, size_type pos, size_type count = npos)
     {
         assert(pos <= str.size());
 
         return append(str.c_str() + pos, count);
     }
 
-    basic_string& append(const CharT* s, size_type count)
+    cow_basic_string& append(const CharT* s, size_type count)
     {
         count = tiny_stl::min(count, traits_type::length(s));
         size_type oldSize = size();
@@ -1005,7 +1005,7 @@ public:
         _CheckLength(newSize);
 
         if (this->_Is_shared())
-            value = new _String_value(value->data);
+            value = new String_value(value->data);
 
         if (count >= value->capa - oldSize)
             _Reallocte(newSize);
@@ -1017,48 +1017,48 @@ public:
         return *this;
     }
 
-    basic_string& append(const CharT* s)
+    cow_basic_string& append(const CharT* s)
     {
         return append(s, traits_type::length(s));
     }
 
     template <typename InIter, 
         typename = enable_if_t<is_iterator<InIter>::value>>
-    basic_string& append(InIter first, InIter last)
+    cow_basic_string& append(InIter first, InIter last)
     {
-        basic_string str{ first, last };
+        cow_basic_string str{ first, last };
 
         return append(str);
     }
 
-    basic_string& append(std::initializer_list<CharT> ilist)
+    cow_basic_string& append(std::initializer_list<CharT> ilist)
     {
-        basic_string str{ ilist };
+        cow_basic_string str{ ilist };
 
         return append(str);
     }
 
-    basic_string& operator+=(const basic_string& str)
+    cow_basic_string& operator+=(const cow_basic_string& str)
     {
         return append(str);
     }
 
-    basic_string& operator+=(CharT ch)
+    cow_basic_string& operator+=(CharT ch)
     {
         return append(1, ch);
     }
 
-    basic_string& operator+=(const CharT* s)
+    cow_basic_string& operator+=(const CharT* s)
     {
         return append(s);
     }
 
-    basic_string& operator+=(std::initializer_list<CharT> ilist)
+    cow_basic_string& operator+=(std::initializer_list<CharT> ilist)
     {
         return append(ilist);
     }
 
-    basic_string& insert(size_type pos, size_type count, CharT ch)
+    cow_basic_string& insert(size_type pos, size_type count, CharT ch)
     {
         size_type oldSize = size();
         size_type newSize = oldSize + count;
@@ -1066,7 +1066,7 @@ public:
         _CheckLengthAndRange(newSize, pos, oldSize);
 
         if (this->_Is_shared())
-            value = new _String_value(value->data);
+            value = new String_value(value->data);
         
         if (count < capacity() - oldSize)   // no reallocate
         {
@@ -1092,7 +1092,7 @@ public:
         return *this;
     }
 
-    basic_string& insert(size_type pos, const CharT* s, size_type count)
+    cow_basic_string& insert(size_type pos, const CharT* s, size_type count)
     {
         size_type oldSize = size();
         size_type newSize = oldSize + count;
@@ -1100,7 +1100,7 @@ public:
         _CheckLengthAndRange(newSize, pos, oldSize);
 
         if (this->_Is_shared())
-            value = new _String_value(value->data);
+            value = new String_value(value->data);
 
         if (count < capacity() - oldSize)   // no reallocate
         {
@@ -1126,17 +1126,17 @@ public:
         return *this;
     }
 
-    basic_string& insert(size_type pos, const CharT* s)
+    cow_basic_string& insert(size_type pos, const CharT* s)
     {
         return insert(pos, s, traits_type::length(s));
     }
 
-    basic_string& insert(size_type pos, const basic_string& str)
+    cow_basic_string& insert(size_type pos, const cow_basic_string& str)
     {
         return insert(pos, str.c_str());
     }
 
-    basic_string& insert(size_type pos, const basic_string& str, 
+    cow_basic_string& insert(size_type pos, const cow_basic_string& str, 
                          size_type str_pos, size_type count = npos)
     {
         _CheckRange(str_pos, str.size());
@@ -1165,7 +1165,7 @@ public:
     iterator insert(const_iterator pos, InIter first, InIter last)
     {
         size_type offset = pos - begin();
-        insert(offset, basic_string(first, last));
+        insert(offset, cow_basic_string(first, last));
 
         return begin() + offset;
     }
@@ -1177,31 +1177,31 @@ public:
 
 
     // Replaces the part of the string indicated by either[pos, pos + count) or [first, last)
-    basic_string& replace(size_type pos, size_type count, const basic_string& str)
+    cow_basic_string& replace(size_type pos, size_type count, const cow_basic_string& str)
     {
         return replace(pos, count, str.c_str(), str.size());
     }
 
-    basic_string& replace(const_iterator first, const_iterator last, const basic_string& str)
+    cow_basic_string& replace(const_iterator first, const_iterator last, const cow_basic_string& str)
     {
         return replace(first, last, str.c_str(), str.size());
     }
 
-    basic_string& replace(size_type pos, size_type count, 
-        const basic_string& str, size_type pos2, size_type count2 = npos)
+    cow_basic_string& replace(size_type pos, size_type count, 
+        const cow_basic_string& str, size_type pos2, size_type count2 = npos)
     {
         return replace(pos, count, str.substr(pos, count));
     }
 
     template <typename InIter, 
         typename = enable_if_t<is_iterator<InIter>::value>>
-    basic_string& replace(const_iterator first, const_iterator last, 
+    cow_basic_string& replace(const_iterator first, const_iterator last, 
                           InIter first2, InIter last2)
     {
-        return replace(first, last, basic_string(first2, last2));
+        return replace(first, last, cow_basic_string(first2, last2));
     }
 
-    basic_string& replace(size_type pos, size_type count,
+    cow_basic_string& replace(size_type pos, size_type count,
                           const CharT* cstr, size_type count2)
     {
         // replace impl
@@ -1212,7 +1212,7 @@ public:
         _CheckLengthAndRange(newSize, pos, oldSize);
 
         if (this->_Is_shared())
-            value = new _String_value(value->data);
+            value = new String_value(value->data);
 
         if (newSize >= capacity() - 1)      // reallocate
             _Reallocte(newSize);
@@ -1227,25 +1227,25 @@ public:
         return *this;
     }
 
-    basic_string& replace(const_iterator first, const_iterator last, 
+    cow_basic_string& replace(const_iterator first, const_iterator last, 
                           const CharT* cstr, size_type count2)
     {
         return replace(first - begin(), last - first, cstr, count2);
     }
 
-    basic_string& replace(size_type pos, size_type count, 
+    cow_basic_string& replace(size_type pos, size_type count, 
                           const CharT* cstr)
     {
         return replace(pos, count, cstr, npos);
     }
 
-    basic_string& replace(const_iterator first, const_iterator last, 
+    cow_basic_string& replace(const_iterator first, const_iterator last, 
                           const CharT* cstr)
     {
         return replace(first, last, cstr, npos);
     }
 
-    basic_string& replace(size_type pos, size_type count,
+    cow_basic_string& replace(size_type pos, size_type count,
                           size_type count2, CharT ch)
     {
         // replace impl
@@ -1255,7 +1255,7 @@ public:
         _CheckLengthAndRange(newSize, pos, oldSize);
 
         if (this->_Is_shared())
-            value = new _String_value(value->data);
+            value = new String_value(value->data);
 
         if (newSize >= capacity() - 1)      // reallocate
             _Reallocte(newSize);
@@ -1270,19 +1270,19 @@ public:
         return *this;
     }
 
-    basic_string& replace(const_iterator first, const_iterator last,
+    cow_basic_string& replace(const_iterator first, const_iterator last,
                           size_type count2, CharT ch)
     {
         return replace(first - begin(), last - first, count2, ch);
     }
 
-    basic_string& replace(const_iterator first, const_iterator last,
+    cow_basic_string& replace(const_iterator first, const_iterator last,
                           std::initializer_list<CharT> ilist)
     {
         return replace(first - begin(), last - first, ilist.begin(), ilist.end());
     }
 
-    int compare(const basic_string& rhs) const noexcept
+    int compare(const cow_basic_string& rhs) const noexcept
     {
         size_type rlen = tiny_stl::min(size(), rhs.size());
         int cmpd = traits_type::compare(data(), rhs.data(), rlen);
@@ -1292,42 +1292,42 @@ public:
     }
 
     // compare this->[pos, pos + count) to rhs
-    int compare(size_type pos1, size_type count1, const basic_string& rhs) const
+    int compare(size_type pos1, size_type count1, const cow_basic_string& rhs) const
     {
         return substr(pos1, count1).compare(rhs);
     }
 
     int compare(size_type pos1, size_type count1, 
-                const basic_string& rhs, size_type pos2, size_type count2 = npos) const
+                const cow_basic_string& rhs, size_type pos2, size_type count2 = npos) const
     {
         return substr(pos1, count1).compare(rhs.substr(pos2, count2));
     }
 
     int compare(const CharT* s) const
     {
-        return compare(basic_string(s));
+        return compare(cow_basic_string(s));
     }
 
     int compare(size_type pos1, size_type count1, const CharT* s)
     {
-        return substr(pos1, count1).compare(basic_string(s));
+        return substr(pos1, count1).compare(cow_basic_string(s));
     }
 
     int compare(size_type pos1, size_type count1, const CharT* s, size_type count2) const
     {
-        return substr(pos1, count1).compare(basic_string(s, count2));
+        return substr(pos1, count1).compare(cow_basic_string(s, count2));
     }
 
-    void swap(basic_string& rhs) noexcept(
+    void swap(cow_basic_string& rhs) noexcept(
         _Alloc_traits::propagate_on_container_swap::value
         || _Alloc_traits::is_always_equal::value)
     {
         tiny_stl::swap(value, rhs.value);
     }
 
-    basic_string substr(size_type pos = 0, size_type count = npos) const
+    cow_basic_string substr(size_type pos = 0, size_type count = npos) const
     {
-        return basic_string(*this, pos, count);
+        return cow_basic_string(*this, pos, count);
     }
 
     // copy this->[pos, pos + count) to dst
@@ -1347,7 +1347,7 @@ public:
     void ltrim(char ch)
     {
         if (this->_Is_shared())
-            value = new _String_value(value->data);
+            value = new String_value(value->data);
 
         this->erase(this->begin(), find_if(this->begin(), this->end(), [ch] (char c) {
             return ch != c;
@@ -1364,7 +1364,7 @@ public:
     void rtrim(char ch)
     {
         if (this->_Is_shared())
-            value = new _String_value(value->data);
+            value = new String_value(value->data);
 
         this->erase(find_if(this->rbegin(), this->rend(), [ch](char c) {
             return ch != c;
@@ -1466,7 +1466,7 @@ public:
     //}
 
 public:
-    size_type find(const basic_string& str, size_type pos = 0) const noexcept
+    size_type find(const cow_basic_string& str, size_type pos = 0) const noexcept
     {
         return _Find(str.c_str(), pos, str.size());
     }
@@ -1488,7 +1488,7 @@ public:
             : static_cast<size_type>(find_at - value->data);
     }
 
-    size_type rfind(const basic_string& str, size_type pos = npos) const noexcept
+    size_type rfind(const cow_basic_string& str, size_type pos = npos) const noexcept
     {
         return _RFind(str.c_str(), pos, str.size());
     }
@@ -1562,11 +1562,11 @@ private:
 
 
 template <typename CharT, typename Traits, typename Alloc>
-basic_string<CharT, Traits, Alloc>
-operator+(const basic_string<CharT, Traits, Alloc>& lhs,
-          const basic_string<CharT, Traits, Alloc>& rhs)
+cow_basic_string<CharT, Traits, Alloc>
+operator+(const cow_basic_string<CharT, Traits, Alloc>& lhs,
+          const cow_basic_string<CharT, Traits, Alloc>& rhs)
 {
-    basic_string<CharT, Traits, Alloc> tmp;
+    cow_basic_string<CharT, Traits, Alloc> tmp;
     tmp.reserve(lhs.size() + rhs.size());
     tmp += lhs;
     tmp += rhs;
@@ -1575,11 +1575,11 @@ operator+(const basic_string<CharT, Traits, Alloc>& lhs,
 }
 
 template <typename CharT, typename Traits, typename Alloc>
-basic_string<CharT, Traits, Alloc>
+cow_basic_string<CharT, Traits, Alloc>
 operator+(const CharT* lhs,
-          const basic_string<CharT, Traits, Alloc>& rhs)
+          const cow_basic_string<CharT, Traits, Alloc>& rhs)
 {
-    basic_string<CharT, Traits, Alloc> tmp;
+    cow_basic_string<CharT, Traits, Alloc> tmp;
     tmp.reserve(Traits::length(lhs), rhs.size());
     tmp += lhs;
     tmp += rhs;
@@ -1588,11 +1588,11 @@ operator+(const CharT* lhs,
 }
 
 template <typename CharT, typename Traits, typename Alloc>
-basic_string<CharT, Traits, Alloc>
+cow_basic_string<CharT, Traits, Alloc>
 operator+(CharT lhs,
-          const basic_string<CharT, Traits, Alloc>& rhs)
+          const cow_basic_string<CharT, Traits, Alloc>& rhs)
 {
-    basic_string<CharT, Traits, Alloc> tmp;
+    cow_basic_string<CharT, Traits, Alloc> tmp;
     tmp.reserve(1 + rhs.size());
     tmp += lhs;
     tmp += rhs;
@@ -1601,11 +1601,11 @@ operator+(CharT lhs,
 }
 
 template <typename CharT, typename Traits, typename Alloc>
-basic_string<CharT, Traits, Alloc>
-operator+(const basic_string<CharT, Traits, Alloc>& lhs,
+cow_basic_string<CharT, Traits, Alloc>
+operator+(const cow_basic_string<CharT, Traits, Alloc>& lhs,
           const CharT* rhs)
 {
-    basic_string<CharT, Traits, Alloc> tmp;
+    cow_basic_string<CharT, Traits, Alloc> tmp;
     tmp.reserve(lhs.size() + Traits::length(rhs));
     tmp += lhs;
     tmp += rhs;
@@ -1614,11 +1614,11 @@ operator+(const basic_string<CharT, Traits, Alloc>& lhs,
 }
 
 template <typename CharT, typename Traits, typename Alloc>
-basic_string<CharT, Traits, Alloc>
-operator+(const basic_string<CharT, Traits, Alloc>& lhs,
+cow_basic_string<CharT, Traits, Alloc>
+operator+(const cow_basic_string<CharT, Traits, Alloc>& lhs,
           CharT rhs)
 {
-    basic_string<CharT, Traits, Alloc> tmp;
+    cow_basic_string<CharT, Traits, Alloc> tmp;
     tmp.reserve(lhs.size() + 1);
     tmp += lhs;
     tmp += rhs;
@@ -1627,56 +1627,56 @@ operator+(const basic_string<CharT, Traits, Alloc>& lhs,
 }
 
 template <typename CharT, typename Traits, typename Alloc>
-basic_string<CharT, Traits, Alloc>
-operator+(basic_string<CharT, Traits, Alloc>&& lhs,
-          const basic_string<CharT, Traits, Alloc>& rhs)
+cow_basic_string<CharT, Traits, Alloc>
+operator+(cow_basic_string<CharT, Traits, Alloc>&& lhs,
+          const cow_basic_string<CharT, Traits, Alloc>& rhs)
 {
     return tiny_stl::move(lhs.append(rhs));
 }
 
 template <typename CharT, typename Traits, typename Alloc>
-basic_string<CharT, Traits, Alloc>
-operator+(const basic_string<CharT, Traits, Alloc>& lhs,
-          basic_string<CharT, Traits, Alloc>&& rhs)
+cow_basic_string<CharT, Traits, Alloc>
+operator+(const cow_basic_string<CharT, Traits, Alloc>& lhs,
+          cow_basic_string<CharT, Traits, Alloc>&& rhs)
 {
     return tiny_stl::move(rhs.insert(0, lhs));
 }
 
 template <typename CharT, typename Traits, typename Alloc>
-basic_string<CharT, Traits, Alloc>
-operator+(basic_string<CharT, Traits, Alloc>&& lhs,
-          basic_string<CharT, Traits, Alloc>&& rhs)
+cow_basic_string<CharT, Traits, Alloc>
+operator+(cow_basic_string<CharT, Traits, Alloc>&& lhs,
+          cow_basic_string<CharT, Traits, Alloc>&& rhs)
 {
     return tiny_stl::move(lhs.append(rhs));
 }
 
 template <typename CharT, typename Traits, typename Alloc>
-basic_string<CharT, Traits, Alloc>
+cow_basic_string<CharT, Traits, Alloc>
 operator+(const CharT* lhs,
-          basic_string<CharT, Traits, Alloc>&& rhs)
+          cow_basic_string<CharT, Traits, Alloc>&& rhs)
 {
     return tiny_stl::move(rhs.insert(0, lhs));
 }
 
 template <typename CharT, typename Traits, typename Alloc>
-basic_string<CharT, Traits, Alloc>
+cow_basic_string<CharT, Traits, Alloc>
 operator+(CharT lhs,
-          basic_string<CharT, Traits, Alloc>&& rhs)
+          cow_basic_string<CharT, Traits, Alloc>&& rhs)
 {
     return tiny_stl::move(rhs.insert(0, 1, lhs));
 }
 
 template <typename CharT, typename Traits, typename Alloc>
-basic_string<CharT, Traits, Alloc>
-operator+(basic_string<CharT, Traits, Alloc>&& lhs,
+cow_basic_string<CharT, Traits, Alloc>
+operator+(cow_basic_string<CharT, Traits, Alloc>&& lhs,
           const CharT* rhs)
 {
     return tiny_stl::move(lhs.append(rhs));
 }
 
 template <typename CharT, typename Traits, typename Alloc>
-basic_string<CharT, Traits, Alloc>
-operator+(basic_string<CharT, Traits, Alloc>&& lhs,
+cow_basic_string<CharT, Traits, Alloc>
+operator+(cow_basic_string<CharT, Traits, Alloc>&& lhs,
           CharT rhs)
 {
     lhs.push_back(rhs);
@@ -1684,150 +1684,150 @@ operator+(basic_string<CharT, Traits, Alloc>&& lhs,
 }
 
 template <typename CharT, typename Traits, typename Alloc>
-inline bool operator==(const basic_string<CharT, Traits, Alloc>& lhs,
-                       const basic_string<CharT, Traits, Alloc>& rhs) noexcept
+inline bool operator==(const cow_basic_string<CharT, Traits, Alloc>& lhs,
+                       const cow_basic_string<CharT, Traits, Alloc>& rhs) noexcept
 {
     return lhs.size() == rhs.size()
         && tiny_stl::equal(lhs.begin(), lhs.end(), rhs.begin());
 }
 
 template <typename CharT, typename Traits, typename Alloc>
-inline bool operator!=(const basic_string<CharT, Traits, Alloc>& lhs,
-                       const basic_string<CharT, Traits, Alloc>& rhs) noexcept
+inline bool operator!=(const cow_basic_string<CharT, Traits, Alloc>& lhs,
+                       const cow_basic_string<CharT, Traits, Alloc>& rhs) noexcept
 {
     return !(lhs == rhs);
 }
 
 template <typename CharT, typename Traits, typename Alloc>
-inline bool operator<(const basic_string<CharT, Traits, Alloc>& lhs,
-                      const basic_string<CharT, Traits, Alloc>& rhs) noexcept
+inline bool operator<(const cow_basic_string<CharT, Traits, Alloc>& lhs,
+                      const cow_basic_string<CharT, Traits, Alloc>& rhs) noexcept
 {
     return tiny_stl::lexicographical_compare(lhs.begin(), lhs.end(),
                                             rhs.begin(), rhs.end());
 }
 
 template <typename CharT, typename Traits, typename Alloc>
-inline bool operator>(const basic_string<CharT, Traits, Alloc>& lhs,
-                      const basic_string<CharT, Traits, Alloc>& rhs) noexcept
+inline bool operator>(const cow_basic_string<CharT, Traits, Alloc>& lhs,
+                      const cow_basic_string<CharT, Traits, Alloc>& rhs) noexcept
 {
     return rhs < lhs;
 }
 
 template <typename CharT, typename Traits, typename Alloc>
-inline bool operator<=(const basic_string<CharT, Traits, Alloc>& lhs,
-                       const basic_string<CharT, Traits, Alloc>& rhs) noexcept
+inline bool operator<=(const cow_basic_string<CharT, Traits, Alloc>& lhs,
+                       const cow_basic_string<CharT, Traits, Alloc>& rhs) noexcept
 {
     return !(rhs < lhs);
 }
 
 template <typename CharT, typename Traits, typename Alloc>
-inline bool operator>=(const basic_string<CharT, Traits, Alloc>& lhs,
-                       const basic_string<CharT, Traits, Alloc>& rhs) noexcept
+inline bool operator>=(const cow_basic_string<CharT, Traits, Alloc>& lhs,
+                       const cow_basic_string<CharT, Traits, Alloc>& rhs) noexcept
 {
     return !(lhs < rhs);
 }
 
 template <typename CharT, typename Traits, typename Alloc>
 inline bool operator==(const CharT* clhs,
-                       const basic_string<CharT, Traits, Alloc>& rhs)
+                       const cow_basic_string<CharT, Traits, Alloc>& rhs)
 {
-    const basic_string<CharT, Traits, Alloc> lhs(clhs);
+    const cow_basic_string<CharT, Traits, Alloc> lhs(clhs);
     return lhs == rhs;
 }
 
 template <typename CharT, typename Traits, typename Alloc>
-inline bool operator==(const basic_string<CharT, Traits, Alloc>& rhs,
+inline bool operator==(const cow_basic_string<CharT, Traits, Alloc>& rhs,
                        const CharT* crhs)
 {
-    const basic_string<CharT, Traits, Alloc> lhs(crhs);
+    const cow_basic_string<CharT, Traits, Alloc> lhs(crhs);
     return lhs == rhs;
 }
 
 template <typename CharT, typename Traits, typename Alloc>
 inline bool operator!=(const CharT* clhs,
-                       const basic_string<CharT, Traits, Alloc>& rhs)
+                       const cow_basic_string<CharT, Traits, Alloc>& rhs)
 {
-    const basic_string<CharT, Traits, Alloc> lhs(clhs);
+    const cow_basic_string<CharT, Traits, Alloc> lhs(clhs);
     return lhs != rhs;
 }
 
 template <typename CharT, typename Traits, typename Alloc>
-inline bool operator!=(const basic_string<CharT, Traits, Alloc>& rhs,
+inline bool operator!=(const cow_basic_string<CharT, Traits, Alloc>& lhs,
                        const CharT* crhs)
 {
-    const basic_string<CharT, Traits, Alloc> rhs(crhs);
+    const cow_basic_string<CharT, Traits, Alloc> rhs(crhs);
     return lhs != rhs;
 }
 
 template <typename CharT, typename Traits, typename Alloc>
 inline bool operator<(const CharT* clhs,
-                      const basic_string<CharT, Traits, Alloc>& rhs)
+                      const cow_basic_string<CharT, Traits, Alloc>& rhs)
 {
-    const basic_string<CharT, Traits, Alloc> lhs(clhs);
+    const cow_basic_string<CharT, Traits, Alloc> lhs(clhs);
     return lhs < rhs;
 }
 
 template <typename CharT, typename Traits, typename Alloc>
-inline bool operator<(const basic_string<CharT, Traits, Alloc>& rhs,
+inline bool operator<(const cow_basic_string<CharT, Traits, Alloc>& lhs,
                       const CharT* crhs)
 {
-    const basic_string<CharT, Traits, Alloc> rhs(crhs);
+    const cow_basic_string<CharT, Traits, Alloc> rhs(crhs);
     return lhs < rhs;
 }
 
 template <typename CharT, typename Traits, typename Alloc>
 inline bool operator>(const CharT* clhs,
-                      const basic_string<CharT, Traits, Alloc>& rhs)
+                      const cow_basic_string<CharT, Traits, Alloc>& rhs)
 {
-    const basic_string<CharT, Traits, Alloc> lhs(clhs);
+    const cow_basic_string<CharT, Traits, Alloc> lhs(clhs);
     return lhs > rhs;
 }
 
 template <typename CharT, typename Traits, typename Alloc>
-inline bool operator>(const basic_string<CharT, Traits, Alloc>& rhs,
+inline bool operator>(const cow_basic_string<CharT, Traits, Alloc>& lhs,
                        const CharT* crhs)
 {
-    const basic_string<CharT, Traits, Alloc> rhs(crhs);
+    const cow_basic_string<CharT, Traits, Alloc> rhs(crhs);
     return lhs > rhs;
 }
 
 template <typename CharT, typename Traits, typename Alloc>
 inline bool operator<=(const CharT* clhs,
-                       const basic_string<CharT, Traits, Alloc>& rhs)
+                       const cow_basic_string<CharT, Traits, Alloc>& rhs)
 {
-    const basic_string<CharT, Traits, Alloc> lhs(clhs);
+    const cow_basic_string<CharT, Traits, Alloc> lhs(clhs);
     return lhs <= rhs;
 }
 
 template <typename CharT, typename Traits, typename Alloc>
-inline bool operator<=(const basic_string<CharT, Traits, Alloc>& rhs,
+inline bool operator<=(const cow_basic_string<CharT, Traits, Alloc>& lhs,
                        const CharT* crhs)
 {
-    const basic_string<CharT, Traits, Alloc> rhs(crhs);
+    const cow_basic_string<CharT, Traits, Alloc> rhs(crhs);
     return lhs <= rhs;
 }
 
 template <typename CharT, typename Traits, typename Alloc>
 inline bool operator>=(const CharT* clhs,
-                       const basic_string<CharT, Traits, Alloc>& rhs)
+                       const cow_basic_string<CharT, Traits, Alloc>& rhs)
 {
-    const basic_string<CharT, Traits, Alloc> lhs(clhs);
+    const cow_basic_string<CharT, Traits, Alloc> lhs(clhs);
     return lhs >= rhs;
 }
 
 template <typename CharT, typename Traits, typename Alloc>
-inline bool operator>=(const basic_string<CharT, Traits, Alloc>& rhs,
+inline bool operator>=(const cow_basic_string<CharT, Traits, Alloc>& lhs,
                        const CharT* crhs)
 {
-    const basic_string<CharT, Traits, Alloc> rhs(crhs);
+    const cow_basic_string<CharT, Traits, Alloc> rhs(crhs);
     return lhs >= rhs;
 }
 
 
 
 template <typename CharT, typename Traits, typename Alloc>
-void swap(basic_string<CharT, Traits, Alloc>& lhs,
-          basic_string<CharT, Traits, Alloc>& rhs)
+void swap(cow_basic_string<CharT, Traits, Alloc>& lhs,
+          cow_basic_string<CharT, Traits, Alloc>& rhs)
     noexcept(noexcept(lhs.swap(rhs)))
 {
     lhs.swap(rhs);
@@ -1836,7 +1836,7 @@ void swap(basic_string<CharT, Traits, Alloc>& lhs,
 template <typename CharT, typename Traits, typename Alloc>
 std::basic_ostream<CharT, Traits>& operator<<(
     std::basic_ostream<CharT, Traits>& os,
-    const basic_string<CharT, Traits, Alloc>& str)
+    const cow_basic_string<CharT, Traits, Alloc>& str)
 {
     // no format output
     os << str.c_str();
@@ -1846,10 +1846,10 @@ std::basic_ostream<CharT, Traits>& operator<<(
 template <typename CharT, typename Traits, typename Alloc>
 std::basic_istream<CharT, Traits>& operator>>(
     std::basic_istream<CharT, Traits>& is,
-    basic_string<CharT, Traits, Alloc>& str)
+    cow_basic_string<CharT, Traits, Alloc>& str)
 {
     if (str._Is_shared())
-        str = basic_string<CharT, Traits, Alloc>(str.data());
+        str = cow_basic_string<CharT, Traits, Alloc>(str.data());
 
     // no format input
     is >> str.data();
@@ -1858,40 +1858,41 @@ std::basic_istream<CharT, Traits>& operator>>(
 }
 
 template <typename CharT, typename Traits, typename Alloc>
-struct hash<basic_string<CharT, Traits, Alloc>>
+struct hash<cow_basic_string<CharT, Traits, Alloc>>
 {
-    using argument_type = basic_string<CharT, Traits, Alloc>;
+    using argument_type = cow_basic_string<CharT, Traits, Alloc>;
     using result_type = size_t;
 
-    size_t operator()(const basic_string<CharT, Traits, Alloc>& str) const noexcept
+    size_t operator()(const cow_basic_string<CharT, Traits, Alloc>& str) const noexcept
     {
         return tiny_stl::_FNVHash(str.c_str(), str.size());
     }
 };
 
-using string    = basic_string<char>;
-using wstring   = basic_string<wchar_t>;
-using u16string = basic_string<char16_t>;
-using u32string = basic_string<char32_t>;
+using cow_string    = cow_basic_string<char>;
+using cow_wstring   = cow_basic_string<wchar_t>;
+using cow_u16string = cow_basic_string<char16_t>;
+using cow_u32string = cow_basic_string<char32_t>;
 
-string operator""s(const char* str, std::size_t len)
+
+cow_string operator""s(const char* str, std::size_t len)
 {
-    return string{ str, len };
+    return cow_string{ str, len };
 }
 
-wstring operator""s(const wchar_t* str, std::size_t len)
+cow_wstring operator""s(const wchar_t* str, std::size_t len)
 {
-    return wstring{ str, len };
+    return cow_wstring{ str, len };
 }
 
-u16string operator""s(const char16_t* str, std::size_t len)
+cow_u16string operator""s(const char16_t* str, std::size_t len)
 {
-    return u16string{ str, len };
+    return cow_u16string{ str, len };
 }
 
-u32string operator""s(const char32_t* str, std::size_t len)
+cow_u32string operator""s(const char32_t* str, std::size_t len)
 {
-    return u32string{ str, len };
+    return cow_u32string{ str, len };
 }
 
 
