@@ -495,9 +495,6 @@ struct is_integral : _Is_integral<remove_cv_t<T>>::type { };
 template <typename T>
 constexpr bool is_integral_v = is_integral<T>::value;
 
-
-#pragma warning(push)
-#pragma warning(disable : 4296)
 template <typename T, bool = is_integral<T>::value>
 struct _Sign_base
 {
@@ -505,7 +502,6 @@ struct _Sign_base
     using _Signed  = bool_constant<U(-1) < U(0)>;
     using _Unsiged = bool_constant<U(0) < U(-1)>;
 };
-#pragma warning(pop)
 
 template <typename T>
 struct _Sign_base<T, false>
