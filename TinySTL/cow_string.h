@@ -272,7 +272,7 @@ public:
         init();
     }
 
-    RCPtr(RCPtr&& rhs) : pointee(rhs.pointee)
+    RCPtr(RCPtr&& rhs) noexcept : pointee(rhs.pointee)
     {
         rhs.pointee = nullptr;
     }
@@ -1873,6 +1873,95 @@ using cow_string    = cow_basic_string<char>;
 using cow_wstring   = cow_basic_string<wchar_t>;
 using cow_u16string = cow_basic_string<char16_t>;
 using cow_u32string = cow_basic_string<char32_t>;
+
+namespace 
+{
+
+const char digits[] = "9876543210123456789";
+const char* zero = digits + 9;
+template <typename E, typename T>
+cow_basic_string<E> IntegerToCowString(const T val) 
+{
+    static_assert(is_integral_v<T>, "T must be integral");
+    bool isNegative = val < 0;
+    E buffer[21]; // -2^63 ~ 2^64-1
+    E* ptr = buffer;
+    do {
+        int lp = static_cast<int>(val % 10);
+        val /= 10;
+        *ptr++ = zero[lp];
+    } while (val);
+
+
+    if (isNegative) {
+        *ptr++ = '-';
+    }
+    *ptr = '\0';
+    reverse(buffer, ptr);
+    return cow_basic_string<E>{buffer};
+}
+
+} // namespace
+
+cow_string to_cow_string(int value)
+{
+    return IntegerToCowString<char>(value);
+}
+
+cow_string to_cow_string(long value)
+{
+    return IntegerToCowString<char>(value);
+}
+
+cow_string to_cow_string(unsigned value)
+{
+    return IntegerToCowString<char>(value);
+}
+
+cow_string to_cow_string(unsigned long value)
+{
+    return IntegerToCowString<char>(value);
+}
+
+cow_string to_cow_string(long long value)
+{
+    return IntegerToCowString<char>(value);
+}
+
+cow_string to_cow_string(unsigned long long value)
+{
+    return IntegerToCowString<char>(value);
+}
+
+cow_wstring to_cow_wstring(int value)
+{
+    return IntegerToCowString<wchar_t>(value);
+}
+
+cow_wstring to_cow_wstring(long value)
+{
+    return IntegerToCowString<wchar_t>(value);
+}
+
+cow_wstring to_cow_wstring(unsigned value)
+{
+    return IntegerToCowString<wchar_t>(value);
+}
+
+cow_wstring to_cow_wstring(unsigned long value)
+{
+    return IntegerToCowString<wchar_t>(value);
+}
+
+cow_wstring to_cow_wstring(long long value)
+{
+    return IntegerToCowString<wchar_t>(value);
+}
+
+cow_wstring to_cow_wstring(unsigned long long value)
+{
+    return IntegerToCowString<wchar_t>(value);
+}
 
 #pragma warning(push)
 #pragma warning(disable: 4455)
