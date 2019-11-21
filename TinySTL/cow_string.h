@@ -1880,7 +1880,7 @@ namespace
 const char digits[] = "9876543210123456789";
 const char* zero = digits + 9;
 template <typename E, typename T>
-cow_basic_string<E> IntegerToCowString(const T val) 
+cow_basic_string<E> IntegerToCowString(T val) 
 {
     static_assert(is_integral_v<T>, "T must be integral");
     bool isNegative = val < 0;

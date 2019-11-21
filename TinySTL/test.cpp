@@ -909,6 +909,24 @@ void testString()
     s15.trim();
     UNIT_TEST(5, s15.size());
     UNIT_TEST(true, s15 == "hello");
+
+    int x = 42;
+    tiny_stl::cow_string s16 = tiny_stl::to_cow_string(x);
+    UNIT_TEST(tiny_stl::cow_string{ "42" }, s16);
+    x = INT_MAX;
+    s16 = tiny_stl::to_cow_string(x);
+    UNIT_TEST(tiny_stl::cow_string{ "2147483647" }, s16);
+    x = INT_MIN;
+    s16 = tiny_stl::to_cow_string(x);
+    UNIT_TEST(tiny_stl::cow_string{ "-2147483648" }, s16);
+
+    long long llx = LLONG_MAX;
+    s16 = tiny_stl::to_cow_string(llx);
+    UNIT_TEST(tiny_stl::cow_string{ "9223372036854775807" }, s16);
+
+    llx = LLONG_MIN;
+    s16 = tiny_stl::to_cow_string(llx);
+    UNIT_TEST(tiny_stl::cow_string{ "-9223372036854775808" }, s16);
 }
 
 
