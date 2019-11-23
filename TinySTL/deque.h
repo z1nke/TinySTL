@@ -56,7 +56,7 @@ struct _Deque_const_iterator
         : cur(c), first(f), last(l), node(n) { }
     _Deque_const_iterator(const _Self&) = default;
 
-    _Deque_const_iterator(_Deque_const_iterator&& rhs) 
+    _Deque_const_iterator(_Deque_const_iterator&& rhs) noexcept
         : cur(rhs.cur), first(rhs.first),
         last(rhs.last), node(rhs.node)  
     { 
@@ -235,7 +235,7 @@ struct _Deque_iterator : _Deque_const_iterator<T>
         : _Base(c, f, l, n) { }
     _Deque_iterator(const _Self&) = default;
 
-    _Deque_iterator(_Deque_iterator&& rhs)
+    _Deque_iterator(_Deque_iterator&& rhs) noexcept
     : _Base(rhs.cur, rhs.first, rhs.last, rhs.node) 
     {
         rhs.cur = nullptr;
@@ -606,7 +606,7 @@ private:
     }
 public:
 
-    deque(deque&& rhs)                              // (6)
+    deque(deque&& rhs) noexcept                     // (6)
     : _Base(tiny_stl::move(rhs.alloc)) 
     {
         _Assign_rv(tiny_stl::move(rhs), true_type{});

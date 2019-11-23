@@ -81,7 +81,7 @@ public:
     unordered_set(const unordered_set& rhs,                         // (3)
         const Alloc& alloc) : _Base(rhs, alloc) { }
 
-    unordered_set(unordered_set&& rhs)                              // (4)
+    unordered_set(unordered_set&& rhs) noexcept                     // (4)
     : _Base(tiny_stl::move(rhs)) { }
 
     unordered_set(std::initializer_list<value_type> ilist,          // (5)

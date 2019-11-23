@@ -2030,7 +2030,7 @@ class _Ref_count_obj : public _Ref_count_base
 {
 public:
     template <typename... Args>
-    explicit _Ref_count_obj(Args&&... args)
+    explicit _Ref_count_obj(Args&&... args) noexcept
         : _Ref_count_base()
     {
         ::new (static_cast<void*>(&mStroage)) 

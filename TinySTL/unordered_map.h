@@ -83,7 +83,7 @@ public:
     unordered_map(const unordered_map& rhs,                         // (3)
         const Alloc& alloc) : _Base(rhs, alloc) { }
 
-    unordered_map(unordered_map&& rhs)                              // (4)
+    unordered_map(unordered_map&& rhs) noexcept                     // (4)
     : _Base(tiny_stl::move(rhs)) { }
 
     unordered_map(std::initializer_list<value_type> ilist,          // (5)

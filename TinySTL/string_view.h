@@ -584,7 +584,7 @@ public:
             return npos;
         }
 
-        for (size_type i = min(pos1, mSize - rhs.mSize); i >= 0; --i)
+        for (size_type i = min(pos1, mSize - rhs.mSize); i != -1; --i)
         {
             if (mData[i] == rhs[0])     // matched the first element
             {

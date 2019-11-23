@@ -306,7 +306,7 @@ public:
         _Copy(rhs); 
     }
 
-    _HashTable(_HashTable&& rhs) 
+    _HashTable(_HashTable&& rhs) noexcept
     : hashfunc(rhs.hashfunc), key_equ(rhs.key_equ),
         buckets(tiny_stl::move(rhs.buckets)),
         maxfactor(rhs.maxfactor), num_elements(rhs.num_elements)

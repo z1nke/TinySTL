@@ -73,7 +73,7 @@ public:
     map(const map& rhs, const Alloc& alloc)
     : _Base(rhs, alloc) { }
 
-    map(map&& rhs) : _Base(tiny_stl::move(rhs)) {}
+    map(map&& rhs) noexcept : _Base(tiny_stl::move(rhs))  {}
 
     map(map&& rhs, const Alloc& alloc) : _Base(tiny_stl::move(rhs), alloc) {}
 

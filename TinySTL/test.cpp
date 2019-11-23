@@ -892,6 +892,7 @@ void testString()
     UNIT_TEST(5, s12.rfind("is"));
     UNIT_TEST(2, s12.rfind("is", 3));
     UNIT_TEST(10, s12.rfind('s'));
+    UNIT_TEST(tiny_stl::cow_string::npos, s12.rfind("that"));
 
     tiny_stl::cow_string s13 = "12345";
     
@@ -1197,6 +1198,5 @@ int main()
     testAll();
     std::cout << test_pass << "/" << test_count 
         << " (passed " << test_pass * 100.0 / test_count << "%)" << std::endl;
-    system("pause");
     return 0;
 }
