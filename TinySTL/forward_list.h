@@ -296,7 +296,7 @@ private:
     }
 
 public:
-    forward_list(forward_list&& rhs)                                // (6)
+    forward_list(forward_list&& rhs) noexcept                       // (6)
     : _Base(tiny_stl::move(rhs._Get_Alloc())) 
     {
         _Construct_rv(tiny_stl::move(rhs), true_type{});

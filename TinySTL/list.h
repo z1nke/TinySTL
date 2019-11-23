@@ -361,7 +361,7 @@ public:
         }
     }
 
-    list(list&& rhs) : _Base(tiny_stl::move(rhs.alloc))          // (6)
+    list(list&& rhs) noexcept : _Base(tiny_stl::move(rhs.alloc)) // (6)
     {      
         _Move_construct(tiny_stl::move(rhs), true_type{});
     }
@@ -467,7 +467,7 @@ public:
         return *this;
     }
 
-    list& operator=(list&& rhs) {
+    list& operator=(list&& rhs) noexcept {
         assert(this != tiny_stl::addressof(rhs));
         clear();
 #pragma warning(push)

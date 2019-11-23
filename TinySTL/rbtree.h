@@ -668,7 +668,7 @@ public:
         _Copy(rhs);
     }
     
-    _RBTree(_RBTree&& rhs) : _Base(rhs.compare, rhs.alloc) 
+    _RBTree(_RBTree&& rhs) noexcept : _Base(rhs.compare, rhs.alloc)
     {
         _Move(tiny_stl::move(rhs));
     }

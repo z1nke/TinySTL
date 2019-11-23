@@ -164,6 +164,7 @@
     <ClInclude Include="set.h" />
     <ClInclude Include="stack.h" />
     <ClInclude Include="cow_string.h" />
+    <ClInclude Include="string.h" />
     <ClInclude Include="string_view.h" />
     <ClInclude Include="tuple.h" />
     <ClInclude Include="type_traits.h" />

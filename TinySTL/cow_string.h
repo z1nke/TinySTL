@@ -1446,7 +1446,7 @@ private:
             if (traits_type::eq(value->data[i], s[count - 1]))  // matched last character
             {
                 size_type j;
-                for (j = count - 1; j >= 0; --j)
+                for (j = count - 1; j != -1; --j)
                 {
                     if (!traits_type::eq(value->data[i + j - count + 1], s[j])) // mismatch
                         break;
