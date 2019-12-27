@@ -9,19 +9,19 @@ namespace tiny_stl
 {
 
 template <typename T>
-struct Cow_string_const_iterator 
+struct CowStringConstIterator 
 {
     using iterator_category = random_access_iterator_tag;
     using value_type        = T;
     using pointer           = const T*;
     using reference         = const T&;
     using difference_type   = ptrdiff_t;
-    using Self             = Cow_string_const_iterator<T>;
+    using Self              = CowStringConstIterator<T>;
 
     T* ptr;
 
-    Cow_string_const_iterator() = default;
-    Cow_string_const_iterator(T* p) : ptr(p) { }
+    CowStringConstIterator() = default;
+    CowStringConstIterator(T* p) : ptr(p) { }
 
     reference operator*() const 
     {
@@ -122,21 +122,21 @@ struct Cow_string_const_iterator
     {
         return !(*this < rhs);
     }
-};  // _String_const_iterator<T>
+};  // StringConstIterator<T>
 
 template <typename T>
-struct Cow_String_iterator : Cow_string_const_iterator<T>
+struct CowStringIterator : CowStringConstIterator<T>
 {
     using iterator_category = random_access_iterator_tag;
     using value_type        = T;
     using pointer           = T*;
     using reference         = T&;
     using difference_type   = ptrdiff_t;
-    using Base             = Cow_string_const_iterator<T>;
-    using Self             = Cow_String_iterator<T>;
+    using Base              = CowStringConstIterator<T>;
+    using Self              = CowStringIterator<T>;
 
-    Cow_String_iterator() = default;
-    Cow_String_iterator(T* p) : Base(p) { }
+    CowStringIterator() = default;
+    CowStringIterator(T* p) : Base(p) { }
 
     reference operator*() const 
     {
@@ -207,7 +207,7 @@ struct Cow_String_iterator : Cow_string_const_iterator<T>
     {
         return *(this->ptr + n);
     }
-};  // class _String_iterator<T>
+};  // class StringIterator<T>
 
 namespace extra
 {
@@ -342,12 +342,12 @@ public:
     using const_reference        = const CharT&;
     using pointer                = CharT*;
     using const_pointer          = const CharT*;
-    using iterator               = Cow_String_iterator<CharT>;
-    using const_iterator         = Cow_string_const_iterator<CharT>;
+    using iterator               = CowStringIterator<CharT>;
+    using const_iterator         = CowStringConstIterator<CharT>;
     using reverse_iterator       = tiny_stl::reverse_iterator<iterator>;
     using const_reverse_iterator = tiny_stl::reverse_iterator<const_iterator>;
 
-    using _Alloc_traits          = tiny_stl::allocator_traits<Alloc>;
+    using AllocTraits            = tiny_stl::allocator_traits<Alloc>;
 public:
     static const size_type npos  = static_cast<size_type>(-1);
 private:
@@ -360,20 +360,20 @@ private:
         CharT* data;
         Alloc alloc;       
         
-        void _Init()
+        void init()
         {
             data = alloc.allocate(capa);                   
             data[0] = traits_type::to_char_type(0);
         }
 
-        void _Init(const CharT* s)
+        void init(const CharT* s)
         {
             data = alloc.allocate(capa);
             traits_type::move(data, s, size);
             data[size] = traits_type::to_char_type(0);
         }
 
-        void _Init(size_type count, CharT ch)
+        void init(size_type count, CharT ch)
         {
             data = alloc.allocate(capa);
             traits_type::assign(data, count, ch);
@@ -383,25 +383,25 @@ private:
         explicit String_value()
         : size(0), capa(8), alloc()   // 8 is the smallest capacity
         { 
-            _Init();
+            init();
         }
 
         String_value(const CharT* s) 
         : size(traits_type::length(s)), capa(size < 8 ? 8 : size + 1), alloc()
         {
-            _Init(s);
+            init(s);
         }
 
         String_value(const CharT* s, size_type count) 
         : size(count), capa(size < 8 ? 8 : size + 1), alloc()
         {
-            _Init(s);
+            init(s);
         }
 
         String_value(size_type count, CharT ch) 
         : size(count), capa(size < 8 ? 8 : size + 1), alloc()
         {
-            _Init(count, ch);
+            init(count, ch);
         }
 
         String_value(const String_value& rhs, size_type pos, size_type count)
@@ -409,7 +409,7 @@ private:
             capa(size < 8 ? 8 : size + 1), alloc()
         {
             assert(pos < rhs.size);
-            _Init(rhs.data + pos);
+            init(rhs.data + pos);
         }
 
         template <typename InIter, 
@@ -506,7 +506,7 @@ public:
         return *this;
     }
 
-    cow_basic_string& operator=(CharT ch)   // the interface....
+    cow_basic_string& operator=(CharT ch)
     {
         value = new String_value(1, ch);
 
@@ -537,7 +537,7 @@ public:
     }
 
     cow_basic_string& assign(const cow_basic_string& rhs, 
-                size_type pos, size_type count = npos)
+                             size_type pos, size_type count = npos)
     {
         value = new String_value(*rhs.value, pos, count);
 
@@ -587,9 +587,9 @@ public:
 
     reference at(size_type pos)
     {
-#ifdef _DEBUG
+#ifndef NDEBUG
         if (pos >= size())
-            _Xrange();
+            xRange();
 #endif
         if (value->is_shared())
             value = new String_value(value->data); // copy when reference access 
@@ -599,9 +599,9 @@ public:
 
     const_reference at(size_type pos) const
     {
-#ifdef _DEBUG
+#ifndef NDEBUG
         if (pos >= size())
-            _Xrange();
+            xRange();
 #endif
 
         return *(value->data + pos);
@@ -769,38 +769,38 @@ public:
 
     void clear() noexcept
     {
-        if (this->_Is_shared())
+        if (this->isShared())
             value = new String_value(value->data);
 
         value->size = 0;
     }
 
 private:
-    void _CheckLength(size_type newSize) const
+    void checkLength(size_type newSize) const
     {
         if (newSize >= max_size())
-            _Xlength();
+            xLength();
     }
 
-    void _CheckRange(size_type pos, size_type len) const
+    void checkRange(size_type pos, size_type len) const
     {
         if (pos > len)
-            _Xrange();
+            xRange();
     }
 
-    void _CheckLengthAndRange(size_type newSize,
+    void checkLengthAndRange(size_type newSize,
         size_type pos, size_type len) const 
     {
-        _CheckLength(newSize);
-        _CheckRange(pos, len);
+        checkLength(newSize);
+        checkRange(pos, len);
     }
 
     template <typename Lambda>
-    void _Resize(size_type count, Lambda lambda)
+    void resizeHelper(size_type count, Lambda lambda)
     {
-        _CheckLength(count);
+        checkLength(count);
 
-        if (this->_Is_shared())
+        if (this->isShared())
             value = new String_value(value->data);
 
         if (count < size()) // count < old size
@@ -814,7 +814,7 @@ private:
             {
                 value->alloc.deallocate(value->data, value->capa);
                 value->capa = count + 1;
-                value->_Init(value->data);  // reallocate
+                value->init(value->data);  // reallocate
             }
             
             lambda();
@@ -831,7 +831,7 @@ public:
             this->value->size = count;
             value->data[value->size] = traits_type::to_char_type(0);
         };
-        _Resize(count, lambda_fill);
+        resizeHelper(count, lambda_fill);
     }
 
     void resize(size_type count)
@@ -841,25 +841,25 @@ public:
             this->value->size = count;
             this->value->data[this->value->size] = traits_type::to_char_type(0);
         };
-        _Resize(count, lambda_default);
+        resizeHelper(count, lambda_default);
     }
 
 
     void reserve(size_type new_cap = 0)
     {
-        if (this->_Is_shared())
+        if (this->isShared())
             value = new String_value(value->data);
 
-        _CheckLength(new_cap);
+        checkLength(new_cap);
 
         size_type oldCapacity = capacity();
         if (new_cap > capacity())
-            _Reallocte(value->size);
+            reallocteHelper(value->size);
         
         // else do nothing
     }
 private:
-    size_type _Capacity_growth(size_type newSize) const noexcept
+    size_type capacityGrowth(size_type newSize) const noexcept
     {
         const size_type oldCapacity = capacity();
 
@@ -871,7 +871,7 @@ private:
         return newCapacity < newSize ? newSize : newCapacity;
     }
 
-    void _Update_pointer(const pointer newFirst, size_type newCapacity)
+    void updatePointer(const pointer newFirst, size_type newCapacity)
     {
         if (value->data != nullptr)
         {
@@ -883,18 +883,18 @@ private:
     }
 
 
-    void _Reallocte(size_type newSize)
+    void reallocteHelper(size_type newSize)
     {
-        size_type newCapacity = _Capacity_growth(newSize);
+        size_type newCapacity = capacityGrowth(newSize);
         const pointer newFirst = value->alloc.allocate(newCapacity);
         traits_type::move(newFirst, value->data, value->size);
-        _Update_pointer(newFirst, newCapacity);
+        updatePointer(newFirst, newCapacity);
     }
 
 public:
     void push_back(CharT ch)
     {
-        if (this->_Is_shared())
+        if (this->isShared())
             value = new String_value(value->data);
 
         size_type oldCapacity = capacity();
@@ -902,7 +902,7 @@ public:
         {
             size_type newSize = value->size + 1;
             
-            _Reallocte(oldCapacity);
+            reallocteHelper(oldCapacity);
         }
             
         value->data[value->size++] = ch;
@@ -912,14 +912,15 @@ public:
     cow_basic_string& erase(size_type index = 0, size_type count = npos)
     {
         assert(index < size());
-        if (this->_Is_shared())
+        if (this->isShared())
             value = new String_value(value->data);
 
         size_type realCount = tiny_stl::min(size() - index, count);
 
         size_type newPos = index + realCount;
         
-        traits_type::move(value->data + index, value->data + newPos, size() - newPos + 1);
+        traits_type::move(value->data + index, value->data + newPos, 
+            size() - newPos + 1);
         value->size = size() - realCount;
         
         return *this;
@@ -952,13 +953,13 @@ public:
         size_type oldSize = size();
         size_type newSize = oldSize + count;
 
-        _CheckLength(newSize);
+        checkLength(newSize);
 
-        if (this->_Is_shared())
+        if (this->isShared())
             value = new String_value(value->data);
 
         if (count >= value->capa - oldSize)  // reallocate
-            _Reallocte(newSize);
+            reallocteHelper(newSize);
      
         traits_type::assign(value->data + oldSize, count, ch);
         value->data[newSize] = traits_type::to_char_type(0);
@@ -974,13 +975,13 @@ public:
         size_type oldSize = size();
         size_type newSize = oldSize + count;
 
-        _CheckLength(newSize);
+        checkLength(newSize);
 
-        if (this->_Is_shared())
+        if (this->isShared())
             value = new String_value(value->data);
 
         if (count >= value->capa - oldSize)
-            _Reallocte(newSize);
+            reallocteHelper(newSize);
 
         traits_type::move(value->data + oldSize, str.c_str(), count);
         value->data[newSize] = traits_type::to_char_type(0);
@@ -989,7 +990,8 @@ public:
         return *this;
     }
 
-    cow_basic_string& append(const cow_basic_string& str, size_type pos, size_type count = npos)
+    cow_basic_string& append(const cow_basic_string& str, 
+                             size_type pos, size_type count = npos)
     {
         assert(pos <= str.size());
 
@@ -1002,13 +1004,13 @@ public:
         size_type oldSize = size();
         size_type newSize = oldSize + count;
 
-        _CheckLength(newSize);
+        checkLength(newSize);
 
-        if (this->_Is_shared())
+        if (this->isShared())
             value = new String_value(value->data);
 
         if (count >= value->capa - oldSize)
-            _Reallocte(newSize);
+            reallocteHelper(newSize);
 
         traits_type::move(value->data + oldSize, s, count);
         value->data[newSize] = traits_type::to_char_type(0);
@@ -1063,9 +1065,9 @@ public:
         size_type oldSize = size();
         size_type newSize = oldSize + count;
 
-        _CheckLengthAndRange(newSize, pos, oldSize);
+        checkLengthAndRange(newSize, pos, oldSize);
 
-        if (this->_Is_shared())
+        if (this->isShared())
             value = new String_value(value->data);
         
         if (count < capacity() - oldSize)   // no reallocate
@@ -1077,13 +1079,13 @@ public:
         }
         else        // reallocate
         {
-            size_type newCapacity = _Capacity_growth(newSize);
+            size_type newCapacity = capacityGrowth(newSize);
             const pointer newFirst = value->alloc.allocate(newCapacity);
-            traits_type::move(newFirst, value->data, pos);      // move elements before the pos
-            traits_type::move(newFirst + (count + pos),         // move elements after the pos
+            traits_type::move(newFirst, value->data, pos);  // move elements before the pos
+            traits_type::move(newFirst + (count + pos),     // move elements after the pos
                 value->data + pos, oldSize - pos);
-            _Update_pointer(newFirst, newCapacity);
-            traits_type::assign(newFirst + pos, count, ch);     // fill count characters
+            updatePointer(newFirst, newCapacity);
+            traits_type::assign(newFirst + pos, count, ch); // fill count characters
         }
 
         value->data[newSize] = traits_type::to_char_type(0);
@@ -1097,9 +1099,9 @@ public:
         size_type oldSize = size();
         size_type newSize = oldSize + count;
 
-        _CheckLengthAndRange(newSize, pos, oldSize);
+        checkLengthAndRange(newSize, pos, oldSize);
 
-        if (this->_Is_shared())
+        if (this->isShared())
             value = new String_value(value->data);
 
         if (count < capacity() - oldSize)   // no reallocate
@@ -1111,13 +1113,13 @@ public:
         }
         else        // reallocate
         {
-            size_type newCapacity = _Capacity_growth(newSize);
+            size_type newCapacity = capacityGrowth(newSize);
             const pointer newFirst = value->alloc.allocate(newCapacity);
-            traits_type::move(newFirst, value->data, pos);      // move elements before the pos
-            traits_type::move(newFirst + (count + pos),         // move elements after the pos
+            traits_type::move(newFirst, value->data, pos);  // move elements before the pos
+            traits_type::move(newFirst + (count + pos),     // move elements after the pos
                 value->data + pos, oldSize - pos);
-            _Update_pointer(newFirst, newCapacity);
-            traits_type::move(newFirst + pos, s, count);        // fill count characters
+            updatePointer(newFirst, newCapacity);
+            traits_type::move(newFirst + pos, s, count);    // fill count characters
         }
 
         value->data[newSize] = traits_type::to_char_type(0);
@@ -1137,9 +1139,9 @@ public:
     }
 
     cow_basic_string& insert(size_type pos, const cow_basic_string& str, 
-                         size_type str_pos, size_type count = npos)
+                             size_type str_pos, size_type count = npos)
     {
-        _CheckRange(str_pos, str.size());
+        checkRange(str_pos, str.size());
 
         return insert(substr(str_pos, count).c_str());
     }
@@ -1182,13 +1184,15 @@ public:
         return replace(pos, count, str.c_str(), str.size());
     }
 
-    cow_basic_string& replace(const_iterator first, const_iterator last, const cow_basic_string& str)
+    cow_basic_string& replace(const_iterator first, const_iterator last, 
+                              const cow_basic_string& str)
     {
         return replace(first, last, str.c_str(), str.size());
     }
 
     cow_basic_string& replace(size_type pos, size_type count, 
-        const cow_basic_string& str, size_type pos2, size_type count2 = npos)
+                              const cow_basic_string& str, size_type pos2, 
+                              size_type count2 = npos)
     {
         return replace(pos, count, str.substr(pos, count));
     }
@@ -1196,26 +1200,26 @@ public:
     template <typename InIter, 
         typename = enable_if_t<is_iterator<InIter>::value>>
     cow_basic_string& replace(const_iterator first, const_iterator last, 
-                          InIter first2, InIter last2)
+                              InIter first2, InIter last2)
     {
         return replace(first, last, cow_basic_string(first2, last2));
     }
 
     cow_basic_string& replace(size_type pos, size_type count,
-                          const CharT* cstr, size_type count2)
+                              const CharT* cstr, size_type count2)
     {
         // replace impl
         size_type oldSize = size();
         count2 = tiny_stl::min(count2, traits_type::length(cstr));
         size_type newSize = oldSize - count + count2;
 
-        _CheckLengthAndRange(newSize, pos, oldSize);
+        checkLengthAndRange(newSize, pos, oldSize);
 
-        if (this->_Is_shared())
+        if (this->isShared())
             value = new String_value(value->data);
 
         if (newSize >= capacity() - 1)      // reallocate
-            _Reallocte(newSize);
+            reallocteHelper(newSize);
 
         traits_type::move(value->data + pos + count2,   // dst
             value->data + pos + count,                  // src
@@ -1228,37 +1232,37 @@ public:
     }
 
     cow_basic_string& replace(const_iterator first, const_iterator last, 
-                          const CharT* cstr, size_type count2)
+                              const CharT* cstr, size_type count2)
     {
         return replace(first - begin(), last - first, cstr, count2);
     }
 
     cow_basic_string& replace(size_type pos, size_type count, 
-                          const CharT* cstr)
+                              const CharT* cstr)
     {
         return replace(pos, count, cstr, npos);
     }
 
     cow_basic_string& replace(const_iterator first, const_iterator last, 
-                          const CharT* cstr)
+                              const CharT* cstr)
     {
         return replace(first, last, cstr, npos);
     }
 
     cow_basic_string& replace(size_type pos, size_type count,
-                          size_type count2, CharT ch)
+                              size_type count2, CharT ch)
     {
         // replace impl
         size_type oldSize = size();
         size_type newSize = oldSize - count + count2;
 
-        _CheckLengthAndRange(newSize, pos, oldSize);
+        checkLengthAndRange(newSize, pos, oldSize);
 
-        if (this->_Is_shared())
+        if (this->isShared())
             value = new String_value(value->data);
 
         if (newSize >= capacity() - 1)      // reallocate
-            _Reallocte(newSize);
+            reallocteHelper(newSize);
 
         traits_type::move(value->data + pos + count2,   // dst
             value->data + pos + count,                  // src
@@ -1271,13 +1275,13 @@ public:
     }
 
     cow_basic_string& replace(const_iterator first, const_iterator last,
-                          size_type count2, CharT ch)
+                              size_type count2, CharT ch)
     {
         return replace(first - begin(), last - first, count2, ch);
     }
 
     cow_basic_string& replace(const_iterator first, const_iterator last,
-                          std::initializer_list<CharT> ilist)
+                              std::initializer_list<CharT> ilist)
     {
         return replace(first - begin(), last - first, ilist.begin(), ilist.end());
     }
@@ -1292,13 +1296,15 @@ public:
     }
 
     // compare this->[pos, pos + count) to rhs
-    int compare(size_type pos1, size_type count1, const cow_basic_string& rhs) const
+    int compare(size_type pos1, size_type count1, 
+                const cow_basic_string& rhs) const
     {
         return substr(pos1, count1).compare(rhs);
     }
 
     int compare(size_type pos1, size_type count1, 
-                const cow_basic_string& rhs, size_type pos2, size_type count2 = npos) const
+                const cow_basic_string& rhs, size_type pos2, 
+                size_type count2 = npos) const
     {
         return substr(pos1, count1).compare(rhs.substr(pos2, count2));
     }
@@ -1313,14 +1319,15 @@ public:
         return substr(pos1, count1).compare(cow_basic_string(s));
     }
 
-    int compare(size_type pos1, size_type count1, const CharT* s, size_type count2) const
+    int compare(size_type pos1, size_type count1, 
+                const CharT* s, size_type count2) const
     {
         return substr(pos1, count1).compare(cow_basic_string(s, count2));
     }
 
     void swap(cow_basic_string& rhs) noexcept(
-        _Alloc_traits::propagate_on_container_swap::value
-        || _Alloc_traits::is_always_equal::value)
+        AllocTraits::propagate_on_container_swap::value
+        || AllocTraits::is_always_equal::value)
     {
         tiny_stl::swap(value, rhs.value);
     }
@@ -1346,7 +1353,7 @@ public:
     // trim from left for the special character ch
     void ltrim(char ch)
     {
-        if (this->_Is_shared())
+        if (this->isShared())
             value = new String_value(value->data);
 
         this->erase(this->begin(), find_if(this->begin(), this->end(), [ch] (char c) {
@@ -1363,7 +1370,7 @@ public:
     // trim from right for the special character ch
     void rtrim(char ch)
     {
-        if (this->_Is_shared())
+        if (this->isShared())
             value = new String_value(value->data);
 
         this->erase(find_if(this->rbegin(), this->rend(), [ch](char c) {
@@ -1400,7 +1407,7 @@ private:
     // find algorithm
     // pos:   this->position at which to start the search 
     // count: s->length of substring to search for
-    size_type _Find(const CharT* s, size_type pos, size_type count) const
+    size_type findHelper(const CharT* s, size_type pos, size_type count) const
     {
         // Here is a naive find algorithm
 
@@ -1432,7 +1439,7 @@ private:
         return npos;
     }
 
-    size_type _RFind(const CharT* s, size_type pos, size_type count) const
+    size_type rfindHelper(const CharT* s, size_type pos, size_type count) const
     {
         size_type thisSize = size();
 
@@ -1468,17 +1475,17 @@ public:
 public:
     size_type find(const cow_basic_string& str, size_type pos = 0) const noexcept
     {
-        return _Find(str.c_str(), pos, str.size());
+        return findHelper(str.c_str(), pos, str.size());
     }
 
     size_type find(const CharT* s, size_type pos, size_type count) const
     {
-        return _Find(s, pos, count);
+        return findHelper(s, pos, count);
     }
 
     size_type find(const CharT* s, size_type pos = 0) const
     {
-        return _Find(s, pos, traits_type::length(s));
+        return findHelper(s, pos, traits_type::length(s));
     }
 
     size_type find(CharT ch, size_type pos = 0) const
@@ -1490,17 +1497,17 @@ public:
 
     size_type rfind(const cow_basic_string& str, size_type pos = npos) const noexcept
     {
-        return _RFind(str.c_str(), pos, str.size());
+        return rfindHelper(str.c_str(), pos, str.size());
     }
 
     size_type rfind(const CharT* s, size_type pos, size_type count) const
     {
-        return _RFind(s, pos, count);
+        return rfindHelper(s, pos, count);
     }
 
     size_type rfind(const CharT* s, size_type pos = npos) const
     {
-        return _RFind(s, pos, traits_type::length(s));
+        return rfindHelper(s, pos, traits_type::length(s));
     }
 
     size_type rfind(CharT ch, size_type pos = npos) const
@@ -1509,7 +1516,7 @@ public:
         CharT str[2];
         str[0] = ch;
         str[1] = traits_type::to_char_type(0);
-        return _RFind(str, pos, 1);
+        return rfindHelper(str, pos, 1);
     }
 
     // find_first_of, find_first_not_of, find_last_of, find_last_not_of 
@@ -1538,22 +1545,22 @@ public:
     }
 
 private:
-    bool _Is_shared() const noexcept
+    bool isShared() const noexcept
     {
         return value->is_shared();
     }
 
-    size_t _Get_ref_count() const noexcept
+    size_t getRefCount() const noexcept
     {
         return value->get_ref_count();
     }
 
-    [[noreturn]] static void _Xlength()
+    [[noreturn]] static void xLength()
     {
         throw "string_base<CharT> too long";
     }
 
-    [[noreturn]] static void _Xrange()
+    [[noreturn]] static void xRange()
     {
         throw "invalid string_base<CharT> subscript";
     }
@@ -1848,7 +1855,7 @@ std::basic_istream<CharT, Traits>& operator>>(
     std::basic_istream<CharT, Traits>& is,
     cow_basic_string<CharT, Traits, Alloc>& str)
 {
-    if (str._Is_shared())
+    if (str.isShared())
         str = cow_basic_string<CharT, Traits, Alloc>(str.data());
 
     // no format input
@@ -1865,7 +1872,7 @@ struct hash<cow_basic_string<CharT, Traits, Alloc>>
 
     size_t operator()(const cow_basic_string<CharT, Traits, Alloc>& str) const noexcept
     {
-        return tiny_stl::_FNVHash(str.c_str(), str.size());
+        return tiny_stl::hashFNV(str.c_str(), str.size());
     }
 };
 

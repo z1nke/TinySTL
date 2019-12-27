@@ -19,7 +19,7 @@ struct FLNode
 };
 
 template <typename T>
-struct _FList_const_iterator 
+struct FListConstIterator 
 {
     using iterator_category = forward_iterator_tag;
     using value_type        = T;
@@ -30,9 +30,9 @@ struct _FList_const_iterator
 
     Ptr ptr;
 
-    _FList_const_iterator() = default;
-    _FList_const_iterator(Ptr x) : ptr(x) { }
-    _FList_const_iterator(const _FList_const_iterator& rhs) : ptr(rhs.ptr) { }
+    FListConstIterator() = default;
+    FListConstIterator(Ptr x) : ptr(x) { }
+    FListConstIterator(const FListConstIterator& rhs) : ptr(rhs.ptr) { }
 
     reference operator*() const 
     {
@@ -44,32 +44,32 @@ struct _FList_const_iterator
         return pointer_traits<pointer>::pointer_to(**this);
     }
 
-    _FList_const_iterator& operator++() 
+    FListConstIterator& operator++() 
     {
         ptr = ptr->next;
         return *this;
     }
 
-    _FList_const_iterator operator++(int) 
+    FListConstIterator operator++(int) 
     {
-        _FList_const_iterator tmp = *this;
+        FListConstIterator tmp = *this;
         ++*this;
         return tmp;
     }
 
-    bool operator==(const _FList_const_iterator& rhs) const 
+    bool operator==(const FListConstIterator& rhs) const 
     {
         return ptr == rhs.ptr;
     }
 
-    bool operator!=(const _FList_const_iterator& rhs) const 
+    bool operator!=(const FListConstIterator& rhs) const 
     {
         return ptr != rhs.ptr;
     }
-};  // class _FList_const_iterator<T>
+};  // class FListConstIterator<T>
 
 template <typename T>
-struct _FList_iterator : _FList_const_iterator<T> 
+struct FListIterator : FListConstIterator<T> 
 {
     using iterator_category = forward_iterator_tag;
     using value_type        = T;
@@ -77,11 +77,11 @@ struct _FList_iterator : _FList_const_iterator<T>
     using pointer           = T*;
     using reference         = T&;
     using Ptr               = FLNode<T>*;
-    using _Base             = _FList_const_iterator<T>;
+    using Base              = FListConstIterator<T>;
 
-    _FList_iterator() : _Base() { }
-    _FList_iterator(Ptr x) : _Base(x) { }
-    _FList_iterator(const _FList_iterator& rhs) : _Base(rhs.ptr) { }
+    FListIterator() : Base() { }
+    FListIterator(Ptr x) : Base(x) { }
+    FListIterator(const FListIterator& rhs) : Base(rhs.ptr) { }
 
     reference operator*() const 
     {
@@ -93,88 +93,88 @@ struct _FList_iterator : _FList_const_iterator<T>
         return pointer_traits<pointer>::pointer_to(**this);
     }
 
-    _FList_iterator& operator++() 
+    FListIterator& operator++() 
     {
         this->ptr = this->ptr->next;
         return *this;
     }
 
-    _FList_iterator operator++(int) 
+    FListIterator operator++(int) 
     {
-        _FList_iterator tmp = *this;
+        FListIterator tmp = *this;
         ++*this;
         return tmp;
     }
-};  // class _FList_iterator<T>
+};  // class FListIterator<T>
 
 template <typename T, typename Alloc>
-class _FList_base 
+class FListBase 
 {
 public:
-    using _Node     = FLNode<T>;
-    using _Nodeptr  = FLNode<T>*;
-    using _Alnode   = typename allocator_traits<Alloc>::template rebind_alloc<_Node>;
+    using Node     = FLNode<T>;
+    using NodePtr  = FLNode<T>*;
+    using AlNode   = typename allocator_traits<Alloc>::template rebind_alloc<Node>;
 
 protected:
-    extra::compress_pair<_Alnode, _Nodeptr> m_pair;
+    extra::compress_pair<AlNode, NodePtr> m_pair;
 
 
-    _Alnode& _Get_Alloc() noexcept 
+    AlNode& getAlloc() noexcept 
     {
         return m_pair.get_first();
     }
 
-    const _Alnode& _Get_Alloc() const noexcept 
+    const AlNode& getAlloc() const noexcept 
     {
         return m_pair.get_first();
     }
 
-    _Nodeptr& _Get_head() noexcept 
+    NodePtr& getHead() noexcept 
     {
         return m_pair.get_second();
     }
 
-    const _Nodeptr& _Get_head() const noexcept 
+    const NodePtr& getHead() const noexcept 
     {
         return m_pair.get_second();
     }
 public:
-    _FList_base() : m_pair() 
+    FListBase() : m_pair() 
     {
-        _Create_head_node();
+        createHeadNode();
     }
 
     template <typename Any_alloc, 
-        typename = enable_if_t<!is_same<decay_t<Any_alloc>, _FList_base>::value>>
-    _FList_base(Any_alloc&& a) 
+        typename = enable_if_t<!is_same<decay_t<Any_alloc>, FListBase>::value>>
+    FListBase(Any_alloc&& a) 
     : m_pair(tiny_stl::forward<Any_alloc>(a)) 
     {
-        _Create_head_node();
+        createHeadNode();
     }
 
 
-    void _Create_head_node() 
+    void createHeadNode() 
     {
-        auto& alloc = _Get_Alloc();
+        auto& alloc = getAlloc();
         try
         {
-            _Get_head() = alloc.allocate(1);
-            alloc.construct(tiny_stl::addressof(_Get_head()->data));
-            _Get_head()->next = nullptr;
+            getHead() = alloc.allocate(1);
+            alloc.construct(tiny_stl::addressof(getHead()->data));
+            getHead()->next = nullptr;
         }
         catch (...)
         {
-            alloc.destroy(tiny_stl::addressof(_Get_head()->data));
-            alloc.deallocate(_Get_head(), 1);
+            alloc.destroy(tiny_stl::addressof(getHead()->data));
+            alloc.deallocate(getHead(), 1);
             throw;
         }
     }
 
     template <typename... U>
-    _Nodeptr _Create_node(_Nodeptr _next, U&&... val) 
+    NodePtr createNode(NodePtr nextNode, U&&... val) 
     {
-        auto& alloc = _Get_Alloc();
-        _Nodeptr p = nullptr;
+        auto& alloc = getAlloc();
+        NodePtr p = nullptr;
         try
         {
             p = alloc.allocate(1);
@@ -183,28 +183,28 @@ public:
         }
         catch (...)
         {
-            _Free_node(p);
+            freeNode(p);
             throw;
         }
 
-        p->next = _next;
+        p->next = nextNode;
 
         return p;
     }
 
-    void _Free_node(_Nodeptr p) 
+    void freeNode(NodePtr p) 
     {
-        auto& alloc = _Get_Alloc();
+        auto& alloc = getAlloc();
         alloc.destroy(tiny_stl::addressof(p->data));
         alloc.deallocate(p, 1);
     }
 
-    ~_FList_base() noexcept 
+    ~FListBase() noexcept 
     {
-        auto& alloc = _Get_Alloc();
+        auto& alloc = getAlloc();
 
-        alloc.destroy(tiny_stl::addressof(_Get_head()->data));
-        alloc.deallocate(_Get_head(), 1);
+        alloc.destroy(tiny_stl::addressof(getHead()->data));
+        alloc.deallocate(getHead(), 1);
     }
 };
 
@@ -217,7 +217,7 @@ public:
 // 
 
 template <typename T, typename Alloc = allocator<T>>
-class forward_list : public _FList_base<T, Alloc> 
+class forward_list : public FListBase<T, Alloc> 
 {
 public:
     static_assert(is_same<T, typename Alloc::value_type>::value,
@@ -232,28 +232,28 @@ public:
     using const_reference   = const T&;
     using pointer           = typename allocator_traits<Alloc>::pointer;
     using const_pointer     = typename allocator_traits<Alloc>::pointer;
-    using iterator          = _FList_iterator<T>;
-    using const_iterator    = _FList_const_iterator<T>;
+    using iterator          = FListIterator<T>;
+    using const_iterator    = FListConstIterator<T>;
 
-    using _Base             = _FList_base<T, Alloc>;
-    using _Self             = forward_list<T, Alloc>;
-    using _Node             = FLNode<T>;
-    using _Nodeptr          = FLNode<T>*;
-    using _Alnode           = typename _Base::_Alnode;
-    using _Alnode_traits    = allocator_traits<allocator_type>;
+    using Base             = FListBase<T, Alloc>;
+    using Self             = forward_list<T, Alloc>;
+    using Node             = FLNode<T>;
+    using NodePtr          = FLNode<T>*;
+    using AlNode           = typename Base::AlNode;
+    using AlNodeTraits     = allocator_traits<allocator_type>;
 
 public:
     forward_list() : forward_list(Alloc()) { }                      // (1)
-    explicit forward_list(const Alloc& alloc) : _Base(alloc) { }
+    explicit forward_list(const Alloc& alloc) : Base(alloc) { }
 
     forward_list(size_type count, const T& val,                     // (2)
-                const Alloc& alloc = Alloc()) : _Base(alloc) 
+                const Alloc& alloc = Alloc()) : Base(alloc) 
     {
         insert_after(before_begin(), count, val);
     }
 
     explicit forward_list(size_type count,                          // (3)
-                const Alloc& alloc = Alloc()) : _Base(alloc) 
+                const Alloc& alloc = Alloc()) : Base(alloc) 
     {
         T val = T{};
         insert_after(before_begin(), count, val);
@@ -262,34 +262,34 @@ public:
     template <typename InIter,                                      // (4)
         typename = enable_if_t<is_iterator<InIter>::value>> 
     forward_list(InIter first, InIter last, const Alloc& alloc = Alloc()) 
-    : _Base(alloc) 
+    : Base(alloc) 
     {
         insert_after(before_begin(), first, last);
     }
 
     forward_list(const forward_list& rhs)                           // (5)
-    : _Base(_Alnode_traits::select_on_container_copy_construction(
+    : Base(AlNodeTraits::select_on_container_copy_construction(
             rhs.get_allocator())) 
     {
         insert_after(before_begin(), rhs.begin(), rhs.end());
     }
 
     forward_list(const forward_list& rhs, const Alloc& alloc)       // (5)
-    : _Base(alloc) 
+    : Base(alloc) 
     {
         insert_after(before_begin(), rhs.begin(), rhs.end());
     }
 
 private:
-    void _Construct_rv(forward_list&& rhs, true_type) 
+    void constructMove(forward_list&& rhs, true_type) 
     {
-        _Swap_ADL(this->_Get_head(), rhs._Get_head());
+        swapADL(this->getHead(), rhs.getHead());
     }
 
-    void _Construct_rv(forward_list&& rhs, false_type) 
+    void constructMove(forward_list&& rhs, false_type) 
     {
-        if (this->_Get_Alloc() == rhs._Get_Alloc())
-            _Construct_rv(tiny_stl::move(rhs), true_type{});
+        if (this->getAlloc() == rhs.getAlloc())
+            constructMove(tiny_stl::move(rhs), true_type{});
         else
             insert_after(before_begin(), tiny_stl::make_move_iterator(rhs.begin()),
                 tiny_stl::make_move_iterator(rhs.end()));
@@ -297,19 +297,19 @@ private:
 
 public:
     forward_list(forward_list&& rhs) noexcept                       // (6)
-    : _Base(tiny_stl::move(rhs._Get_Alloc())) 
+    : Base(tiny_stl::move(rhs.getAlloc())) 
     {
-        _Construct_rv(tiny_stl::move(rhs), true_type{});
+        constructMove(tiny_stl::move(rhs), true_type{});
     }
 
     forward_list(forward_list&& rhs, const Alloc& alloc)            // (7)
-    : _Base(alloc) 
+    : Base(alloc) 
     {
-        _Construct_rv(tiny_stl::move(rhs), false_type{});
+        constructMove(tiny_stl::move(rhs), false_type{});
     }
 
     forward_list(std::initializer_list<T> ilist,                    // (8)
-                const Alloc& alloc = Alloc()) : _Base(alloc)
+                const Alloc& alloc = Alloc()) : Base(alloc)
     {
         insert_after(before_begin(), ilist.begin(), ilist.end());
     }
@@ -320,8 +320,8 @@ public:
 
 #pragma warning(push)   // if constexpr
 #pragma warning(disable : 4984)
-        if constexpr (_Alnode_traits::propagate_on_container_copy_assignment::value) 
-            this->_Get_Alloc() = rhs._Get_Alloc();
+        if constexpr (AlNodeTraits::propagate_on_container_copy_assignment::value) 
+            this->getAlloc() = rhs.getAlloc();
 #pragma warning(pop)
 
         assign(rhs.begin(), rhs.end());
@@ -329,7 +329,7 @@ public:
     }
 
     forward_list& operator=(forward_list&& rhs)
-                noexcept(_Alnode_traits::is_always_equal::value) 
+                noexcept(AlNodeTraits::is_always_equal::value) 
     {
         assert(this != tiny_stl::addressof(rhs));
 
@@ -337,12 +337,12 @@ public:
 
 #pragma warning(push)   // if constexpr
 #pragma warning(disable : 4984)
-        if constexpr (_Alnode_traits::propagate_on_container_move_assignment::value)
-            this->_Get_Alloc() = rhs._Get_Alloc();
+        if constexpr (AlNodeTraits::propagate_on_container_move_assignment::value)
+            this->getAlloc() = rhs.getAlloc();
 #pragma warning(pop)
 
-        _Construct_rv(tiny_stl::move(rhs),
-            typename _Alnode_traits::propagate_on_container_move_assignment{});
+        constructMove(tiny_stl::move(rhs),
+            typename AlNodeTraits::propagate_on_container_move_assignment{});
 
         return *this;
     }
@@ -376,19 +376,19 @@ public:
 
     allocator_type get_allocator() const 
     {
-        return this->_Get_Alloc();
+        return this->getAlloc();
     }
 
     void clear() noexcept 
     {
-        _Nodeptr pNext;
-        _Nodeptr p = this->_Get_head()->next;
-        this->_Get_head()->next = nullptr;
+        NodePtr pNext;
+        NodePtr p = this->getHead()->next;
+        this->getHead()->next = nullptr;
 
         for (; p != nullptr; p = pNext) 
         {
             pNext = p->next;
-            this->_Free_node(p);
+            this->freeNode(p);
         }
     }
 
@@ -404,12 +404,12 @@ public:
 
     iterator before_begin() noexcept 
     {
-        return iterator(this->_Get_head());
+        return iterator(this->getHead());
     }
 
     const_iterator before_begin() const noexcept 
     {
-        return const_iterator(this->_Get_head());
+        return const_iterator(this->getHead());
     }
 
     const_iterator cbefore_begin() const noexcept 
@@ -419,12 +419,12 @@ public:
 
     iterator begin() noexcept 
     {
-        return iterator(this->_Get_head()->next);
+        return iterator(this->getHead()->next);
     }
 
     const_iterator begin() const noexcept 
     {
-        return const_iterator(this->_Get_head()->next);
+        return const_iterator(this->getHead()->next);
     }
 
     const_iterator cbegin() const noexcept 
@@ -454,7 +454,7 @@ public:
 
     size_type max_size() const noexcept 
     {
-        return allocator_traits<_Alnode>::max_size(this->_Get_Alloc());
+        return allocator_traits<AlNode>::max_size(this->getAlloc());
     }
 
 
@@ -464,22 +464,22 @@ public:
     }
 
 private:
-    size_type _Size() const 
+    size_type sizeAux() const 
     {
         size_type n = 0;
         for (const_iterator p = begin(); p != end(); ++p, ++n);
         return n;
     }
 
-    const_iterator _Before_end() const 
+    const_iterator beforeEndAux() const 
     {
         const_iterator p = before_begin();
-        for (const_iterator _next = p; ++_next != end(); p = _next);
+        for (const_iterator nextNode = p; ++nextNode != end(); p = nextNode);
         return p;
     }
 
 public:
-    iterator _Make_iter(const_iterator iter) const
+    iterator makeIter(const_iterator iter) const
     {
         return iterator(iter.ptr);
     }
@@ -487,12 +487,12 @@ public:
     template <typename... Args>
     iterator emplace_after(const_iterator pos, Args&&... args) 
     {
-        _Nodeptr p = pos.ptr;
-        _Nodeptr newNode = this->_Create_node(pos.ptr->next, 
+        NodePtr p = pos.ptr;
+        NodePtr newNode = this->createNode(pos.ptr->next, 
                             tiny_stl::forward<Args>(args)...);
         p->next = newNode;
 
-        return _Make_iter(++pos);
+        return makeIter(++pos);
     }
 
     iterator insert_after(const_iterator pos, const T& val) 
@@ -509,7 +509,7 @@ public:
     {
         while (count--) 
             pos = emplace_after(pos, val);
-        return _Make_iter(pos);
+        return makeIter(pos);
     }
 
     template <typename InIter,
@@ -518,7 +518,7 @@ public:
     {
         for (; first != last; ++first, ++pos) 
             emplace_after(pos, *first);
-        return _Make_iter(pos);
+        return makeIter(pos);
     }
 
     iterator insert_after(const_iterator pos, std::initializer_list<T> ilist) 
@@ -538,17 +538,17 @@ public:
 
     iterator erase_after(const_iterator pos) 
     {
-        _Nodeptr cur = pos.ptr;
+        NodePtr cur = pos.ptr;
 
         assert(pos.ptr->next != nullptr);
 
         ++pos;
-        _Nodeptr pFree = pos.ptr;
+        NodePtr pFree = pos.ptr;
         cur->next = pFree->next;
         ++pos;                      // for return value
-        this->_Free_node(pFree);
+        this->freeNode(pFree);
 
-        return _Make_iter(pos);
+        return makeIter(pos);
     }
 
     // erase the elements in the range (first, last)
@@ -564,11 +564,11 @@ public:
             assert(first != end());
             if (first != last) 
             {
-                const_iterator _next = first;
-                for (++_next; _next != last; ) 
-                    _next = erase_after(first);
+                const_iterator nextNode = first;
+                for (++nextNode; nextNode != last; ) 
+                    nextNode = erase_after(first);
             }
-            return _Make_iter(last);
+            return makeIter(last);
         }
     }
 
@@ -579,9 +579,9 @@ public:
 
     void resize(size_type count, const T& val) 
     {
-        size_type curSize = this->_Size();
+        size_type curSize = this->sizeAux();
         if (curSize < count)
-            insert_after(this->_Before_end(), count - curSize, val);
+            insert_after(this->beforeEndAux(), count - curSize, val);
         else if (curSize > count) 
         {
             const_iterator tail = before_begin();
@@ -601,13 +601,13 @@ public:
     {
         if (this != tiny_stl::addressof(rhs)) 
         {
-            _Swap_alloc(this->_Get_Alloc(), rhs._Get_Alloc());
-            _Swap_ADL(this->_Get_head(), rhs._Get_head());
+            swapAlloc(this->getAlloc(), rhs.getAlloc());
+            swapADL(this->getHead(), rhs.getHead());
         }
     }
 
 private:
-    void _Splice_after(const_iterator pos, forward_list& rhs,
+    void spliceAfter(const_iterator pos, forward_list& rhs,
                        const_iterator first, const_iterator last) 
     {
         assert(this->get_allocator() == rhs.get_allocator());
@@ -630,7 +630,7 @@ private:
     }
 
     template <typename Cmp>
-    void _Merge(forward_list& rhs, const Cmp& cmp) 
+    void mergeAux(forward_list& rhs, const Cmp& cmp) 
     {
         if (this != tiny_stl::addressof(rhs)) 
         {       
@@ -645,20 +645,20 @@ private:
             for (; next1 != last1 && next2 != last2; ++first1) 
             {
                 if (cmp(*next2, *next1))     // move *first2 to the front of *first
-                    _Splice_after(first1, rhs, first2, ++next2);
+                    spliceAfter(first1, rhs, first2, ++next2);
                 else 
                     ++next1;
             }
 
             if (next2 != last2)
-                _Splice_after(first1, rhs, first2, last2);
+                spliceAfter(first1, rhs, first2, last2);
         }
     }
 
     
     // merge sort
     template <typename BinPred>
-    void _Sort(iterator before_first, iterator last, 
+    void sortAux(iterator before_first, iterator last, 
                BinPred pred, size_type size) 
     {                         
         if (size < 2)
@@ -667,10 +667,10 @@ private:
         size_type mid_size = size >> 1;
 
         iterator mid = tiny_stl::next(before_first, 1 + mid_size);      // init mid
-        _Sort(before_first, mid, pred, mid_size);                       // sort first half
+        sortAux(before_first, mid, pred, mid_size);                     // sort first half
 
         iterator before_mid = tiny_stl::next(before_first, mid_size);   // init before_mid
-        _Sort(before_mid, last, pred, size - mid_size);                 // sort second half
+        sortAux(before_mid, last, pred, size - mid_size);               // sort second half
 
         // Because the iterator mid does not fail
         // the previous sort will change the mid
@@ -702,31 +702,31 @@ private:
 public:
     void merge(forward_list& rhs) 
     {
-        _Merge(rhs, tiny_stl::less<>{});
+        mergeAux(rhs, tiny_stl::less<>{});
     }
 
     void merge(forward_list&& rhs) 
     {
-        _Merge(rhs, tiny_stl::less<>{});
+        mergeAux(rhs, tiny_stl::less<>{});
     }
 
     template <typename Cmp>
     void merge(forward_list& rhs, Cmp cmp) 
     {
-        _Merge(rhs, cmp);
+        mergeAux(rhs, cmp);
     }
 
     template <typename Cmp>
     void merge(forward_list&& rhs, Cmp cmp) 
     {
-        _Merge(rhs, cmp);
+        mergeAux(rhs, cmp);
     }
 
     // move all elements from rhs into after the pos
     void splice_after(const_iterator pos, forward_list& rhs) 
     {
         assert(this != tiny_stl::addressof(rhs));
-        _Splice_after(pos, rhs, rhs.before_begin(), rhs.end());
+        spliceAfter(pos, rhs, rhs.before_begin(), rhs.end());
     }
 
     void splice_after(const_iterator pos, forward_list&& rhs) 
@@ -738,12 +738,12 @@ public:
     void splice_after(const_iterator pos, forward_list& rhs, 
                       const_iterator first) 
     {
-        const_iterator _next = first;
-        ++_next;
-        if (pos == first || pos == _next)
+        const_iterator nextNode = first;
+        ++nextNode;
+        if (pos == first || pos == nextNode)
             return;
 
-        _Splice_after(pos, rhs, first, ++_next);
+        spliceAfter(pos, rhs, first, ++nextNode);
     }
 
     void splice_after(const_iterator pos, forward_list&& rhs,
@@ -757,13 +757,13 @@ public:
                       const_iterator first, const_iterator last) 
     {
         // pos can't be an element of (first, last)
-#ifdef _DEBUG
-        const_iterator _next = first;
-        for (++_next; _next != last; ++_next) 
-            assert(pos != _next);
-#endif // _DEBUG
+#ifndef NDEBUG // DEBUG
+        const_iterator nextNode = first;
+        for (++nextNode; nextNode != last; ++nextNode) 
+            assert(pos != nextNode);
+#endif // !NDEBUG
 
-        _Splice_after(pos, rhs, first, last);
+        spliceAfter(pos, rhs, first, last);
     }
 
     void splice_after(const_iterator pos, forward_list&& rhs,
@@ -798,13 +798,13 @@ public:
     {
         if (!empty()) 
         {
-            const_iterator beforeEnd = _Before_end();
+            const_iterator beforeEnd = beforeEndAux();
             const_iterator first = begin();
-            const_iterator _next = first;
-            for (; first != beforeEnd; first = _next) 
+            const_iterator nextNode = first;
+            for (; first != beforeEnd; first = nextNode) 
             {
-                ++_next;
-                this->_Get_head()->next = _next.ptr;
+                ++nextNode;
+                this->getHead()->next = nextNode.ptr;
                 first.ptr->next = beforeEnd.ptr->next;
                 beforeEnd.ptr->next = first.ptr;
             }
@@ -817,14 +817,14 @@ public:
         if (empty())
             return;
         const_iterator first = begin();
-        const_iterator _next = first;
+        const_iterator nextNode = first;
         
-        for (++_next; _next != end();) 
+        for (++nextNode; nextNode != end();) 
         {
-            if (pred(*first, *_next)) 
-                _next = erase_after(first);
+            if (pred(*first, *nextNode)) 
+                nextNode = erase_after(first);
             else 
-                first = _next++;
+                first = nextNode++;
         }
     }
 
@@ -836,7 +836,7 @@ public:
     template <typename Cmp>
     void sort(Cmp cmp) 
     {
-        _Sort(before_begin(), end(), cmp, this->_Size());
+        sortAux(before_begin(), end(), cmp, this->sizeAux());
     }
 
     void sort() 

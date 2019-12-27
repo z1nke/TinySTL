@@ -74,10 +74,10 @@ struct iterator
 };
 
 template <typename, typename = void>
-struct _Iterator_traits_base { };
+struct IteratorTraitsBase { };
 
 template <typename Iter>
-struct _Iterator_traits_base<Iter, void_t<
+struct IteratorTraitsBase<Iter, void_t<
     typename Iter::iterator_category,
     typename Iter::value_type,
     typename Iter::difference_type,
@@ -92,7 +92,7 @@ struct _Iterator_traits_base<Iter, void_t<
 };
 
 template <typename T, bool = is_object<T>::value> // pointer to object
-struct _Iterator_traits_pointer_base 
+struct IteratorTraitsPointerBase 
 {
     using iterator_category = random_access_iterator_tag;
     using value_type        = remove_cv_t<T>;
@@ -103,11 +103,11 @@ struct _Iterator_traits_pointer_base
 
 template <typename Iter>
 struct iterator_traits 
-    : _Iterator_traits_base<Iter> { };
+    : IteratorTraitsBase<Iter> { };
 
 template <typename T>
 struct iterator_traits<T*> 
-    : _Iterator_traits_pointer_base<T> { };
+    : IteratorTraitsPointerBase<T> { };
 
 template<typename T, typename = void>
 struct is_iterator : false_type { };
@@ -145,25 +145,27 @@ value_type(const Iter&)
 }
 
 template <typename Iter>
-using _Iterator_value_t = typename iterator_traits<Iter>::value_type;
+using IteratorValueType = typename iterator_traits<Iter>::value_type;
 
 
 namespace 
 {
-    template <typename Iter>
-    constexpr Iter _operator_arrow(Iter target, 
-                            true_type /*is a pointer*/) 
-    {
-        return target;
-    }
 
-    template <typename Iter>
-    constexpr decltype(auto) _operator_arrow(Iter&& target,
-                            false_type /*is not a pointer*/) 
-    {
-        return (tiny_stl::forward<Iter>(target).operator->());
-    }
+template <typename Iter>
+constexpr Iter operator_arrow(Iter target, 
+                              true_type /*is a pointer*/) 
+{
+    return target;
 }
+
+template <typename Iter>
+constexpr decltype(auto) operator_arrow(Iter&& target,
+                                        false_type /*is not a pointer*/) 
+{
+    return (tiny_stl::forward<Iter>(target).operator->());
+}
+
+} // namespace
 
 //  rend                           rbegin
 // |v |p                            |v |p     v is value, p is position
@@ -185,7 +187,7 @@ public:
     using pointer           = typename iterator_traits<Iter>::pointer;
     using reference         = typename iterator_traits<Iter>::reference;
     using iterator_type     = Iter;
-    using _Self             = reverse_iterator<Iter>;
+    using Self              = reverse_iterator<Iter>;
 public:
     constexpr reverse_iterator() : current() { }
     constexpr explicit reverse_iterator(iterator_type x) : current(x) { }
@@ -195,7 +197,7 @@ public:
         : current(rhs.base()) { }
 
     template <typename Other>
-    constexpr _Self& operator=(const reverse_iterator<Other>& rhs) 
+    constexpr Self& operator=(const reverse_iterator<Other>& rhs) 
     {
         current = rhs.base();
         return *this;
@@ -216,57 +218,57 @@ public:
     {
         Iter tmp = current;
         --tmp;
-        return (_operator_arrow(tmp, is_pointer<Iter>()));
+        return (operator_arrow(tmp, is_pointer<Iter>()));
     }
 
-    constexpr _Self& operator++() // preincrement
+    constexpr Self& operator++() // preincrement
     {    
         --current;
         return *this;
     }
 
-    constexpr _Self operator++(int) // postincrement
+    constexpr Self operator++(int) // postincrement
     {    
-        _Self tmp = *this;
+        Self tmp = *this;
         --current;
         return tmp;
     }
 
-    constexpr _Self& operator--() // predecrement
+    constexpr Self& operator--() // predecrement
     {    
         ++current;
         return *this;
     }
 
-    constexpr _Self operator--(int) // postdecrement
+    constexpr Self operator--(int) // postdecrement
     {  
-        _Self tmp = *this;
+        Self tmp = *this;
         ++current;
         return tmp;
     }
 
     // only random-access iterators
 
-    constexpr _Self& operator+=(difference_type n) 
+    constexpr Self& operator+=(difference_type n) 
     {
         current -= n;
         return *this;
     }
 
-    constexpr _Self operator+(difference_type n) const 
+    constexpr Self operator+(difference_type n) const 
     {
-        return _Self(current - n);
+        return Self(current - n);
     }
 
-    constexpr _Self& operator-=(difference_type n) 
+    constexpr Self& operator-=(difference_type n) 
     {
         current += n;
         return *this;
     }
 
-    constexpr _Self operator-(difference_type n) const 
+    constexpr Self operator-(difference_type n) const 
     {
-        return _Self(current + n);
+        return Self(current + n);
     }
 
     constexpr reference operator[](difference_type n) const 
@@ -502,23 +504,23 @@ constexpr move_iterator<Iter> make_move_iterator(Iter iter)
 
 
 template <typename InIter, typename Distance>
-inline void __advance(InIter& iter, Distance n, 
-                      input_iterator_tag) 
+inline void advanceAux(InIter& iter, Distance n, 
+                       input_iterator_tag) 
 {
     while (n--) 
         ++iter;
 }
 
 template <typename FwdIter, typename Distance>
-inline void __advance(FwdIter& iter, Distance n, 
-                    forward_iterator_tag) 
+inline void advanceAux(FwdIter& iter, Distance n, 
+                       forward_iterator_tag) 
 {
-    __advance(iter, n, input_iterator_tag{});
+    advanceAux(iter, n, input_iterator_tag{});
 }
 
 template <typename BidirectionalIterator, typename Distance>
-inline void __advance(BidirectionalIterator& iter, Distance n,
-                      bidirectional_iterator_tag) 
+inline void advanceAux(BidirectionalIterator& iter, Distance n,
+                       bidirectional_iterator_tag) 
 {
     if (n >= 0)
         while (n--)
@@ -529,8 +531,8 @@ inline void __advance(BidirectionalIterator& iter, Distance n,
 }
 
 template <typename RandomAccessIterator, typename Distance>
-inline void __advance(RandomAccessIterator& iter, Distance n,
-                      random_access_iterator_tag) 
+inline void advanceAux(RandomAccessIterator& iter, Distance n,
+                       random_access_iterator_tag) 
 {
     iter += n;
 }
@@ -538,7 +540,7 @@ inline void __advance(RandomAccessIterator& iter, Distance n,
 
 template <typename InIter>
 inline typename iterator_traits<InIter>::difference_type
-__distance(InIter first, InIter last, input_iterator_tag) 
+distanceAux(InIter first, InIter last, input_iterator_tag) 
 {
     typename iterator_traits<InIter>::difference_type n = 0;
     while (first != last) 
@@ -551,8 +553,8 @@ __distance(InIter first, InIter last, input_iterator_tag)
 
 template <typename RandomAccessIterator>
 inline typename iterator_traits<RandomAccessIterator>::difference_type
-__distance(RandomAccessIterator first, RandomAccessIterator last,
-           random_access_iterator_tag) 
+distanceAux(RandomAccessIterator first, RandomAccessIterator last,
+            random_access_iterator_tag) 
 {
     return last - first;
 }
@@ -561,7 +563,7 @@ __distance(RandomAccessIterator first, RandomAccessIterator last,
 template <typename InIter, typename Distance>
 inline void advance(InIter& iter, Distance n) 
 {
-    __advance(iter, n, typename iterator_traits<
+    advanceAux(iter, n, typename iterator_traits<
         remove_const_t<InIter>>::iterator_category{});
 }
 
@@ -571,7 +573,7 @@ distance(InIter first, InIter last)
 {
     using category = typename iterator_traits<
         InIter>::iterator_category;
-    return __distance(first, last, category{});
+    return distanceAux(first, last, category{});
 }
 
 template <typename InIter>
@@ -583,6 +585,6 @@ constexpr InIter next(InIter iter,
 }
 
 template <typename Iter>
-using _Iter_diff_t = typename iterator_traits<Iter>::difference_type;
+using IterDiffType = typename iterator_traits<Iter>::difference_type;
 
 }  // namespace tiny_stl 

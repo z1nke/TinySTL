@@ -30,12 +30,13 @@ public:
 
     void swap(tuple&) noexcept { }
 
-    constexpr bool _Equal(const tuple&) const noexcept
+public:
+    constexpr bool equal(const tuple&) const noexcept
     {
         return true;
     }
 
-    constexpr bool _Less(const tuple&) const noexcept
+    constexpr bool less(const tuple&) const noexcept
     {
         return false;
     }
@@ -46,7 +47,7 @@ class tuple<Head, Tail...> : private tuple<Tail...>
 {
 public:
     using First = Head;
-    using _Base = tuple<Tail...>;
+    using Base = tuple<Tail...>;
 
     static constexpr size_t size = 1 + sizeof...(Tail);
 protected:
@@ -56,13 +57,13 @@ public:
 
     template <enable_if_t<                                              // (1)
         is_default_constructible<Head>::value, int> = 0>
-    explicit tuple() : m_head(), _Base() { }
+    explicit tuple() : m_head(), Base() { }
 
 
     template <enable_if_t<                                              // (2)
         is_copy_constructible<Head>::value, int> = 0>
     explicit constexpr tuple(Head h, Tail... t) 
-    : m_head(h), _Base(t...) { }
+    : m_head(h), Base(t...) { }
 
 
     template <typename H, typename... T, enable_if_t<                   // (3)
@@ -71,7 +72,7 @@ public:
         int> = 0>
     explicit constexpr tuple(H&& h, T&&... t)
     : m_head(tiny_stl::forward<H>(h)), 
-        _Base(tiny_stl::forward<T>(t)...) { }
+        Base(tiny_stl::forward<T>(t)...) { }
 
 
     template <typename H, typename... T, enable_if_t<                   // (4)
@@ -79,7 +80,7 @@ public:
         && sizeof...(Tail) == sizeof...(T), 
         int> = 0>
     constexpr tuple(const tuple<H, T...>& rhs) 
-    : m_head(rhs.get_head()), _Base(rhs.get_tail()) { }
+    : m_head(rhs.get_head()), Base(rhs.get_tail()) { }
 
 
     template <typename H, typename... T, enable_if_t<                   // (5)
@@ -88,7 +89,7 @@ public:
         int> = 0>
     constexpr tuple(tuple<H, T...>&& rhs) 
     : m_head(tiny_stl::forward<H&&>(rhs.get_head())), 
-        _Base(tiny_stl::forward<_Base&&>(rhs.get_tail())) { }
+        Base(tiny_stl::forward<Base&&>(rhs.get_tail())) { }
 
 
     template <typename U1, typename U2, enable_if_t<                    // (6)
@@ -96,7 +97,7 @@ public:
         && sizeof...(Tail) == 1, 
         int> = 0>
     constexpr tuple(const pair<U1, U2>& p) 
-    : m_head(p.first), _Base(p.second) { }
+    : m_head(p.first), Base(p.second) { }
 
 
     template <typename U1, typename U2, enable_if_t<                    // (7)
@@ -105,7 +106,7 @@ public:
         int> = 0>
     constexpr tuple(pair<U1, U2>&& p)
     : m_head(tiny_stl::forward<U1&&>(p.first)), 
-        _Base(tiny_stl::forward<U2&&>(p.second)) { }
+        Base(tiny_stl::forward<U2&&>(p.second)) { }
 
 
     tuple(const tuple&) = default;                                      // (8)
@@ -123,10 +124,10 @@ public:
 
     tuple& operator=(tuple&& rhs)
         noexcept(std::is_nothrow_move_assignable<Head>::value
-            && std::is_nothrow_move_assignable<_Base>::value)
+            && std::is_nothrow_move_assignable<Base>::value)
     {
         get_head() = tiny_stl::forward<Head>(rhs.get_head());
-        get_tail() = tiny_stl::forward<_Base>(rhs.get_tail());
+        get_tail() = tiny_stl::forward<Base>(rhs.get_tail());
 
         return *this;
     }
@@ -146,7 +147,7 @@ public:
         get_head() = tiny_stl::forward<typename 
             tuple<Ts...>::First>(rhs.get_head());
         get_tail() = tiny_stl::forward<typename 
-            tuple<Ts...>::_Base>(rhs.get_tail());
+            tuple<Ts...>::Base>(rhs.get_tail());
 
         return *this;
     }
@@ -173,8 +174,8 @@ public:
         noexcept(conjunction<std::_Is_nothrow_swappable<Head>, 
             std::_Is_nothrow_swappable<Tail>...>::value)
     {
-        tiny_stl::_Swap_ADL(get_head(), rhs.get_head());
-        _Base::swap(rhs.get_tail());
+        tiny_stl::swapADL(get_head(), rhs.get_head());
+        Base::swap(rhs.get_tail());
     }
 
     Head& get_head()
@@ -187,35 +188,35 @@ public:
         return m_head;
     }
 
-    _Base& get_tail()
+    Base& get_tail()
     {
         return *this;
     }
 
-    const _Base& get_tail() const
+    const Base& get_tail() const
     {
         return *this;
     }
 
     template <typename... Us>
-    constexpr bool _Equal(const tuple<Us...>& rhs) const
+    constexpr bool equal(const tuple<Us...>& rhs) const
     {
         static_assert(size == sizeof...(Us), 
             "tuple with different size");
 
         return get_head() == rhs.get_head()
-            && _Base::_Equal(rhs.get_tail());
+            && Base::equal(rhs.get_tail());
     }
 
     template <typename... Us>
-    constexpr bool _Less(const tuple<Us...>& rhs) const
+    constexpr bool less(const tuple<Us...>& rhs) const
     {
         static_assert(size == sizeof...(Us),
             "tuple with different size");
 
         return get_head() < rhs.get_head()
             || (!(rhs.get_head() < get_head()) 
-                && _Base::_Less(rhs.get_tail()));
+                && Base::less(rhs.get_tail()));
     }
 
 };
@@ -230,7 +231,7 @@ inline void swap(tuple<Ts...>& lhs, tuple<Ts...>& rhs)
 template <typename... Args>
 inline auto make_tuple(Args... args)
 {
-    return tuple<_Unrefwrap<Args>...>(
+    return tuple<UnRefWrap<Args>...>(
         tiny_stl::forward<Args>(args)...);
 }
 
@@ -295,7 +296,7 @@ template <typename... Ts, typename... Us>
 constexpr bool operator==(const tuple<Ts...>& lhs, 
                           const tuple<Us...>& rhs)
 {
-    return lhs._Equal(rhs);
+    return lhs.equal(rhs);
 }
 
 template <typename... Ts, typename... Us>
@@ -309,7 +310,7 @@ template <typename... Ts, typename... Us>
 constexpr bool operator<(const tuple<Ts...>& lhs,
                          const tuple<Us...>& rhs)
 {
-    return lhs._Less(rhs);
+    return lhs.less(rhs);
 }
 
 template <typename... Ts, typename... Us>

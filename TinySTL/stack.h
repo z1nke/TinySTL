@@ -107,10 +107,10 @@ public:
     void swap(stack& rhs) 
         noexcept(std::_Is_nothrow_swappable<Container>::value)
     {
-        _Swap_ADL(this->cont, rhs.cont);
+        swapADL(this->cont, rhs.cont);
     }
 
-    const container_type& _Get_container() const 
+    const container_type& getContainer() const 
     {
         return this->cont;
     }
@@ -120,7 +120,7 @@ template <typename T, typename Container>
 inline bool operator==(const stack<T, Container>& lhs,
                        const stack<T, Container>& rhs)
 {
-    return lhs._Get_container() == rhs._Get_container();
+    return lhs.getContainer() == rhs.getContainer();
 }
 
 
@@ -136,7 +136,7 @@ template <typename T, typename Container>
 inline bool operator<(const stack<T, Container>& lhs,
                       const stack<T, Container>& rhs) 
 {
-    return lhs._Get_container() < rhs._Get_container();
+    return lhs.getContainer() < rhs.getContainer();
 }
 
 template <typename T, typename Container>
