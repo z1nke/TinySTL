@@ -555,7 +555,7 @@ struct greater_equal<void>
 };
 
 template <typename T>
-inline size_t _FNVHash(const T* p, size_t count) noexcept
+inline size_t hashFNV(const T* p, size_t count) noexcept
 {
     static_assert(is_arithmetic_v<T>, "T must be arithmetic type");
     size_t ret = 2166136261U;
@@ -576,7 +576,7 @@ struct hash
 
     size_t operator()(const Key& key) const noexcept
     {
-        return _FNVHash(&reinterpret_cast<const unsigned char&>(key), 
+        return hashFNV(&reinterpret_cast<const unsigned char&>(key), 
                         sizeof(Key));
     }
 };

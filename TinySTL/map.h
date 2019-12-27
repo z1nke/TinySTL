@@ -8,7 +8,7 @@ namespace tiny_stl
 template <typename Key, typename T, 
     typename Compare = less<Key>, 
     typename Alloc = allocator<pair<Key, T>>>
-class map : public _RBTree<pair<Key, T>, Compare, Alloc, true>
+class map : public RBTree<pair<Key, T>, Compare, Alloc, true>
 {
 public:
     using key_type               = Key;
@@ -20,16 +20,16 @@ public:
     using allocator_type         = Alloc;
     using reference              = value_type&;
     using const_reference        = const value_type&;
-    using _Al_traits             = allocator_traits<allocator_type>;
-    using pointer                = typename _Al_traits::pointer;
-    using const_pointer          = typename _Al_traits::const_pointer;
-    using _Base                  = _RBTree<pair<Key, T>, Compare, Alloc, true>;
-    using _Alnode                = typename _Base::_Alnode;
-    using _Alnode_traits         = typename _Base::_Alnode_traits;
-    using iterator               = typename _Base::iterator;
-    using const_iterator         = typename _Base::const_iterator;
-    using reverse_iterator       = typename _Base::reverse_iterator;
-    using const_reverse_iterator = typename _Base::const_reverse_iterator;
+    using AlTraits               = allocator_traits<allocator_type>;
+    using pointer                = typename AlTraits::pointer;
+    using const_pointer          = typename AlTraits::const_pointer;
+    using Base                   = RBTree<pair<Key, T>, Compare, Alloc, true>;
+    using AlNode                 = typename Base::AlNode;
+    using AlNodeTraits           = typename Base::AlNodeTraits;
+    using iterator               = typename Base::iterator;
+    using const_iterator         = typename Base::const_iterator;
+    using reverse_iterator       = typename Base::reverse_iterator;
+    using const_reverse_iterator = typename Base::const_reverse_iterator;
 
 
     class value_compare
@@ -48,39 +48,39 @@ public:
 public:
     map() : map(Compare()) { }
     explicit map(const Compare& cmp, const Alloc& alloc = Alloc()) 
-    : _Base(cmp, alloc) { }
+    : Base(cmp, alloc) { }
 
     explicit map(const Alloc& alloc) 
-    : _Base(Compare(), alloc) { }
+    : Base(Compare(), alloc) { }
 
     template <typename InIter>
     map(InIter first, InIter last, const Compare& cmp = Compare(), 
-        const Alloc& alloc = Alloc()) : _Base(cmp, alloc)
+        const Alloc& alloc = Alloc()) : Base(cmp, alloc)
     {
         this->insert_unique(first, last);
     }
 
     template <typename InIter>
-    map(InIter first, InIter last, const Alloc& alloc) : _Base(Compare(), alloc)
+    map(InIter first, InIter last, const Alloc& alloc) : Base(Compare(), alloc)
     {
         this->insert_unique(first, last);
     }
 
     map(const map& rhs)
-    : _Base(rhs, _Al_traits::select_on_container_copy_construction(rhs.get_allocator()))
+    : Base(rhs, AlTraits::select_on_container_copy_construction(rhs.get_allocator()))
     { }
 
     map(const map& rhs, const Alloc& alloc)
-    : _Base(rhs, alloc) { }
+    : Base(rhs, alloc) { }
 
-    map(map&& rhs) noexcept : _Base(tiny_stl::move(rhs))  {}
+    map(map&& rhs) noexcept : Base(tiny_stl::move(rhs))  {}
 
-    map(map&& rhs, const Alloc& alloc) : _Base(tiny_stl::move(rhs), alloc) {}
+    map(map&& rhs, const Alloc& alloc) : Base(tiny_stl::move(rhs), alloc) {}
 
     map(std::initializer_list<value_type> ilist,
         const Compare& cmp = Compare(),
         const Alloc& alloc = Alloc()) 
-    : _Base(cmp, alloc)
+    : Base(cmp, alloc)
     {
         this->insert_unique(ilist.begin(), ilist.end());
     }
@@ -91,13 +91,13 @@ public:
 
     map& operator=(const map& rhs)
     {
-        _Base::operator=(rhs);
+        Base::operator=(rhs);
         return *this;
     }
 
     map& operator=(map&& rhs)
     {
-        _Base::operator=(tiny_stl::move(rhs));
+        Base::operator=(tiny_stl::move(rhs));
         return *this;
     }
 
@@ -112,7 +112,7 @@ public:
     {
         iterator pos = this->find(key);
         if (pos == this->end())
-            _Xrange();
+            xRange();
 
         return pos->second;
     }
@@ -121,7 +121,7 @@ public:
     {
         const_iterator pos = this->find(key);
         if (pos == this->end())
-            _Xrange();
+            xRange();
 
         return pos->second;
     }
@@ -181,7 +181,7 @@ public:
 
     void swap(map& rhs)
     {
-        _Base::swap(rhs);
+        Base::swap(rhs);
     }
 
     key_compare key_comp() const
@@ -195,7 +195,7 @@ public:
     }
 
 private:
-    [[noreturn]] static void _Xrange()
+    [[noreturn]] static void xRange()
     {
         throw "map<Key, T>, key is not exist";
     }
@@ -211,7 +211,7 @@ inline void swap(map<Key, T, Cmp, Alloc>& lhs, map<Key, T, Cmp, Alloc>& rhs)
 template <typename Key, typename T, 
     typename Compare = less<Key>, 
     typename Alloc = allocator<pair<Key, T>>>
-class multimap : public _RBTree<pair<Key, T>, Compare, Alloc, true>
+class multimap : public RBTree<pair<Key, T>, Compare, Alloc, true>
 {
 public:
     using key_type               = Key;
@@ -223,16 +223,16 @@ public:
     using allocator_type         = Alloc;
     using reference              = value_type&;
     using const_reference        = const value_type&;
-    using _Al_traits             = allocator_traits<allocator_type>;
-    using pointer                = typename _Al_traits::pointer;
-    using const_pointer          = typename _Al_traits::const_pointer;
-    using _Base                  = _RBTree<pair<Key, T>, Compare, Alloc, true>;
-    using _Alnode                = typename _Base::_Alnode;
-    using _Alnode_traits         = typename _Base::_Alnode_traits;
-    using iterator               = typename _Base::iterator;
-    using const_iterator         = typename _Base::const_iterator;
-    using reverse_iterator       = typename _Base::reverse_iterator;
-    using const_reverse_iterator = typename _Base::const_reverse_iterator;
+    using AlTraits               = allocator_traits<allocator_type>;
+    using pointer                = typename AlTraits::pointer;
+    using const_pointer          = typename AlTraits::const_pointer;
+    using Base                   = RBTree<pair<Key, T>, Compare, Alloc, true>;
+    using AlNode                 = typename Base::AlNode;
+    using AlNodeTraits           = typename Base::AlNodeTraits;
+    using iterator               = typename Base::iterator;
+    using const_iterator         = typename Base::const_iterator;
+    using reverse_iterator       = typename Base::reverse_iterator;
+    using const_reverse_iterator = typename Base::const_reverse_iterator;
 
 
     class value_compare
@@ -251,38 +251,38 @@ public:
 public:
     multimap() : multimap(Compare()) { }
     explicit multimap(const Compare& cmp, const Alloc& alloc = Alloc()) 
-    : _Base(cmp, alloc) { }
+    : Base(cmp, alloc) { }
 
     explicit multimap(const Alloc& alloc) 
-    : _Base(Compare(), alloc) { }
+    : Base(Compare(), alloc) { }
 
     template <typename InIter>
     multimap(InIter first, InIter last, const Compare& cmp = Compare(), 
-        const Alloc& alloc = Alloc()) : _Base(cmp, alloc)
+        const Alloc& alloc = Alloc()) : Base(cmp, alloc)
     {
         this->insert_equal(first, last);
     }
 
     template <typename InIter>
-    multimap(InIter first, InIter last, const Alloc& alloc) : _Base(Compare(), alloc)
+    multimap(InIter first, InIter last, const Alloc& alloc) : Base(Compare(), alloc)
     {
         this->insert_equal(first, last);
     }
 
     multimap(const multimap& rhs)
-    : _Base(rhs, _Al_traits::select_on_container_copy_construction(rhs.get_allocator()))
+    : Base(rhs, AlTraits::select_on_container_copy_construction(rhs.get_allocator()))
     { }
 
     multimap(const multimap& rhs, const Alloc& alloc)
-    : _Base(rhs, alloc) { }
+    : Base(rhs, alloc) { }
 
-    multimap(multimap&& rhs) : _Base(tiny_stl::move(rhs)) {}
+    multimap(multimap&& rhs) : Base(tiny_stl::move(rhs)) {}
 
-    multimap(multimap&& rhs, const Alloc& alloc) : _Base(tiny_stl::move(rhs), alloc) {}
+    multimap(multimap&& rhs, const Alloc& alloc) : Base(tiny_stl::move(rhs), alloc) {}
 
     multimap(std::initializer_list<value_type> ilist,
         const Compare& cmp = Compare(),
-        const Alloc& alloc = Alloc()) : _Base(cmp, alloc)
+        const Alloc& alloc = Alloc()) : Base(cmp, alloc)
     {
         this->insert_equal(ilist.begin(), ilist.end());
     }
@@ -293,13 +293,13 @@ public:
 
     multimap& operator=(const multimap& rhs)
     {
-        _Base::operator=(rhs);
+        Base::operator=(rhs);
         return *this;
     }
 
     multimap& operator=(multimap&& rhs)
     {
-        _Base::operator=(tiny_stl::move(rhs));
+        Base::operator=(tiny_stl::move(rhs));
         return *this;
     }
 
@@ -346,7 +346,7 @@ public:
 
     void swap(multimap& rhs)
     {
-        _Base::swap(rhs);
+        Base::swap(rhs);
     }
 
     key_compare key_comp() const
@@ -360,7 +360,7 @@ public:
     }
 
 private:
-    [[noreturn]] static void _Xrange()
+    [[noreturn]] static void xRange()
     {
         throw "multimap<Key, T>, key is not exist";
     }

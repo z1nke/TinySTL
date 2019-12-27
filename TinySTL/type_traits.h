@@ -254,47 +254,47 @@ using add_cv_t = typename add_cv<T>::type;
 namespace 
 {
 template <typename T, typename = void>
-struct _Add_reference 
+struct AddReference 
 {
     using Lvalue = T;
     using Rvalue = T;
 };
 
 template <typename T>
-struct _Add_reference<T, void_t<T&>> // void_t<T&> avoid void&
+struct AddReference<T, void_t<T&>> // void_t<T&> avoid void&
 {  
     using Lvalue = T&;
     using Rvalue = T&&;
 };
 
 template <typename T, bool is_function_type = false>
-struct _Add_pointer 
+struct AddPointer 
 {
     using type = typename remove_reference<T>::type*;
 };
 
 template <typename T>
-struct _Add_pointer<T, true>
+struct AddPointer<T, true>
 {
     using type = T;
 };
 
 template <typename T, typename... Args>
-struct _Add_pointer<T(Args...), true>
+struct AddPointer<T(Args...), true>
 {
     using type = T(*)(Args...);
 };
 
 // for function e.g. printf
 template <typename T, typename... Args>
-struct _Add_pointer<T(Args..., ...), true> { };
+struct AddPointer<T(Args..., ...), true> { };
 
 }   // unnamed namespace
 
 template <typename T>
 struct add_lvalue_reference 
 {
-    using type = typename _Add_reference<T>::Lvalue;
+    using type = typename AddReference<T>::Lvalue;
 };
 
 template <typename T>
@@ -304,7 +304,7 @@ using add_lvalue_reference_t
 template <typename T>
 struct add_rvalue_reference 
 {
-    using type = typename _Add_reference<T>::Rvalue;
+    using type = typename AddReference<T>::Rvalue;
 };
 
 template <typename T>
@@ -312,7 +312,7 @@ using add_rvalue_reference_t
     = typename add_rvalue_reference<T>::type;
 
 template <typename T>
-struct add_pointer : _Add_pointer<T, is_function<T>::value> { };
+struct add_pointer : AddPointer<T, is_function<T>::value> { };
 
 template <typename T>
 using add_pointer_t = typename add_pointer<T>::type;
@@ -423,114 +423,112 @@ template <typename T>
 constexpr bool is_final_v = is_final<T>::value;
 
 template <typename T>
-struct _Is_floating_point : false_type { };
+struct IsFloatingPoint : false_type { };
 
 template <>
-struct _Is_floating_point<float> : true_type { };
+struct IsFloatingPoint<float> : true_type { };
 
 template <>
-struct _Is_floating_point<double> : true_type { };
+struct IsFloatingPoint<double> : true_type { };
 
 template <>
-struct _Is_floating_point<long double> : true_type { };
+struct IsFloatingPoint<long double> : true_type { };
 
 template <typename T>
 struct is_floating_point 
-    : _Is_floating_point<remove_cv_t<T>>::type { };
+    : IsFloatingPoint<remove_cv_t<T>>::type { };
 
 template <typename T>
 constexpr bool is_floating_point_v = is_floating_point<T>::value;
 
 
 template <typename T>
-struct _Is_integral : false_type { };
+struct IsIntegral : false_type { };
 
 template <>
-struct _Is_integral<bool> : true_type { };
+struct IsIntegral<bool> : true_type { };
 
 template <> 
-struct _Is_integral<char> : true_type { };
+struct IsIntegral<char> : true_type { };
 
 template <>
-struct _Is_integral<unsigned char> : true_type { };
+struct IsIntegral<unsigned char> : true_type { };
 
 template <>
-struct _Is_integral<signed char> : true_type { };
-
-#ifdef _NATIVE_WCHAR_T_DEFINED
-template <>
-struct _Is_integral<wchar_t> : true_type { };
-#endif
+struct IsIntegral<signed char> : true_type { };
 
 template <>
-struct _Is_integral<char16_t> : true_type { };
+struct IsIntegral<wchar_t> : true_type { };
 
 template <>
-struct _Is_integral<char32_t> : true_type { };
+struct IsIntegral<char16_t> : true_type { };
 
 template <>
-struct _Is_integral<short> : true_type { };
+struct IsIntegral<char32_t> : true_type { };
 
 template <>
-struct _Is_integral<unsigned int> : true_type { };
+struct IsIntegral<short> : true_type { };
 
 template <>
-struct _Is_integral<int> : true_type { };
+struct IsIntegral<unsigned int> : true_type { };
 
 template <>
-struct _Is_integral<unsigned long> : true_type { };
+struct IsIntegral<int> : true_type { };
 
 template <>
-struct _Is_integral<long> : true_type { };
+struct IsIntegral<unsigned long> : true_type { };
 
 template <>
-struct _Is_integral<unsigned long long> : true_type { };
+struct IsIntegral<long> : true_type { };
 
 template <>
-struct _Is_integral<long long> : true_type { };
+struct IsIntegral<unsigned long long> : true_type { };
+
+template <>
+struct IsIntegral<long long> : true_type { };
 
 template <typename T>
-struct is_integral : _Is_integral<remove_cv_t<T>>::type { };
+struct is_integral : IsIntegral<remove_cv_t<T>>::type { };
 
 template <typename T>
 constexpr bool is_integral_v = is_integral<T>::value;
 
 template <typename T, bool = is_integral<T>::value>
-struct _Sign_base
+struct SignBase
 {
     using U        = remove_cv_t<T>;
-    using _Signed  = bool_constant<U(-1) < U(0)>;
-    using _Unsiged = bool_constant<U(0) < U(-1)>;
+    using Signed  = bool_constant<U(-1) < U(0)>;
+    using Unsiged = bool_constant<U(0) < U(-1)>;
 };
 
 template <typename T>
-struct _Sign_base<T, false>
+struct SignBase<T, false>
 {
-    using _Signed   = typename is_floating_point<T>::type;
-    using _Unsigned = false_type;
+    using Signed   = typename is_floating_point<T>::type;
+    using Unsigned = false_type;
 };
 
 template <typename T>
-struct is_signed : _Sign_base<T>::_Sign_base {};
+struct is_signed : SignBase<T>::SignBase {};
 
 template <typename T>
 constexpr bool is_signed_v = is_signed<T>::value;
 
 template <typename T>
-struct is_unsigned : _Sign_base<T>::_Unsigned {};
+struct is_unsigned : SignBase<T>::Unsigned {};
 
 template <typename T>
 constexpr bool is_unsigned_v = is_unsigned<T>::value;
 
 
 template <typename T>
-struct _Change_sign 
+struct ChangeSign 
 {
     static_assert((is_integral<T>::value && !is_same<bool, remove_cv_t<T>>::value)
                 || is_enum<T>::value,
     "make_signed<T> or make_unsigned<T> need integral type or emumeration type");
 
-    using _Signed =
+    using Signed =
     conditional_t<is_same<T, signed char>::value
         || is_same<T, unsigned char>::value, signed,
         conditional_t<is_same<T, short>::value
@@ -549,40 +547,40 @@ struct _Change_sign
     >>>>>>>>>;
                 
 
-    using _Unsigned =
-    conditional_t<is_same<_Signed, signed char>::value, unsigned char,
-        conditional_t<is_same<_Signed, short>::value, unsigned short,
-            conditional_t<is_same<_Signed, int>::value, unsigned int,
-                conditional_t<is_same<_Signed, long>::value, unsigned long,
+    using Unsigned =
+    conditional_t<is_same<Signed, signed char>::value, unsigned char,
+        conditional_t<is_same<Signed, short>::value, unsigned short,
+            conditional_t<is_same<Signed, int>::value, unsigned int,
+                conditional_t<is_same<Signed, long>::value, unsigned long,
                 unsigned long long
     >>>>;
 };
 
 template <typename T>
-struct _Change_sign<const T> 
+struct ChangeSign<const T> 
 {
-    using _Signed = const typename _Change_sign<T>::_Signed;
-    using _Unsigned = const typename _Change_sign<T>::_Unsigned;
+    using Signed = const typename ChangeSign<T>::Signed;
+    using Unsigned = const typename ChangeSign<T>::Unsigned;
 };
 
 template<typename T>
-struct _Change_sign<volatile T> 
+struct ChangeSign<volatile T> 
 {	
-    using _Signed = volatile typename _Change_sign<T>::_Signed;
-    using _Unsigned = volatile typename _Change_sign<T>::_Unsigned;
+    using Signed = volatile typename ChangeSign<T>::Signed;
+    using Unsigned = volatile typename ChangeSign<T>::Unsigned;
 };
 
 template<typename T>
-struct _Change_sign<const volatile T>
+struct ChangeSign<const volatile T>
 {	
-    using _Signed = const volatile typename _Change_sign<T>::_Signed;
-    using _Unsigned = const volatile typename _Change_sign<T>::_Unsigned;
+    using Signed = const volatile typename ChangeSign<T>::Signed;
+    using Unsigned = const volatile typename ChangeSign<T>::Unsigned;
 };
 
 template <typename T>
 struct make_signed 
 {
-    using type = typename _Change_sign<T>::_Signed;
+    using type = typename ChangeSign<T>::Signed;
 };
 
 template <typename T>
@@ -591,7 +589,7 @@ using make_signed_t = typename make_signed<T>::type;
 template <typename T>
 struct make_unsigned 
 {
-    using type = typename _Change_sign<T>::_Unsigned;
+    using type = typename ChangeSign<T>::Unsigned;
 };
 
 template <typename T>
@@ -611,40 +609,40 @@ template <typename T>
 constexpr bool is_empty_v = is_empty<T>::value;
 
 template<typename T>
-struct _Is_character : false_type { };
+struct IsCharacter : false_type { };
 
 template<>
-struct _Is_character<char> : true_type { };
+struct IsCharacter<char> : true_type { };
 
 template<>
-struct _Is_character<signed char> : true_type { };
+struct IsCharacter<signed char> : true_type { };
 
 template<>
-struct _Is_character<unsigned char> : true_type { };
+struct IsCharacter<unsigned char> : true_type { };
 
 
 template <typename T>
-struct _Is_member_pointer : false_type { };
+struct IsMemberPointer : false_type { };
 
 template <typename T, typename C>
-struct _Is_member_pointer<T C::*> : true_type { };
+struct IsMemberPointer<T C::*> : true_type { };
 
 template <typename T>
 struct is_member_pointer :
-    _Is_member_pointer<typename remove_cv<T>::type> { };
+    IsMemberPointer<typename remove_cv<T>::type> { };
 
 template <typename T>
 constexpr bool is_member_pointer_v = is_member_pointer<T>::value;
 
 template <typename T>
-struct _Is_pointer : false_type { };
+struct IsPointer : false_type { };
 
 template <typename T>
-struct _Is_pointer<T*> : true_type { };
+struct IsPointer<T*> : true_type { };
 
 template <typename T>
 struct is_pointer 
-    : _Is_pointer<typename remove_cv<T>::type> { };
+    : IsPointer<typename remove_cv<T>::type> { };
 
 template <typename T>
 constexpr bool is_pointer_v = is_pointer<T>::value;
@@ -872,26 +870,26 @@ public:
 
 
 template <typename T>
-struct _Unrefwrap_helper
+struct UnRefWrapHelper
 {
     using type = T;
-    static constexpr bool _Is_refwrap = false;
+    static constexpr bool isRefWrap = false;
 };
 
 template <typename T>
-struct _Unrefwrap_helper<reference_wrapper<T>>
+struct UnRefWrapHelper<reference_wrapper<T>>
 {
     using type = T&;
-    static constexpr bool _Is_refwrap = true;
+    static constexpr bool isRefWrap = true;
 };
 
 template <typename T>
-struct _Unrefwrap
+struct UnRefWrap
 {
     using Decay = decay_t<T>;
-    using type = typename _Unrefwrap_helper<Decay>::type;
-    static constexpr bool _Is_refwrap =
-        _Unrefwrap_helper<T>::_Is_refwrap;
+    using type = typename UnRefWrapHelper<Decay>::type;
+    static constexpr bool isRefWrap =
+        UnRefWrapHelper<T>::isRefWrap;
 };
 
 template <typename Traits>
@@ -901,15 +899,15 @@ struct negation : bool_constant<
 template <typename Traits>
 constexpr bool negation_v = negation<Traits>::value;
 
-template <typename T, bool is_map>
-struct _Asso_type_helper              // map
+template <typename T, bool isMap>
+struct AssociatedTypeHelper              // map
 {
     using key_type = typename T::first_type;
     using mapped_type = typename T::second_type;
 };
 
 template <typename T>
-struct _Asso_type_helper<T, false>    // set
+struct AssociatedTypeHelper<T, false>    // set
 {
     using key_type = T;
     using mapped_type = void;

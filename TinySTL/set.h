@@ -9,7 +9,7 @@ namespace tiny_stl
 template <typename Key, 
     typename Compare = tiny_stl::less<Key>, 
     typename Alloc = tiny_stl::allocator<Key>>
-class set : public _RBTree<Key, Compare, Alloc, false>
+class set : public RBTree<Key, Compare, Alloc, false>
 {   
 public:
     using key_type               = Key;
@@ -21,53 +21,53 @@ public:
     using allocator_type         = Alloc;
     using reference              = value_type&;
     using const_reference        = const value_type&;
-    using _Al_traits             = allocator_traits<allocator_type>;
-    using pointer                = typename _Al_traits::pointer;
-    using const_pointer          = typename _Al_traits::const_pointer;
-    using _Base                  = _RBTree<Key, Compare, allocator_type, false>;
-    using _Alnode                = typename _Base::_Alnode;
-    using _Alnode_traits         = typename _Base::_Alnode_traits;
-    using iterator               = typename _Base::iterator;
-    using const_iterator         = typename _Base::const_iterator;
-    using reverse_iterator       = typename _Base::reverse_iterator;
-    using const_reverse_iterator = typename _Base::const_reverse_iterator;
+    using AlTraits               = allocator_traits<allocator_type>;
+    using pointer                = typename AlTraits::pointer;
+    using const_pointer          = typename AlTraits::const_pointer;
+    using Base                   = RBTree<Key, Compare, allocator_type, false>;
+    using AlNode                 = typename Base::AlNode;
+    using AlNodeTraits           = typename Base::AlNodeTraits;
+    using iterator               = typename Base::iterator;
+    using const_iterator         = typename Base::const_iterator;
+    using reverse_iterator       = typename Base::reverse_iterator;
+    using const_reverse_iterator = typename Base::const_reverse_iterator;
 
 public:
     set() : set(Compare()) { }
     explicit set(const Compare& cmp, const Alloc& alloc = Alloc()) 
-    : _Base(cmp, alloc) { }
+    : Base(cmp, alloc) { }
 
     explicit set(const Alloc& alloc) 
-    : _Base(key_compare(), alloc) { }
+    : Base(key_compare(), alloc) { }
 
     template <typename InIter>
     set(InIter first, InIter last, const key_compare& cmp, 
-        const Alloc& alloc = Alloc()) : _Base(cmp, alloc) 
+        const Alloc& alloc = Alloc()) : Base(cmp, alloc) 
     { 
         this->insert_unique(first, last);
     }
 
     template <typename InIter>
     set(InIter first, InIter last, const Alloc& alloc)
-    : _Base(key_compare(), alloc) 
+    : Base(key_compare(), alloc) 
     { 
         this->insert_unique(first, last);
     }
 
     set(const set& rhs) 
-    : _Base(rhs, _Al_traits::select_on_container_copy_construction(rhs.get_allocator())) 
+    : Base(rhs, AlTraits::select_on_container_copy_construction(rhs.get_allocator())) 
     { }
 
     set(const set& rhs, const Alloc& alloc)
-    : _Base(rhs, alloc) { }
+    : Base(rhs, alloc) { }
 
-    set(set&& rhs) : _Base(tiny_stl::move(rhs)) { }
+    set(set&& rhs) : Base(tiny_stl::move(rhs)) { }
 
-    set(set&& rhs, const Alloc& alloc) : _Base(tiny_stl::move(rhs), alloc) { }
+    set(set&& rhs, const Alloc& alloc) : Base(tiny_stl::move(rhs), alloc) { }
 
     set(std::initializer_list<value_type> ilist,
         const Compare& cmp = Compare(),
-        const Alloc& alloc = Alloc()) : _Base(cmp, alloc)
+        const Alloc& alloc = Alloc()) : Base(cmp, alloc)
     {
         this->insert_unique(ilist.begin(), ilist.end());
     }
@@ -77,13 +77,13 @@ public:
 
     set& operator=(const set& rhs)
     {
-        _Base::operator=(rhs);
+        Base::operator=(rhs);
         return *this;
     }
 
     set& operator=(set&& rhs)
     {
-        _Base::operator=(tiny_stl::move(rhs));
+        Base::operator=(tiny_stl::move(rhs));
         return *this;
     }
 
@@ -123,7 +123,7 @@ public:
 
     void swap(set& rhs)
     {
-        _Base::swap(rhs);
+        Base::swap(rhs);
     }
     
     key_compare key_comp() const
@@ -150,7 +150,7 @@ inline void swap(set<Key, Compare, Alloc>& lhs,
 template <typename Key,
     typename Compare = tiny_stl::less<Key>,
     typename Alloc = tiny_stl::allocator<Key>>
-class multiset : public _RBTree<Key, Compare, Alloc, false>
+class multiset : public RBTree<Key, Compare, Alloc, false>
 {
 public:
     using key_type               = Key;
@@ -162,53 +162,53 @@ public:
     using allocator_type         = Alloc;
     using reference              = value_type&;
     using const_reference        = const value_type&;
-    using _Al_traits             = allocator_traits<allocator_type>;
-    using pointer                = typename _Al_traits::pointer;
-    using const_pointer          = typename _Al_traits::const_pointer;
-    using _Base                  = _RBTree<Key, Compare, allocator_type, false>;
-    using _Alnode                = typename _Base::_Alnode;
-    using _Alnode_traits         = typename _Base::_Alnode_traits;
-    using iterator               = typename _Base::iterator;
-    using const_iterator         = typename _Base::const_iterator;
-    using reverse_iterator       = typename _Base::reverse_iterator;
-    using const_reverse_iterator = typename _Base::const_reverse_iterator;
+    using AlTraits             = allocator_traits<allocator_type>;
+    using pointer                = typename AlTraits::pointer;
+    using const_pointer          = typename AlTraits::const_pointer;
+    using Base                  = RBTree<Key, Compare, allocator_type, false>;
+    using AlNode                = typename Base::AlNode;
+    using AlNodeTraits         = typename Base::AlNodeTraits;
+    using iterator               = typename Base::iterator;
+    using const_iterator         = typename Base::const_iterator;
+    using reverse_iterator       = typename Base::reverse_iterator;
+    using const_reverse_iterator = typename Base::const_reverse_iterator;
 
 public:
     multiset() : multiset(Compare()) { }
     explicit multiset(const Compare& cmp, const Alloc& alloc = Alloc())
-    : _Base(cmp, alloc) { }
+    : Base(cmp, alloc) { }
 
     explicit multiset(const Alloc& alloc)
-    : _Base(key_compare(), alloc) { }
+    : Base(key_compare(), alloc) { }
 
     template <typename InIter>
     multiset(InIter first, InIter last, const key_compare& cmp,
-        const Alloc& alloc = Alloc()) : _Base(cmp, alloc) 
+        const Alloc& alloc = Alloc()) : Base(cmp, alloc) 
     { 
         this->insert_equal(first, last);
     }
 
     template <typename InIter>
     multiset(InIter first, InIter last, const Alloc& alloc)
-    : _Base(key_compare(), alloc) 
+    : Base(key_compare(), alloc) 
     { 
         this->insert_equal(first, last);
     }
 
     multiset(const multiset& rhs)
-    : _Base(rhs, _Al_traits::select_on_container_copy_construction(rhs.get_allocator())) { }
+    : Base(rhs, AlTraits::select_on_container_copy_construction(rhs.get_allocator())) { }
 
     multiset(const multiset& rhs, const Alloc& alloc)
-    : _Base(rhs, alloc) { }
+    : Base(rhs, alloc) { }
 
-    multiset(multiset&& rhs) : _Base(tiny_stl::move(rhs)) { }
+    multiset(multiset&& rhs) : Base(tiny_stl::move(rhs)) { }
 
     multiset(multiset&& rhs, const Alloc& alloc) 
-    : _Base(tiny_stl::move(rhs), alloc) { }
+    : Base(tiny_stl::move(rhs), alloc) { }
 
     multiset(std::initializer_list<value_type> ilist,
-        const Compare& cmp = Compare(),
-        const Alloc& alloc = Alloc()) : _Base(cmp, alloc)
+             const Compare& cmp = Compare(),
+             const Alloc& alloc = Alloc()) : Base(cmp, alloc)
     {
         this->insert_equal(ilist.begin(), ilist.end());
     }
@@ -218,13 +218,13 @@ public:
 
     multiset& operator=(const multiset& rhs)
     {
-        _Base::operator=(rhs);
+        Base::operator=(rhs);
         return *this;
     }
 
     multiset& operator=(multiset&& rhs)
     {
-        _Base::operator=(tiny_stl::move(rhs));
+        Base::operator=(tiny_stl::move(rhs));
         return *this;
     }
 
@@ -264,7 +264,7 @@ public:
 
     void swap(multiset& rhs)
     {
-        _Base::swap(rhs);
+        Base::swap(rhs);
     }
 
     key_compare key_comp() const
@@ -280,7 +280,7 @@ public:
 
 template <typename Key, typename Compare, typename Alloc>
 inline void swap(multiset<Key, Compare, Alloc>& lhs,
-          multiset<Key, Compare, Alloc>& rhs)
+                 multiset<Key, Compare, Alloc>& rhs)
     noexcept(lhs.swap(rhs))
 {
     lhs.swap(rhs);

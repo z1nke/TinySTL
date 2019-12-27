@@ -114,10 +114,10 @@ public:
     void swap(queue& rhs) 
         noexcept(std::_Is_nothrow_swappable<Container>::value)
     {
-        _Swap_ADL(cont, rhs.cont);
+        swapADL(cont, rhs.cont);
     }
 
-    const container_type& _Get_container() const 
+    const container_type& getContainer() const 
     {
         return this->cont;
     }
@@ -127,7 +127,7 @@ template <typename T, typename Container>
 inline bool operator==(const queue<T, Container>& lhs,
                        const queue<T, Container>& rhs)
 {
-    return lhs._Get_container() == rhs._Get_container();
+    return lhs.getContainer() == rhs.getContainer();
 }
 
 
@@ -143,7 +143,7 @@ template <typename T, typename Container>
 inline bool operator<(const queue<T, Container>& lhs,
                       const queue<T, Container>& rhs) 
 {
-    return lhs._Get_container() < rhs._Get_container();
+    return lhs.getContainer() < rhs.getContainer();
 }
 
 template <typename T, typename Container>
@@ -323,8 +323,8 @@ public:
         noexcept(std::_Is_nothrow_swappable<Container>::value
             && std::_Is_nothrow_swappable<Compare>::value)
     {
-        _Swap_ADL(comp, rhs.comp);
-        _Swap_ADL(cont, rhs.cont);
+        swapADL(comp, rhs.comp);
+        swapADL(cont, rhs.cont);
     }
 };  // class priority_queue<T, Container>
 

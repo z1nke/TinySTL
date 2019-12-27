@@ -153,43 +153,43 @@ inline InIter find_if_not(InIter first, InIter last, UnaryPred pred)
 
 
 template <typename FwdIter, typename T>
-struct _Fill_memset_is_safe_helper 
+struct FillMemsetIsSafeHelper 
 {
-    using _Value_type = typename iterator_traits<FwdIter>::value_type;
+    using ValueType = typename iterator_traits<FwdIter>::value_type;
     using type = typename conjunction<
         is_pointer<FwdIter>,
         disjunction<
             conjunction<
-                _Is_character<T>,
-                _Is_character<_Value_type>>,
+                IsCharacter<T>,
+                IsCharacter<ValueType>>,
             conjunction<
                 is_same<bool, T>,
-                is_same<bool, _Value_type>>
+                is_same<bool, ValueType>>
         >>::type;
 };
 
 template <typename FwdIter, typename T>
-inline typename _Fill_memset_is_safe_helper<FwdIter, T>::type
-_Fill_memset_is_safe(const FwdIter&, const T&) 
+inline typename FillMemsetIsSafeHelper<FwdIter, T>::type
+fillMemsetIsSafe(const FwdIter&, const T&) 
 {
     return {};
 }
 
 template <typename OutIter, typename Diff, typename T>
-inline OutIter _Fill_n(OutIter dest, Diff n, const T& val, 
-                        true_type /* fill memset is safe*/) 
+inline OutIter fillNHelper(OutIter dest, Diff n, const T& val, 
+                           true_type /* fill memset is safe*/) 
 {
     if (n > 0) 
     {
-        _CSTD memset(dest, val, n);
+        ::memset(dest, val, n);
         return dest + n;
     }
     return dest;
 }
 
 template <typename OutIter, typename Diff, typename T>
-inline OutIter _Fill_n(OutIter dest, Diff n, const T& val, 
-                        false_type) 
+inline OutIter fillNHelper(OutIter dest, Diff n, const T& val, 
+                           false_type) 
 {
     for (; n > 0; --n, ++dest)
         *dest = val;
@@ -199,17 +199,17 @@ inline OutIter _Fill_n(OutIter dest, Diff n, const T& val,
 template <typename OutIter, typename Diff, typename T>
 inline OutIter fill_n(OutIter dest, Diff n, const T& val) 
 {
-    return _Fill_n(dest, n, val, _Fill_memset_is_safe(dest, val));
+    return fillNHelper(dest, n, val, fillMemsetIsSafe(dest, val));
 }
 
 template <typename FwdIter, typename T>
-inline void _Fill(FwdIter first, FwdIter last, const T& val, true_type) 
+inline void fillHelper(FwdIter first, FwdIter last, const T& val, true_type) 
 {
-    _CSTD memset(first, last - first, val);
+    ::memset(first, last - first, val);
 }
 
 template <typename FwdIter, typename T>
-inline void _Fill(FwdIter first, FwdIter last, const T& val, false_type) 
+inline void fillHelper(FwdIter first, FwdIter last, const T& val, false_type) 
 {
     for (; first != last; ++first)
         *first = val;
@@ -218,7 +218,7 @@ inline void _Fill(FwdIter first, FwdIter last, const T& val, false_type)
 template <typename FwdIter, typename T>
 inline void fill(FwdIter first, FwdIter last, const T& val) 
 {
-    _Fill(first, last, val, _Fill_memset_is_safe(first, val));
+    fillHelper(first, last, val, fillMemsetIsSafe(first, val));
 }
 
 
@@ -330,7 +330,7 @@ inline FwdIter2 swap_ranges(FwdIter1 first1, FwdIter1 last1, FwdIter2 first2)
 
 template <typename InIter1, typename InIter2, typename BinPred>
 inline bool equal(InIter1 first1, InIter1 last1,
-                 InIter2 first2, BinPred pred) 
+                  InIter2 first2, BinPred pred) 
 {
     for (; first1 != last1; ++first1, ++first2) 
         if (!pred(*first1, *first2)) 
@@ -347,7 +347,7 @@ inline bool equal(InIter1 first1, InIter1 last1, InIter2 first2)
 
 template <typename InIter1, typename InIter2, typename BinPred>
 inline bool equal(InIter1 first1, InIter1 last1, 
-                InIter2 first2, InIter2 last2, BinPred pred) 
+                  InIter2 first2, InIter2 last2, BinPred pred) 
 {
     // for input iterator
     for (; first1 != last1 && first2 != last2; ++first1, ++first2)
@@ -539,9 +539,9 @@ inline pair<T, T> minmax(std::initializer_list<T> ilist, Compare cmp)
 
 
 template <typename InIter1, typename InIter2, typename BinPred>
-inline bool _Lexicographical_compare(InIter1 first1, InIter1 last1,
-                                    InIter2 first2, InIter2 last2, 
-                                    BinPred pred) 
+inline bool lexicographicalCompareHelper(InIter1 first1, InIter1 last1,
+                                         InIter2 first2, InIter2 last2, 
+                                         BinPred pred) 
 {
     for (; first1 != last1 && first2 != last2; ++first1, ++first2) 
     {
@@ -560,9 +560,10 @@ inline bool _Lexicographical_compare(InIter1 first1, InIter1 last1,
 
 template <typename InIter1, typename InIter2, typename BinPred>
 inline bool lexicographical_compare(InIter1 first1, InIter1 last1,
-                    InIter2 first2, InIter2 last2, BinPred pred) 
+                                    InIter2 first2, InIter2 last2, 
+                                    BinPred pred) 
 {
-    return _Lexicographical_compare(first1, last1, first2, last2, pred);
+    return lexicographicalCompareHelper(first1, last1, first2, last2, pred);
 }
 
 
@@ -610,8 +611,8 @@ inline void reverse(BidIter first, BidIter last)
 
 
 template <typename RanIter, typename Diff, typename T, typename Cmp>
-inline void _Push_heap(RanIter first, Diff hole, Diff top, 
-                        T&& val, Cmp& cmp) 
+inline void pushHeapHelper(RanIter first, Diff hole, Diff top, 
+                           T&& val, Cmp& cmp) 
 {
     Diff i = (hole - 1) / 2;
     for (; top < hole && cmp(*(first + i), val); i = (hole - 1) / 2) 
@@ -632,7 +633,7 @@ inline void push_heap(RanIter first, RanIter last, Cmp cmp)
     if (count >= 2) 
     {
         auto val = tiny_stl::move(*--last);
-        _Push_heap(first, --count, static_cast<Diff>(0), 
+        pushHeapHelper(first, --count, static_cast<Diff>(0), 
                 tiny_stl::move(val), cmp);
     }
 }
@@ -644,7 +645,7 @@ inline void push_heap(RanIter first, RanIter last) // O(logn)
 }
 
 template <typename RanIter, typename Diff, typename T, typename Cmp>
-inline void _Adjust_heap(RanIter first, Diff hole, Diff len, T&& val, Cmp& cmp) 
+inline void adjustHeapHelper(RanIter first, Diff hole, Diff len, T&& val, Cmp& cmp) 
 {
     Diff top = hole;    // 0
     Diff rightChild = hole * 2 + 2; // init right child to 2
@@ -667,16 +668,16 @@ inline void _Adjust_heap(RanIter first, Diff hole, Diff len, T&& val, Cmp& cmp)
     }
 
     // val is the origin last element. move it to hole
-    _Push_heap(first, hole, top, tiny_stl::move(val), cmp);
+    pushHeapHelper(first, hole, top, tiny_stl::move(val), cmp);
 }
 
 template <typename RanIter, typename T, typename Cmp>
-inline void _Pop_heap(RanIter first, RanIter last, RanIter dest, T&& val, Cmp& cmp) 
+inline void popHeapHelper(RanIter first, RanIter last, RanIter dest, T&& val, Cmp& cmp) 
 {
     using Diff = typename iterator_traits<RanIter>::difference_type;
     *dest = tiny_stl::move(*first);     // move the first to tail, hole is 0
     
-    _Adjust_heap(first, static_cast<Diff>(0), static_cast<Diff>(last - first),
+    adjustHeapHelper(first, static_cast<Diff>(0), static_cast<Diff>(last - first),
         tiny_stl::move(val), cmp);
 }
 
@@ -685,7 +686,7 @@ inline void pop_heap(RanIter first, RanIter last, Cmp cmp)
 {
     --last;
     auto val = tiny_stl::move(*last);
-    _Pop_heap(first, last, last, tiny_stl::move(val), cmp);
+    popHeapHelper(first, last, last, tiny_stl::move(val), cmp);
 }
 
 template <typename RanIter>                             // O(logn)
@@ -721,7 +722,7 @@ inline void make_heap(RanIter first, RanIter last, Cmp cmp)
     while (true) 
     {
         auto val = tiny_stl::move(*(first + parent));
-        _Adjust_heap(first, parent, len, val, cmp);
+        adjustHeapHelper(first, parent, len, val, cmp);
         if (parent-- == 0)
             return;
     }
@@ -799,7 +800,7 @@ namespace
 
 // insert_sort
 template <typename RanIter, typename Compare>
-void _Insert_sort(RanIter first, RanIter last, Compare& cmp)
+void insertSort(RanIter first, RanIter last, Compare& cmp)
 {
     if (first == last) return;
 
@@ -819,7 +820,7 @@ void _Insert_sort(RanIter first, RanIter last, Compare& cmp)
 
 // quick_sort
 template <typename RanIter>
-inline auto _Get_random(RanIter first, RanIter last)
+inline auto getRandom(RanIter first, RanIter last)
 {
     using Diff = typename iterator_traits<RanIter>::difference_type;
     static std::mt19937 e;
@@ -829,10 +830,10 @@ inline auto _Get_random(RanIter first, RanIter last)
 }
 
 template <typename RanIter, typename Compare>
-inline RanIter _Partition(RanIter first, RanIter last, Compare& cmp)
+inline RanIter quickSortPartition(RanIter first, RanIter last, Compare& cmp)
 {
     using Diff = typename iterator_traits<RanIter>::difference_type;
-    Diff randomPos = _Get_random(first, last);
+    Diff randomPos = getRandom(first, last);
     iter_swap(first + randomPos, last - 1);
     auto key = *(last - 1);
 
@@ -849,26 +850,26 @@ inline RanIter _Partition(RanIter first, RanIter last, Compare& cmp)
     return i;
 }
 
-const std::ptrdiff_t _INSERT_SORT_MAX = 32;
+const std::ptrdiff_t INSERT_SORT_MAX = 32;
 
 template <typename RanIter, typename Compare>
-inline void _Quick_sort(RanIter first, RanIter last, _Iter_diff_t<RanIter> diff, Compare& cmp)
+inline void quickSort(RanIter first, RanIter last, IterDiffType<RanIter> diff, Compare& cmp)
 {
-    _Iter_diff_t<RanIter> count = last - first;
-    if (count > _INSERT_SORT_MAX && diff > 0)
+    IterDiffType<RanIter> count = last - first;
+    if (count > INSERT_SORT_MAX && diff > 0)
     {
-        RanIter miditer = _Partition(first, last, cmp);
+        RanIter miditer = quickSortPartition(first, last, cmp);
 
         diff = (diff >> 1) + (diff >> 2);
 
-        _Quick_sort(first, miditer, diff, cmp);
+        quickSort(first, miditer, diff, cmp);
         first = miditer;
 
-        _Quick_sort(miditer + 1, last, diff, cmp);
+        quickSort(miditer + 1, last, diff, cmp);
         last = miditer + 1;
     }
 
-    if (count > _INSERT_SORT_MAX)
+    if (count > INSERT_SORT_MAX)
     {
         make_heap(first, last, cmp);
         sort_heap(first, last, cmp);
@@ -876,7 +877,7 @@ inline void _Quick_sort(RanIter first, RanIter last, _Iter_diff_t<RanIter> diff,
 
     else if (count >= 2)
     {
-        _Insert_sort(first, last, cmp);
+        insertSort(first, last, cmp);
     }
 }
 
@@ -887,7 +888,7 @@ inline void sort(RanIter first, RanIter last, Compare cmp)
 {
     if (last - first - 1 > 0)
     {
-        _Quick_sort(first, last, last - first, cmp);
+        quickSort(first, last, last - first, cmp);
     }
 }
 
@@ -899,8 +900,8 @@ inline void sort(RanIter first, RanIter last)
 
 
 template <typename FwdIter, typename T, typename Compare>
-inline FwdIter lower_bound(FwdIter first,           // >=
-    FwdIter last, const T& val, Compare cmp)
+inline FwdIter lower_bound(FwdIter first, FwdIter last,  // >=
+                           const T& val, Compare cmp)
 {
     assert(is_sorted(first, last, cmp));
 
@@ -935,8 +936,8 @@ inline FwdIter lower_bound(FwdIter first, FwdIter last, const T& val)
 }
 
 template <typename FwdIter, typename T, typename Compare>
-inline FwdIter upper_bound(FwdIter first,
-    FwdIter last, const T& val, Compare cmp)
+inline FwdIter upper_bound(FwdIter first, FwdIter last, 
+                           const T& val, Compare cmp)
 {
     assert(is_sorted(first, last, cmp));
 

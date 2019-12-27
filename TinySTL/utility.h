@@ -86,7 +86,7 @@ inline void swap(T(&lhs)[N], T(&rhs)[N])
 }
 
 template <typename T>
-inline void _Swap_ADL(T& lhs, T& rhs) 
+inline void swapADL(T& lhs, T& rhs) 
     noexcept(std::_Is_nothrow_swappable<T>::value) 
 {
     // ADL: argument-dependent lookup
@@ -252,8 +252,8 @@ struct pair
     {
         if (this != tiny_stl::addressof(rhs)) 
         {
-            _Swap_ADL(first, rhs.first);
-            _Swap_ADL(second, rhs.second);
+            swapADL(first, rhs.first);
+            swapADL(second, rhs.second);
         }
     }
 };  // class pair<T1, T2>
@@ -262,13 +262,13 @@ struct pair
 // else                 -> decay_t<T>
 
 template <typename T1, typename T2>
-constexpr pair<typename _Unrefwrap<T1>::type,
-               typename _Unrefwrap<T2>::type>
+constexpr pair<typename UnRefWrap<T1>::type,
+               typename UnRefWrap<T2>::type>
 make_pair(T1&& t1, T2&& t2) 
 {
     using Type_pair = pair<
-        typename _Unrefwrap<T1>::type,
-        typename _Unrefwrap<T2>::type>;
+        typename UnRefWrap<T1>::type,
+        typename UnRefWrap<T2>::type>;
     return Type_pair(tiny_stl::forward<T1>(t1),
         tiny_stl::forward<T2>(t2));
 }
@@ -352,7 +352,7 @@ struct tuple_size<const volatile T>
 
 // tuple element
 template <typename T>
-struct _Always_false : false_type { };
+struct AlwaysFalse : false_type { };
 
 
 template <size_t Idx, typename Tuple>
@@ -363,7 +363,7 @@ struct tuple_element;
 template <size_t Idx>
 struct tuple_element<Idx, tuple<>> 
 {
-    static_assert(_Always_false<integral_constant<size_t, Idx>>::value, 
+    static_assert(AlwaysFalse<integral_constant<size_t, Idx>>::value, 
         "tuple index out of range");
 };
 
@@ -382,24 +382,24 @@ template <size_t Idx, typename Tuple>
 struct tuple_element<Idx, const Tuple>
     : tuple_element<Idx, Tuple> 
 {
-    using _BaseType = tuple_element<Idx, Tuple>;
-    using type = add_const_t<typename _BaseType::type>;
+    using BaseType = tuple_element<Idx, Tuple>;
+    using type = add_const_t<typename BaseType::type>;
 };
 
 template <size_t Idx, typename Tuple>
 struct tuple_element<Idx, volatile Tuple> 
     : tuple_element<Idx, Tuple>
 {
-    using _BaseType = tuple_element<Idx, Tuple>;
-    using type = add_volatile_t<typename _BaseType::type>;
+    using BaseType = tuple_element<Idx, Tuple>;
+    using type = add_volatile_t<typename BaseType::type>;
 };
 
 template <size_t Idx, typename Tuple>
 struct tuple_element<Idx, const volatile Tuple>
     : tuple_element<Idx, Tuple> 
 {
-    using _BaseType = tuple_element<Idx, Tuple>;
-    using type = add_cv_t<typename _BaseType::type>;
+    using BaseType = tuple_element<Idx, Tuple>;
+    using type = add_cv_t<typename BaseType::type>;
 };
 
 
@@ -420,14 +420,14 @@ template<size_t Idx, typename T>
 using tuple_element_t = typename tuple_element<Idx, T>::type;
 
 template <typename Ret, typename Pair>
-constexpr Ret _Pair_get_helper(Pair& p,
+constexpr Ret pairGetHelper(Pair& p,
     integral_constant<size_t, 0>) noexcept 
 {
     return (p.first);
 }
 
 template <typename Ret, typename Pair>
-constexpr Ret _Pair_get_helper(Pair& p,
+constexpr Ret pairGetHelper(Pair& p,
     integral_constant<size_t, 1>) noexcept
 {
     return (p.second);
@@ -439,7 +439,7 @@ constexpr tuple_element_t<Idx, pair<T1, T2>>&
 get(pair<T1, T2>& p) noexcept 
 {
     using Ret = tuple_element_t<Idx, pair<T1, T2>>&;
-    return _Pair_get_helper<Ret>(p, integral_constant<size_t, Idx>{});
+    return pairGetHelper<Ret>(p, integral_constant<size_t, Idx>{});
 }
 
 template <size_t Idx, typename T1, typename T2>     // (2) C++ 14
@@ -447,7 +447,7 @@ constexpr const tuple_element_t<Idx, pair<T1, T2>>&
 get(const pair<T1, T2>& p) noexcept 
 {
     using Ret = const tuple_element_t<Idx, pair<T1, T2>>&;
-    return _Pair_get_helper<Ret>(p, integral_constant<size_t, Idx>{});
+    return pairGetHelper<Ret>(p, integral_constant<size_t, Idx>{});
 }
 
 template <size_t Idx, typename T1, typename T2>     // (3) C++ 14
@@ -527,7 +527,7 @@ public:
     using second_type = T2;
 private:
     T2 second;
-    using _Base = T1;
+    using Base = T1;
 
 public:
     constexpr explicit compress_pair() : T1(), second() { }
@@ -596,6 +596,18 @@ public:
 };  // class extra::compress_pair<T1, T2>
 
 }   // extra namespace
+
+template <typename T>
+struct TidyRAII { // for strong exception guarantee
+    T* obj;
+    ~TidyRAII()
+    {
+        if (obj)
+        {
+            obj->tidy();
+        }
+    }
+};
 
 
 }   // tiny_stl namespace

@@ -7,10 +7,10 @@ namespace tiny_stl
 {
 
 template <typename T, typename HashTableType>
-struct _Hash_iterator;
+struct HashIterator;
 
 template <typename T, typename HashTableType>
-struct _Hash_const_iterator
+struct HashConstIterator
 {
     using iterator_category = forward_iterator_tag;
     using value_type        = T;
@@ -19,16 +19,16 @@ struct _Hash_const_iterator
     using pointer           = const T*;
 
     size_t idx_bucket;
-    _FList_const_iterator<T> iter;
+    FListConstIterator<T> iter;
     HashTableType* hashtable;
     
-    _Hash_const_iterator() = default;
-    _Hash_const_iterator(size_t idx, _FList_const_iterator<T> it, HashTableType* ht)
+    HashConstIterator() = default;
+    HashConstIterator(size_t idx, FListConstIterator<T> it, HashTableType* ht)
     : idx_bucket(idx), iter(it), hashtable(ht) { }
 
-    _Hash_const_iterator(const _Hash_const_iterator&) = default;
+    HashConstIterator(const HashConstIterator&) = default;
 
-    _Hash_const_iterator(const _Hash_iterator<T, remove_const_t<HashTableType>>& rhs)
+    HashConstIterator(const HashIterator<T, remove_const_t<HashTableType>>& rhs)
     : idx_bucket(rhs.idx_bucket), iter(rhs.iter.ptr), 
         hashtable(static_cast<HashTableType*>(rhs.hashtable)) { }
 
@@ -42,7 +42,7 @@ struct _Hash_const_iterator
         return pointer_traits<pointer>::pointer_to(**this);
     }
 
-    _Hash_const_iterator& operator++()
+    HashConstIterator& operator++()
     {
         ++iter;
         if (iter == hashtable->buckets[idx_bucket].end())   // jump to the next 
@@ -69,26 +69,26 @@ struct _Hash_const_iterator
         return *this;
     }
 
-    _Hash_const_iterator operator++(int)
+    HashConstIterator operator++(int)
     {
-        _Hash_const_iterator tmp = *this;
+        HashConstIterator tmp = *this;
         ++*this;
         return tmp;
     }
 
-    bool operator==(const _Hash_const_iterator& rhs) const
+    bool operator==(const HashConstIterator& rhs) const
     {
         return iter == rhs.iter;
     }
 
-    bool operator!=(const _Hash_const_iterator& rhs) const
+    bool operator!=(const HashConstIterator& rhs) const
     {
         return iter != rhs.iter;
     }
 };
 
 template <typename T, typename HashTableType>
-struct _Hash_iterator 
+struct HashIterator 
 {
     using iterator_category = forward_iterator_tag;
     using value_type        = T;
@@ -97,11 +97,11 @@ struct _Hash_iterator
     using pointer           = T*;
 
     size_t idx_bucket;
-    _FList_iterator<T> iter;
+    FListIterator<T> iter;
     HashTableType* hashtable;
 
-    _Hash_iterator() = default;
-    _Hash_iterator(size_t idx, _FList_iterator<T> it, HashTableType* ht)
+    HashIterator() = default;
+    HashIterator(size_t idx, FListIterator<T> it, HashTableType* ht)
     : idx_bucket(idx), iter(it), hashtable(ht) { }
 
     reference operator*() const
@@ -114,7 +114,7 @@ struct _Hash_iterator
         return pointer_traits<pointer>::pointer_to(**this);
     }
 
-    _Hash_iterator& operator++()
+    HashIterator& operator++()
     {
         ++iter;
         if (iter == hashtable->buckets[idx_bucket].end())   
@@ -141,26 +141,26 @@ struct _Hash_iterator
         return *this;
     }
 
-    _Hash_iterator operator++(int)
+    HashIterator operator++(int)
     {
-        _Hash_iterator tmp = *this;
+        HashIterator tmp = *this;
         ++*this;
         return tmp;
     }
 
-    bool operator==(const _Hash_iterator& rhs) const
+    bool operator==(const HashIterator& rhs) const
     {
         return iter == rhs.iter;
     }
 
-    bool operator!=(const _Hash_iterator& rhs) const
+    bool operator!=(const HashIterator& rhs) const
     {
         return iter != rhs.iter;
     }
 };
 
-static const int _stl_primes_size = 28;
-static const size_t _stl_primes_array[_stl_primes_size] =
+static const int stlPrimesSize = 28;
+static const size_t stlPrimesArray[stlPrimesSize] =
 {
     53, 97, 193, 389, 769, 1543, 3079, 6151, 12289, 24593, 
     49157, 98317, 196613, 393241, 786433, 1572869, 3145739, 
@@ -168,23 +168,24 @@ static const size_t _stl_primes_array[_stl_primes_size] =
     402653189, 805306457, 1610612741, 3221225473U, 4294967291U
 };
 
-inline size_t _stl_next_prime(size_t n)
+inline size_t stlNextPrime(size_t n)
 {
-    const size_t* first = _stl_primes_array;
-    const size_t* last = _stl_primes_array + _stl_primes_size;
+    const size_t* first = stlPrimesArray;
+    const size_t* last = stlPrimesArray + stlPrimesSize;
     const size_t* pos = lower_bound(first, last, n);
 
     return pos == last ? *(last - 1) : *pos;
 }
 
-template <typename T, typename Hash, typename KeyEqual, typename Alloc, bool is_map>
-class _HashTable
+template <typename T, typename Hash, typename KeyEqual, 
+          typename Alloc, bool isMap>
+class HashTable
 {
-    friend _Hash_const_iterator<T, const _HashTable>;
-    friend _Hash_iterator<T, _HashTable>;
+    friend HashConstIterator<T, const HashTable>;
+    friend HashIterator<T, HashTable>;
 public:
-    using key_type              = typename _Asso_type_helper<T, is_map>::key_type;
-    using mapped_type           = typename _Asso_type_helper<T, is_map>::mapped_type;
+    using key_type              = typename AssociatedTypeHelper<T, isMap>::key_type;
+    using mapped_type           = typename AssociatedTypeHelper<T, isMap>::mapped_type;
     using value_type            = T;
     using size_type             = size_t;
     using difference_type       = ptrdiff_t;
@@ -193,67 +194,68 @@ public:
     using allocator_type        = Alloc;
     using reference             = value_type&;
     using const_reference       = const value_type&;
-    using _Al_traits            = allocator_traits<Alloc>;
-    using _List                 = forward_list<T>;
-    using pointer               = typename _Al_traits::pointer;
-    using const_pointer         = typename _Al_traits::const_pointer;
+    using AlTraits              = allocator_traits<Alloc>;
+    using List                  = forward_list<T>;
+    using pointer               = typename AlTraits::pointer;
+    using const_pointer         = typename AlTraits::const_pointer;
     
-    using iterator              = _Hash_iterator<T, _HashTable>;
-    using const_iterator        = _Hash_const_iterator<T, const _HashTable>;
+    using iterator              = HashIterator<T, HashTable>;
+    using const_iterator        = HashConstIterator<T, const HashTable>;
 
     using local_iterator        = typename forward_list<T>::iterator;
     using const_local_iterator  = typename forward_list<T>::const_iterator;
 
-    using _Al_flist             = typename allocator_traits<Alloc>::template rebind_alloc<forward_list<T>>;
-    using _Bucket               = vector<forward_list<T>, _Al_flist>;
-    using _Self                 = _HashTable<T, Hash, KeyEqual, Alloc, is_map>;
+    using AlFlist               
+        = typename allocator_traits<Alloc>::template rebind_alloc<forward_list<T>>;
+    using Bucket                = vector<forward_list<T>, AlFlist>;
+    using Self                  = HashTable<T, Hash, KeyEqual, Alloc, isMap>;
 public:
-    _Bucket   buckets;
+    Bucket    buckets;
     size_type num_elements;
     float     maxfactor;
     hasher    hashfunc;
     key_equal key_equ;
 private:
-    const key_type& _Get_key(const T& val, true_type) const    // map
+    const key_type& getKey(const T& val, true_type) const    // map
     {
         return val.first;
     }
 
-    const key_type& _Get_key(const T& val, false_type) const   // set
+    const key_type& getKey(const T& val, false_type) const   // set
     {
         return val;
     }
 
     const key_type& get_key(const T& val) const
     {
-        return _Get_key(val, tiny_stl::bool_constant<is_map>{});
+        return getKey(val, tiny_stl::bool_constant<isMap>{});
     }
 
-    size_type _Get_nth_bucket(const T& val) const
+    size_type getNthBucket(const T& val) const
     {
         return hashfunc(get_key(val)) % buckets.size();
     }
 
-    size_type _Get_nth_bucket_k(const key_type& key) const
+    size_type getNthBucketK(const key_type& key) const
     {
         return hashfunc(key) % buckets.size();
     }
 
-    void _Init(size_type n)
+    void init(size_type n)
     {
-        const size_type num_bucket = _stl_next_prime(n);
+        const size_type num_bucket = stlNextPrime(n);
         buckets.reserve(num_bucket);
-        buckets.assign(num_bucket, _List{});
+        buckets.assign(num_bucket, List{});
         maxfactor = 1.0f;
         num_elements = 0;
     }
 
-    void _Copy(const _HashTable& rhs)
+    void copyAux(const HashTable& rhs)
     {
         buckets = rhs.buckets;
     }
 
-    size_type _Update_next_iter(const_local_iterator& iter, size_type idx) const
+    size_type updateNextIter(const_local_iterator& iter, size_type idx) const
     {
         size_type iterIdx = idx;
         if (iter == buckets[iterIdx].end())
@@ -280,33 +282,33 @@ private:
         return iterIdx;
     }
 
-    size_type _Update_next_iter(local_iterator& iter, size_type idx)
+    size_type updateNextIter(local_iterator& iter, size_type idx)
     {
-        return static_cast<const _Self&>(*this)._Update_next_iter(iter, idx);
+        return static_cast<const Self&>(*this).updateNextIter(iter, idx);
     }
 
 public:
-    _HashTable(size_type n,
+    HashTable(size_type n,
         const Alloc& al = Alloc(),
         const hasher& hf = hasher(), 
         const key_equal& equ = key_equal())
     : hashfunc(hf), key_equ(equ),
-        buckets(static_cast<_Al_flist>(al))
+        buckets(static_cast<AlFlist>(al))
     {
-        _Init(n);
+        init(n);
     }
 
-    _HashTable(const _HashTable&) = default;
+    HashTable(const HashTable&) = default;
 
-    _HashTable(const _HashTable& rhs, const Alloc& alloc)
+    HashTable(const HashTable& rhs, const Alloc& alloc)
     : hashfunc(rhs.hashfunc), key_equ(rhs.key_equ),
-        buckets(static_cast<_Al_flist>(alloc)),
+        buckets(static_cast<AlFlist>(alloc)),
         maxfactor(rhs.maxfactor), num_elements(rhs.num_elements)
     {
-        _Copy(rhs); 
+        copyAux(rhs); 
     }
 
-    _HashTable(_HashTable&& rhs) noexcept
+    HashTable(HashTable&& rhs) noexcept
     : hashfunc(rhs.hashfunc), key_equ(rhs.key_equ),
         buckets(tiny_stl::move(rhs.buckets)),
         maxfactor(rhs.maxfactor), num_elements(rhs.num_elements)
@@ -314,7 +316,7 @@ public:
         rhs.num_elements = 0;
     }
 
-    _HashTable& operator=(const _HashTable& rhs)
+    HashTable& operator=(const HashTable& rhs)
     {
         assert(this != tiny_stl::addressof(rhs));
         buckets = rhs.buckets;
@@ -326,7 +328,7 @@ public:
         return *this;
     }
 
-    _HashTable& operator=(_HashTable&& rhs)
+    HashTable& operator=(HashTable&& rhs)
     {
         assert(this != tiny_stl::addressof(rhs));
         buckets = tiny_stl::move(rhs.buckets);
@@ -339,7 +341,7 @@ public:
         return *this;
     }
 
-    ~_HashTable() noexcept = default;
+    ~HashTable() noexcept = default;
 
     allocator_type get_allocator() const 
     {
@@ -413,19 +415,19 @@ public:
 
     void clear() noexcept
     {
-        _Init(0);
+        init(0);
     }
 
 private:
     template <typename Value>
-    iterator _Insert_equal(Value&& val)
+    iterator insertEqualAux(Value&& val)
     {
         if (load_factor() > max_load_factor())
-            rehash(_stl_next_prime(size()));
+            rehash(stlNextPrime(size()));
 
         ++num_elements;
 
-        size_type idx = _Get_nth_bucket(val);
+        size_type idx = getNthBucket(val);
 
         for (auto cpos = cbegin(idx); cpos != cend(idx); ++cpos)
         {
@@ -445,15 +447,15 @@ private:
     }
 
     template <typename Value>
-    pair<iterator, bool> _Insert_unique(Value&& val)
+    pair<iterator, bool> insertUniqueAux(Value&& val)
     {        
-        size_type idx = _Get_nth_bucket(val);
+        size_type idx = getNthBucket(val);
 
         for (auto cpos = cbegin(idx); cpos != cend(idx); ++cpos)
         {
             if (key_equ(get_key(val), get_key(*cpos)))   // existing
             {
-                return make_pair(iterator(idx, buckets[idx]._Make_iter(cpos), this), 
+                return make_pair(iterator(idx, buckets[idx].makeIter(cpos), this), 
                                 false);
             }
         }
@@ -462,8 +464,8 @@ private:
         ++num_elements;
         if (load_factor() > max_load_factor())
         {
-            rehash(_stl_next_prime(size()));
-            idx = _Get_nth_bucket(val);
+            rehash(stlNextPrime(size()));
+            idx = getNthBucket(val);
         }
         
         auto pos = buckets[idx].insert_after(buckets[idx].before_begin(),
@@ -475,50 +477,50 @@ private:
 protected:
     iterator insert_equal(const value_type& val)
     {
-        return _Insert_equal(val);
+        return insertEqualAux(val);
     }
 
     iterator insert_equal(value_type&& val)
     {
-        return _Insert_equal(tiny_stl::move(val));
+        return insertEqualAux(tiny_stl::move(val));
     }
 
     template <typename InIter>
     void insert_equal(InIter first, InIter last)
     {
         for (; first != last; ++first)
-            _Insert_equal(*first);
+            insertEqualAux(*first);
     }
 
     pair<iterator, bool> insert_unique(const value_type& val)
     {
-        return _Insert_unique(val);
+        return insertUniqueAux(val);
     }
 
     pair<iterator, bool> insert_unique(value_type&& val)
     {
-        return _Insert_unique(tiny_stl::move(val));
+        return insertUniqueAux(tiny_stl::move(val));
     }
 
     template <typename InIter>
     void insert_unique(InIter first, InIter last)
     {
         for (; first != last; ++first)
-            _Insert_unique(*first);
+            insertUniqueAux(*first);
     }
 
     template <typename... Args>
     iterator emplace_equal(Args&&... args)
     {
         T val(tiny_stl::forward<Args>(args)...);
-        return _Insert_equal(tiny_stl::move(val));
+        return insertEqualAux(tiny_stl::move(val));
     }
 
     template <typename... Args>
     pair<iterator, bool> emplace_unique(Args&&... args)
     {
         T val(tiny_stl::forward<Args>(args)...);
-        return _Insert_unique(tiny_stl::move(val));
+        return insertUniqueAux(tiny_stl::move(val));
     }
 
     size_type count_equal(const key_type& key) const
@@ -539,14 +541,14 @@ public:
         assert(pos != cend());
         --num_elements;
         
-        size_type idx = _Get_nth_bucket(*pos);
-        auto _prev  = buckets[idx].cbefore_begin();         // pos prev
-        auto _next = _prev;
-        for (++_next; _next != pos.iter; ++_next, ++_prev); // find pos prev
+        size_type idx = getNthBucket(*pos);
+        auto prev  = buckets[idx].cbefore_begin();         // pos prev
+        auto next = prev;
+        for (++next; next != pos.iter; ++next, ++prev); // find pos prev
 
-        auto iter = buckets[idx].erase_after(_prev);        // erase pos
+        auto iter = buckets[idx].erase_after(prev);        // erase pos
 
-        _Update_next_iter(iter, idx);
+        updateNextIter(iter, idx);
 
         return iterator(idx, iter, this);
     }
@@ -563,13 +565,13 @@ public:
             erase(first++);
        
         return iterator(first.idx_bucket,
-            buckets[first.idx_bucket]._Make_iter(first.iter),
+            buckets[first.idx_bucket].makeIter(first.iter),
             this);
     }
 
     size_type erase(const key_type& key)
     {
-        auto range = static_cast<const _Self*>(this)->equal_range(key);
+        auto range = static_cast<const Self*>(this)->equal_range(key);
         size_type num = distance(range.first, range.second);
 
         erase(range.first, range.second);
@@ -577,18 +579,18 @@ public:
         return num;
     }
 
-    void swap(_HashTable& rhs)
+    void swap(HashTable& rhs)
     {
-        _Swap_ADL(hashfunc, rhs.hashfunc);
-        _Swap_ADL(key_equ, rhs.key_equ);
-        _Swap_ADL(maxfactor, rhs.maxfactor);
-        _Swap_ADL(num_elements, rhs.num_elements);
+        swapADL(hashfunc, rhs.hashfunc);
+        swapADL(key_equ, rhs.key_equ);
+        swapADL(maxfactor, rhs.maxfactor);
+        swapADL(num_elements, rhs.num_elements);
         buckets.swap(rhs.buckets);
     }
 public:
     iterator find(const key_type& key)
     {
-        size_type idx = _Get_nth_bucket_k(key);        
+        size_type idx = getNthBucketK(key);        
         for (auto pos = begin(idx); pos != end(idx); ++pos)
         {
             if (key_equ(get_key(*pos), key))
@@ -600,7 +602,7 @@ public:
 
     const_iterator find(const key_type& key) const
     {
-        size_type idx = _Get_nth_bucket_k(key);
+        size_type idx = getNthBucketK(key);
         for (auto pos = begin(idx); pos != end(idx); ++pos)
         {
             if (key_equ(*pos, key))
@@ -612,7 +614,7 @@ public:
 
     pair<iterator, iterator> equal_range(const key_type& key)
     {
-        size_type idx = _Get_nth_bucket_k(key);
+        size_type idx = getNthBucketK(key);
 
         auto first = begin(idx);
         for (; first != end(idx); ++first)
@@ -632,7 +634,7 @@ public:
                 break;
         }
 
-        size_type lastIdx = _Update_next_iter(last, idx);
+        size_type lastIdx = updateNextIter(last, idx);
 
         return make_pair(iterator(idx, first, this), 
             iterator(lastIdx, last, this));
@@ -640,7 +642,7 @@ public:
 
     pair<const_iterator, const_iterator> equal_range(const key_type& key) const
     {
-        size_type idx = _Get_nth_bucket_k(key);
+        size_type idx = getNthBucketK(key);
 
         auto first = begin(idx);
         for (; first != end(idx); ++first)
@@ -660,7 +662,7 @@ public:
                 break;
         }
 
-        size_type lastIdx = _Update_next_iter(last, idx);
+        size_type lastIdx = updateNextIter(last, idx);
 
         return make_pair(const_iterator(idx, first, this),
             const_iterator(lastIdx, last, this));
@@ -708,7 +710,7 @@ public:
 
     size_type max_bucket_count() const noexcept
     {
-        return _stl_primes_array[_stl_primes_size - 1] >> 2;
+        return stlPrimesArray[stlPrimesSize - 1] >> 2;
     }
 
     size_type bucket_size(size_type n) const
@@ -722,7 +724,7 @@ public:
     size_type bucket(const key_type& key) const
     {
         assert(bucket_count() != 0);
-        return _Get_nth_bucket_k(key);
+        return getNthBucketK(key);
     }
 
     float load_factor() const
@@ -746,7 +748,7 @@ public:
     {
         if (n <= size() / max_load_factor())
             return;
-        _HashTable tmp(_stl_next_prime(n));
+        HashTable tmp(stlNextPrime(n));
         for (const auto& val : *this)
             tmp.insert_equal(val);
         this->swap(tmp);
@@ -766,27 +768,27 @@ public:
     {
         return key_equ;
     }
-};  // _HashTable
+};  // HashTable
 
 
-template <typename T, typename Hash, typename KeyEqual, typename Alloc, bool is_map>
-inline bool operator==(const _HashTable<T, Hash, KeyEqual, Alloc, is_map>& lhs,
-                       const _HashTable<T, Hash, KeyEqual, Alloc, is_map>& rhs)
+template <typename T, typename Hash, typename KeyEqual, typename Alloc, bool isMap>
+inline bool operator==(const HashTable<T, Hash, KeyEqual, Alloc, isMap>& lhs,
+                       const HashTable<T, Hash, KeyEqual, Alloc, isMap>& rhs)
 {
     return lhs.size() == rhs.size()
         && equal(lhs.begin(), lhs.end(), rhs.begin());
 }
 
-template <typename T, typename Hash, typename KeyEqual, typename Alloc, bool is_map>
-inline bool operator!=(const _HashTable<T, Hash, KeyEqual, Alloc, is_map>& lhs,
-                       const _HashTable<T, Hash, KeyEqual, Alloc, is_map>& rhs)
+template <typename T, typename Hash, typename KeyEqual, typename Alloc, bool isMap>
+inline bool operator!=(const HashTable<T, Hash, KeyEqual, Alloc, isMap>& lhs,
+                       const HashTable<T, Hash, KeyEqual, Alloc, isMap>& rhs)
 {
     return !(lhs == rhs);
 }
 
-template <typename T, typename Hash, typename KeyEqual, typename Alloc, bool is_map>
-inline bool operator==(_HashTable<T, Hash, KeyEqual, Alloc, is_map>& lhs,
-                       _HashTable<T, Hash, KeyEqual, Alloc, is_map>& rhs)
+template <typename T, typename Hash, typename KeyEqual, typename Alloc, bool isMap>
+inline bool operator==(HashTable<T, Hash, KeyEqual, Alloc, isMap>& lhs,
+                       HashTable<T, Hash, KeyEqual, Alloc, isMap>& rhs)
 {
     return lhs.swap(rhs);
 }

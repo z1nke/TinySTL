@@ -11,7 +11,7 @@ namespace tiny_stl
 {
 
 template <typename T>
-inline T* _allocate(ptrdiff_t size, T* /* p */) 
+inline T* allocateHelper(ptrdiff_t size, T* /* p */) 
 {
     std::set_new_handler(nullptr);
     T* tmp = reinterpret_cast<T*>(::operator new(static_cast<size_t>(size * sizeof(T))));
@@ -24,13 +24,13 @@ inline T* _allocate(ptrdiff_t size, T* /* p */)
 }
 
 template <typename T>
-inline void _deallocate(T* buffer) noexcept 
+inline void deallocateHelper(T* buffer) noexcept 
 {
     ::operator delete(buffer);
 }
 
 template <typename T, typename... Args>
-inline void __construct(T* p, Args&&... args) 
+inline void constructHelper(T* p, Args&&... args) 
 {
     new (const_cast<void*>(static_cast<const volatile void*>(p)))
         T(tiny_stl::forward<Args>(args)...);            // placement new, ctor T
@@ -57,7 +57,7 @@ public:
     using propagate_on_container_move_assignment = tiny_stl::true_type; // c++14
     using is_always_equal   = tiny_stl::true_type;                      // c++17
 
-    using _Not_user_specialized = void;
+    using NotUserSpecialized = void;
 
 public:
     allocator() noexcept { }    // do nothing
@@ -81,13 +81,13 @@ public:
 
     pointer allocate(size_type n) 
     {
-        return _allocate(static_cast<difference_type>(n), 
+        return allocateHelper(static_cast<difference_type>(n), 
             reinterpret_cast<pointer>(0));
     }
 
     void deallocate(pointer p, size_t n) noexcept 
     {
-        _deallocate(p);
+        deallocateHelper(p);
     }
 
     pointer address(reference x) const noexcept 
@@ -103,7 +103,7 @@ public:
     template <typename T, typename... Args>
     void construct(T* p, Args&&... args) 
     {
-        __construct(p, tiny_stl::forward<Args>(args)...);
+        constructHelper(p, tiny_stl::forward<Args>(args)...);
     }
 
     template <typename T>
@@ -162,22 +162,22 @@ inline bool operator!=(const allocator<T>& lhs,
 }
 
 template <typename Alloc>
-inline void __Swap_alloc(Alloc& lhs, Alloc& rhs, true_type) 
+inline void swapAllocHelper(Alloc& lhs, Alloc& rhs, true_type) 
 {
-    _Swap_ADL(lhs, rhs);
+    swapADL(lhs, rhs);
 }
 
 template <typename Alloc>
-inline void __Swap_alloc(Alloc& lhs, Alloc& rhs, false_type) 
+inline void swapAllocHelper(Alloc& lhs, Alloc& rhs, false_type) 
 {
     assert(lhs == rhs);
 }
 
 template <typename Alloc>
-inline void _Swap_alloc(Alloc& lhs, Alloc& rhs) noexcept 
+inline void swapAlloc(Alloc& lhs, Alloc& rhs) noexcept 
 {
     typename allocator_traits<Alloc>::propagate_on_container_swap tag;
-    __Swap_alloc(lhs, rhs, tag);
+    swapAllocHelper(lhs, rhs, tag);
 }
 
 }   // namespace tiny_stl

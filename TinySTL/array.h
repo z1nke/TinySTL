@@ -8,7 +8,7 @@ namespace tiny_stl
 {
 
 template <typename T, size_t Size>
-class _Array_const_iterator 
+class ArrayConstIterator 
 {
 public:
     using iterator_category = random_access_iterator_tag;
@@ -17,14 +17,14 @@ public:
     using pointer           = const T*;
     using reference         = const T&;
 public:
-#ifdef _DEBUG
+#ifndef NDEBUG // DEBUG
     pointer ptr;
     size_t idx;
 
-    constexpr _Array_const_iterator() 
+    constexpr ArrayConstIterator() 
         : ptr(nullptr), idx(0) { }
 
-    constexpr explicit _Array_const_iterator(pointer p,
+    constexpr explicit ArrayConstIterator(pointer p,
         size_t offset = 0) 
         : ptr(p), idx(offset) { }
 
@@ -40,59 +40,59 @@ public:
     }
 
 
-    constexpr _Array_const_iterator& operator++() // preincrement
+    constexpr ArrayConstIterator& operator++() // preincrement
     { 
         assert(ptr != nullptr && idx < Size);
         ++idx;
         return *this;
     }
 
-    constexpr _Array_const_iterator operator++(int) // postincrement
+    constexpr ArrayConstIterator operator++(int) // postincrement
     { 
-        _Array_const_iterator tmp = *this;
+        ArrayConstIterator tmp = *this;
         ++*this;
         return tmp;
     }
 
-    constexpr _Array_const_iterator& operator--() // predecrement
+    constexpr ArrayConstIterator& operator--() // predecrement
     { 
         assert(ptr != nullptr && idx != 0);
         --idx;
         return *this;
     }
 
-    constexpr _Array_const_iterator operator--(int) // postdecrement
+    constexpr ArrayConstIterator operator--(int) // postdecrement
     { 
-        _Array_const_iterator tmp = *this;
+        ArrayConstIterator tmp = *this;
         --*this;
         return tmp;
     }
 
-    constexpr _Array_const_iterator& operator+=(ptrdiff_t offset) 
+    constexpr ArrayConstIterator& operator+=(ptrdiff_t offset) 
     {
         assert(idx + offset <= Size);
         idx += offset;
         return *this;
     }
 
-    constexpr _Array_const_iterator operator+(ptrdiff_t offset) const 
+    constexpr ArrayConstIterator operator+(ptrdiff_t offset) const 
     {
-        _Array_const_iterator tmp = *this;
+        ArrayConstIterator tmp = *this;
         return tmp += offset;
     }
 
-    constexpr _Array_const_iterator& operator-=(ptrdiff_t offset) 
+    constexpr ArrayConstIterator& operator-=(ptrdiff_t offset) 
     {
         return (*this += (-offset));
     }
 
-    constexpr _Array_const_iterator operator-(ptrdiff_t offset) const 
+    constexpr ArrayConstIterator operator-(ptrdiff_t offset) const 
     {
-        _Array_const_iterator tmp = *this;
+        ArrayConstIterator tmp = *this;
         return *this -= offset;
     }
 
-    constexpr ptrdiff_t operator-(const _Array_const_iterator& rhs) const 
+    constexpr ptrdiff_t operator-(const ArrayConstIterator& rhs) const 
     {
         assert(ptr == rhs.ptr);
         return static_cast<ptrdiff_t>(idx - rhs.idx);
@@ -103,44 +103,44 @@ public:
         return *(*this + offset);
     }
 
-    constexpr bool operator==(const _Array_const_iterator& rhs) const 
+    constexpr bool operator==(const ArrayConstIterator& rhs) const 
     {
         assert(ptr == rhs.ptr);
         return idx == rhs.idx;
     }
 
-    constexpr bool operator!=(const _Array_const_iterator& rhs) const 
+    constexpr bool operator!=(const ArrayConstIterator& rhs) const 
     {
         return (!(*this == rhs));
     }
 
-    constexpr bool operator<(const _Array_const_iterator& rhs) const 
+    constexpr bool operator<(const ArrayConstIterator& rhs) const 
     {
         assert(ptr != rhs.ptr);
         return idx < rhs.idx;
     }
 
-    constexpr bool operator<=(const _Array_const_iterator& rhs) const 
+    constexpr bool operator<=(const ArrayConstIterator& rhs) const 
     {
         return (!(rhs < *this));
     }
 
-    constexpr bool operator>(const _Array_const_iterator& rhs) const 
+    constexpr bool operator>(const ArrayConstIterator& rhs) const 
     {
         return rhs < *this;
     }
 
-    constexpr bool operator>=(const _Array_const_iterator& rhs) const 
+    constexpr bool operator>=(const ArrayConstIterator& rhs) const 
     {
         return !(*this < rhs);
     }
 #else
     pointer ptr;
 
-    constexpr _Array_const_iterator() 
+    constexpr ArrayConstIterator() 
         : ptr(nullptr) { }
 
-    constexpr explicit _Array_const_iterator(pointer p,
+    constexpr explicit ArrayConstIterator(pointer p,
         size_t offset = 0) 
         : ptr(p + offset) { }
 
@@ -155,56 +155,56 @@ public:
     }
 
 
-    constexpr _Array_const_iterator& operator++() // preincrement
+    constexpr ArrayConstIterator& operator++() // preincrement
     { 
         ++ptr;
         return *this;
     }
 
-    constexpr _Array_const_iterator operator++(int) // postincrement
+    constexpr ArrayConstIterator operator++(int) // postincrement
     { 
-        _Array_const_iterator tmp = *this;
+        ArrayConstIterator tmp = *this;
         ++*this;
         return tmp;
     }
 
-    constexpr _Array_const_iterator& operator--() // predecrement
+    constexpr ArrayConstIterator& operator--() // predecrement
     { 
         --ptr;
         return *this;
     }
 
-    constexpr _Array_const_iterator operator--(int) // postdecrement
+    constexpr ArrayConstIterator operator--(int) // postdecrement
     { 
-        _Array_const_iterator tmp = *this;
+        ArrayConstIterator tmp = *this;
         --*this;
         return tmp;
     }
 
-    constexpr _Array_const_iterator& operator+=(ptrdiff_t offset) 
+    constexpr ArrayConstIterator& operator+=(ptrdiff_t offset) 
     {
         ptr += offset;
         return *this;
     }
 
-    constexpr _Array_const_iterator operator+(ptrdiff_t offset) const 
+    constexpr ArrayConstIterator operator+(ptrdiff_t offset) const 
     {
-        _Array_const_iterator tmp = *this;
+        ArrayConstIterator tmp = *this;
         return tmp += offset;
     }
 
-    constexpr _Array_const_iterator& operator-=(ptrdiff_t offset) 
+    constexpr ArrayConstIterator& operator-=(ptrdiff_t offset) 
     {
         return (*this += (-offset));
     }
 
-    constexpr _Array_const_iterator operator-(ptrdiff_t offset) const 
+    constexpr ArrayConstIterator operator-(ptrdiff_t offset) const 
     {
-        _Array_const_iterator tmp = *this;
+        ArrayConstIterator tmp = *this;
         return *this -= offset;
     }
 
-    constexpr ptrdiff_t operator-(const _Array_const_iterator& rhs) const 
+    constexpr ptrdiff_t operator-(const ArrayConstIterator& rhs) const 
     {
         return ptr - rhs.ptr;
     }
@@ -214,133 +214,133 @@ public:
         return *(*this + offset);
     }
 
-    constexpr bool operator==(const _Array_const_iterator& rhs) const 
+    constexpr bool operator==(const ArrayConstIterator& rhs) const 
     {
         return ptr == rhs.ptr;
     }
 
-    constexpr bool operator!=(const _Array_const_iterator& rhs) const 
+    constexpr bool operator!=(const ArrayConstIterator& rhs) const 
     {
         return (!(*this == rhs));
     }
 
-    constexpr bool operator<(const _Array_const_iterator& rhs) const 
+    constexpr bool operator<(const ArrayConstIterator& rhs) const 
     {
         return ptr < rhs.ptr;
     }
 
-    constexpr bool operator<=(const _Array_const_iterator& rhs) const 
+    constexpr bool operator<=(const ArrayConstIterator& rhs) const 
     {
         return (!(rhs < *this));
     }
 
-    constexpr bool operator>(const _Array_const_iterator& rhs) const 
+    constexpr bool operator>(const ArrayConstIterator& rhs) const 
     {
         return rhs < *this;
     }
 
-    constexpr bool operator>=(const _Array_const_iterator& rhs) const 
+    constexpr bool operator>=(const ArrayConstIterator& rhs) const 
     {
         return !(*this < rhs);
     }
 
-#endif // _DEBUG
-};  // class _Array_const_iterator<T>
+#endif // !NDEBUG
+};  // class ArrayConstIterator<T>
 
 template <typename T, size_t Size>
-constexpr _Array_const_iterator<T, Size> operator+(ptrdiff_t offset,
-                                _Array_const_iterator<T, Size> rhs) 
+constexpr ArrayConstIterator<T, Size> operator+(ptrdiff_t offset,
+                                ArrayConstIterator<T, Size> rhs) 
 {
     return rhs += offset;
 }
 
 template <typename T, size_t Size>
-class _Array_iterator : public _Array_const_iterator<T, Size> 
+class ArrayIterator : public ArrayConstIterator<T, Size> 
 {
 private:
-    using _Base = _Array_const_iterator<T, Size>;
+    using Base = ArrayConstIterator<T, Size>;
 public:
     using pointer   = T*;
     using reference = T&;
 
-    constexpr _Array_iterator() { }
+    constexpr ArrayIterator() { }
 
-    constexpr explicit _Array_iterator(pointer p, ptrdiff_t offset) 
-        : _Base(p, offset) { }
+    constexpr explicit ArrayIterator(pointer p, ptrdiff_t offset) 
+        : Base(p, offset) { }
 
     constexpr reference operator*() const 
     {
-        return const_cast<reference>(_Base::operator*());
+        return const_cast<reference>(Base::operator*());
     }
 
     constexpr pointer operator->() const 
     {
-        return const_cast<pointer>(_Base::operator->());
+        return const_cast<pointer>(Base::operator->());
     }
 
-    constexpr _Array_iterator& operator++() 
+    constexpr ArrayIterator& operator++() 
     {
-        ++*static_cast<_Base*>(this);
+        ++*static_cast<Base*>(this);
         return *this;
     }
 
-    constexpr _Array_iterator operator++(int) 
+    constexpr ArrayIterator operator++(int) 
     {
-        _Array_iterator tmp = *this;
+        ArrayIterator tmp = *this;
         ++*this;
         return tmp;
     }
 
-    constexpr _Array_iterator& operator--() 
+    constexpr ArrayIterator& operator--() 
     {
-        --*static_cast<_Base*>(this);
+        --*static_cast<Base*>(this);
         return *this;
     }
 
-    constexpr _Array_iterator operator--(int) 
+    constexpr ArrayIterator operator--(int) 
     {
-        _Array_iterator tmp = *this;
+        ArrayIterator tmp = *this;
         --*this;
         return tmp;
     }
 
-    constexpr _Array_iterator& operator+=(ptrdiff_t offset) 
+    constexpr ArrayIterator& operator+=(ptrdiff_t offset) 
     {
-        *static_cast<_Base*>(this) += offset;
+        *static_cast<Base*>(this) += offset;
         return *this;
     }
 
-    constexpr _Array_iterator operator+(ptrdiff_t offset) const 
+    constexpr ArrayIterator operator+(ptrdiff_t offset) const 
     {
-        _Array_iterator tmp = *this;
+        ArrayIterator tmp = *this;
         return tmp += offset;
     }
 
-    constexpr _Array_iterator& operator-=(ptrdiff_t offset) 
+    constexpr ArrayIterator& operator-=(ptrdiff_t offset) 
     {
         return (*this += (-offset));
     }
 
-    constexpr _Array_iterator operator-(ptrdiff_t offset) const 
+    constexpr ArrayIterator operator-(ptrdiff_t offset) const 
     {
-        _Array_iterator tmp = *this;
+        ArrayIterator tmp = *this;
         return tmp -= offset;
     }
 
-    constexpr ptrdiff_t operator-(const _Base& rhs) const 
+    constexpr ptrdiff_t operator-(const Base& rhs) const 
     {
-        return *(static_cast<const _Base*>(this)) - rhs;
+        return *(static_cast<const Base*>(this)) - rhs;
     }
 
     constexpr reference operator[](ptrdiff_t offset) const 
     {
         return *(*this + offset);
     }
-};  // class _Array_iterator
+};  // class ArrayIterator
 
 template <typename T, size_t Size>
-constexpr _Array_iterator<T, Size> operator+(ptrdiff_t offset,
-                                _Array_iterator<T, Size> rhs) 
+constexpr ArrayIterator<T, Size> operator+(ptrdiff_t offset,
+                                ArrayIterator<T, Size> rhs) 
 {
     return rhs += offset;
 }
@@ -359,8 +359,8 @@ public:
     using const_pointer          = const T*;
     using reference              = T&;
     using const_reference        = const T&;
-    using iterator               = _Array_iterator<T, Size>;
-    using const_iterator         = _Array_const_iterator<T, Size>;
+    using iterator               = ArrayIterator<T, Size>;
+    using const_iterator         = ArrayConstIterator<T, Size>;
     using reverse_iterator       = tiny_stl::reverse_iterator<iterator>;
     using const_reverse_iterator = tiny_stl::reverse_iterator<const_iterator>;
 

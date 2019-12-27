@@ -16,7 +16,7 @@ namespace
 {
 
 template <typename T, typename... Args>
-inline void __Construct_in_place(T& dest, Args&&... args) 
+inline void constructInPlace(T& dest, Args&&... args) 
     noexcept((is_nothrow_constructible<T, Args...>::value)) 
 {
     ::new (static_cast<void*>(&dest))
@@ -24,7 +24,7 @@ inline void __Construct_in_place(T& dest, Args&&... args)
 }
 
 template <typename T>
-inline void __Destroy_in_place(T& obj) noexcept 
+inline void destroyInPlace(T& obj) noexcept 
 {
     obj.~T();
 }
@@ -33,18 +33,18 @@ inline void __Destroy_in_place(T& obj) noexcept
 // use plain function to copy/fill
 
 template <typename InIt, typename FwdIt>
-inline FwdIt _Uninitialized_copy(InIt first, InIt last,
-                                 FwdIt dest, false_type /*no special optimization*/) 
+inline FwdIt uninitializedCopyAux(InIt first, InIt last,
+                                  FwdIt dest, false_type /*no special optimization*/) 
 {
     for (; first != last; ++dest, ++first) 
-        __Construct_in_place(*dest, *first);
+        constructInPlace(*dest, *first);
     
     return dest;
 }
 
 template <typename InIt, typename FwdIt>
-inline FwdIt _Uninitialized_copy(InIt first, InIt last,
-                                 FwdIt dest, true_type /*is pod -- assign*/) 
+inline FwdIt uninitializedCopyAux(InIt first, InIt last,
+                                  FwdIt dest, true_type /*is pod -- assign*/) 
 {
     for (; first != last; ++first, ++dest) 
         *dest = *first;
@@ -53,18 +53,18 @@ inline FwdIt _Uninitialized_copy(InIt first, InIt last,
 }
 
 template <typename InIt, typename Size, typename FwdIt>
-inline FwdIt _Uninitialized_copy_n(InIt first, Size n,
+inline FwdIt uninitializedCopyNAux(InIt first, Size n,
                                    FwdIt dest, 
                                    false_type /*no special optimization*/) 
 {
     for (; n > 0; ++dest, ++first, --n) 
-        __Construct_in_place(*dest, *first);
+        constructInPlace(*dest, *first);
 
     return dest;
 }
 
 template <typename InIt, typename Size, typename FwdIt>
-inline FwdIt _Uninitialized_copy_n(InIt first, Size n, 
+inline FwdIt uninitializedCopyNAux(InIt first, Size n, 
                                    FwdIt dest, 
                                    true_type /*is pod -- assign*/) 
 {
@@ -75,34 +75,34 @@ inline FwdIt _Uninitialized_copy_n(InIt first, Size n,
 }
 
 template <typename FwdIt, typename T>
-inline void _Uninitialized_fill(FwdIt first, FwdIt last, const T& x, 
-                                false_type /*is not pod type*/) 
+inline void uninitializedFillAux(FwdIt first, FwdIt last, const T& x, 
+                                 false_type /*is not pod type*/) 
 {
 
     for (; first != last; ++first) 
-        __Construct_in_place(*first, x);
+        constructInPlace(*first, x);
 }
 
 template <typename FwdIt, typename T>
-inline void _Uninitialized_fill(FwdIt first, FwdIt last, const T& x,
-                                true_type /*is pod -- assign*/ )
+inline void uninitializedFillAux(FwdIt first, FwdIt last, const T& x,
+                                 true_type /*is pod -- assign*/ )
 {
     for (; first != last; ++first) 
         *first = x;
 }
 
 template <typename FwdIt, typename Size, typename T>
-inline void _Uninitialized_fill_n(FwdIt first, Size n, const T& x, 
-                                false_type/*is not pod type*/) 
+inline void uninitializedFillNAux(FwdIt first, Size n, const T& x, 
+                                  false_type/*is not pod type*/) 
 {
 
     for (; n--; ++first) 
-        __Construct_in_place(*first, x);
+        constructInPlace(*first, x);
 }
 
 template <typename FwdIt, typename Size, typename T> 
-inline void _Uninitialized_fill_n(FwdIt first, Size n, const T& x,
-                                true_type /*is pod -- copy*/) 
+inline void uninitializedFillNAux(FwdIt first, Size n, const T& x,
+                                  true_type /*is pod -- copy*/) 
 {
     for (; n--; ++first) 
         *first = x;
@@ -116,7 +116,7 @@ inline FwdIter uninitialized_copy(InIter first,
                                   FwdIter dest) 
 {
     using T = typename iterator_traits<InIter>::value_type;
-    return _Uninitialized_copy(first, last, dest, 
+    return uninitializedCopyAux(first, last, dest, 
         bool_constant<is_pod<T>::value>{});
 }
 
@@ -142,7 +142,7 @@ inline FwdIter uninitialized_copy_n(InIter first, Size n,
                                     FwdIter dest) 
 {
     using T = typename iterator_traits<InIter>::value_type;
-    return _Uninitialized_copy_n(first, n, dest, 
+    return uninitializedCopyNAux(first, n, dest, 
         integral_constant<bool, is_pod_v<T>>{});
 }
 
@@ -165,7 +165,7 @@ template <typename FwdIter, typename T>
 inline void uninitialized_fill(FwdIter first, 
                     FwdIter last, const T& x) 
 {
-    _Uninitialized_fill(first, last, x, 
+    uninitializedFillAux(first, last, x, 
         integral_constant<bool, is_pod_v<T>>{});
 }
 
@@ -174,7 +174,7 @@ template <typename FwdIter, typename Size, typename T>
 inline void uninitialized_fill_n(FwdIter first, 
                                  Size n, const T& x) 
 {
-    _Uninitialized_fill_n(first, n, x,
+    uninitializedFillNAux(first, n, x,
         integral_constant<bool, is_pod_v<T>>{});
 }
 
@@ -182,51 +182,51 @@ inline void uninitialized_fill_n(FwdIter first,
 // use allocator to copy/fill
 
 template <typename Alloc, typename = void>
-struct _Is_default_allocator : false_type { };
+struct IsDefaultAllocator : false_type { };
 
 template <typename T>
-struct _Is_default_allocator<allocator<T>,
-    typename allocator<T>::_Not_user_specialized> : true_type { };
+struct IsDefaultAllocator<allocator<T>,
+    typename allocator<T>::NotUserSpecialized> : true_type { };
 
 template <typename Void, typename... Ts>
-struct _Has_no_alloc_construct : true_type { };
+struct HasNoAllocConstruct : true_type { };
 
 template <typename Alloc, typename Ptr, typename... Args>
-struct _Has_no_alloc_construct<void_t<
+struct HasNoAllocConstruct<void_t<
     decltype(tiny_stl::declval<Alloc&>().construct(tiny_stl::declval<Ptr>(), 
         tiny_stl::declval<Args>()...))>, Alloc, Ptr, Args...> : false_type { };
 
 
 template <typename Alloc, typename Ptr, typename... Args>
-using _Use_default_construct = disjunction<
-    _Is_default_allocator<Alloc>,
-    _Has_no_alloc_construct<void, Alloc, Ptr, Args...>>;
+using UseDefaultConstruct = disjunction<
+    IsDefaultAllocator<Alloc>,
+    HasNoAllocConstruct<void, Alloc, Ptr, Args...>>;
 
 
 template <typename Alloc, typename Ptr, typename = void>
-struct _Has_no_alloc_destroy : true_type { };
+struct HasNoAllocDestroy : true_type { };
 
 template <typename Alloc, typename Ptr>
-struct _Has_no_alloc_destroy<Alloc, Ptr, void_t<
+struct HasNoAllocDestroy<Alloc, Ptr, void_t<
     decltype(tiny_stl::declval<Alloc&>().destroy(tiny_stl::declval<Ptr>()))>>
     : false_type { };
 
 template <typename Alloc, typename Ptr>
-using _Use_default_destroy = disjunction<
-    _Is_default_allocator<Alloc>,
-    _Has_no_alloc_destroy<Alloc, Ptr>>;
+using UseDefaultDestroy = disjunction<
+    IsDefaultAllocator<Alloc>,
+    HasNoAllocDestroy<Alloc, Ptr>>;
 
 template <typename FwdIter, typename Alloc>
-inline void __Destroy_alloc_range(FwdIter first, FwdIter last,
-                                  Alloc&, true_type) 
+inline void destroyAllocRangeAux(FwdIter first, FwdIter last,
+                                 Alloc&, true_type) 
 {
     // do nothing
 }
 
 
 template <typename FwdIter, typename Alloc>
-inline void __Destroy_alloc_range(FwdIter first, FwdIter last,
-                                Alloc& alloc, false_type) 
+inline void destroyAllocRangeAux(FwdIter first, FwdIter last,
+                                 Alloc& alloc, false_type) 
 {
     for (; first != last; ++first) 
         alloc.destroy(tiny_stl::addressof(*first));
@@ -234,45 +234,45 @@ inline void __Destroy_alloc_range(FwdIter first, FwdIter last,
 
 
 template <typename FwdIter, typename Alloc>
-inline void _Destroy_alloc_range(FwdIter first, FwdIter last, Alloc& alloc) 
+inline void destroyAllocRange(FwdIter first, FwdIter last, Alloc& alloc) 
 {
     using T = typename Alloc::value_type;
-    __Destroy_alloc_range(first, last, alloc, typename conjunction<
+    destroyAllocRangeAux(first, last, alloc, typename conjunction<
         is_trivially_destructible<T>,
-        _Use_default_destroy<Alloc, T*>>::type{});
+        UseDefaultDestroy<Alloc, T*>>::type{});
 }
 
 
 template <typename FwdIter>
-inline void __Destroy_range(FwdIter, FwdIter, true_type) 
+inline void destroyRangeAux(FwdIter, FwdIter, true_type) 
 {
     // do nothing
 }
 
 template <typename FwdIter>
-inline void __Destroy_range(FwdIter first, FwdIter last, false_type) 
+inline void destroyRangeAux(FwdIter first, FwdIter last, false_type) 
 {
     for (; first != last; ++first)
-        __Destroy_in_place(*first);
+        destroyInPlace(*first);
     
 }
 
 template <typename FwdIter>
-inline void _Destroy_range(FwdIter first, FwdIter last) 
+inline void destroyRange(FwdIter first, FwdIter last) 
 {
-    __Destroy_range(first, last, 
-        is_trivially_destructible<_Iterator_value_t<FwdIter>>{});
+    destroyRangeAux(first, last, 
+        is_trivially_destructible<IteratorValueType<FwdIter>>{});
 }
 
 template <typename FwdIter>
 inline void destroy(FwdIter first, FwdIter last)
 {
-    _Destroy_range(first, last);
+    destroyRange(first, last);
 }
 
 template <typename FwdIter, typename Size, typename Alloc>
-inline FwdIter __Uninit_alloc_fill_n(FwdIter first, Size n,
-    const typename iterator_traits<FwdIter>::value_type& val,
+inline FwdIter uninitAllocFillNAux(FwdIter first, Size n,
+                                   const typename iterator_traits<FwdIter>::value_type& val,
     Alloc& alloc, false_type /* fill memset is not safe */) 
 {
 
@@ -283,74 +283,75 @@ inline FwdIter __Uninit_alloc_fill_n(FwdIter first, Size n,
 }
 
 template <typename FwdIter, typename Size, typename Alloc>
-inline FwdIter __Uninit_alloc_fill_n(FwdIter first, Size n,
-    const typename iterator_traits<FwdIter>::value_type& val,
+inline FwdIter uninitAllocFillNAux(FwdIter first, Size n,
+                                   const typename iterator_traits<FwdIter>::value_type& val,
     Alloc&, true_type /* fill memset is safe */) 
 {
-    _CSTD memset(first, val, n);
+    ::memset(first, val, n);
     return first + n;
 }
 
 template <typename FwdIter, typename Size, typename Alloc>
-inline FwdIter _Uninitialized_alloc_fill_n(FwdIter first, Size n,
+inline FwdIter uninitializedAllocFillN(FwdIter first, Size n,
     const typename iterator_traits<FwdIter>::value_type& val,
     Alloc& alloc) 
 {    
     // if memset safe && (default allocator || not user allocator)
     // then use memset
-    return __Uninit_alloc_fill_n(first, n, val, alloc,
-        typename conjunction<decltype(tiny_stl::_Fill_memset_is_safe(first, val)),
-        _Use_default_construct<Alloc, decltype(tiny_stl::addressof(*first)), 
+    return uninitAllocFillNAux(first, n, val, alloc,
+        typename conjunction<decltype(tiny_stl::fillMemsetIsSafe(first, val)),
+        UseDefaultConstruct<Alloc, decltype(tiny_stl::addressof(*first)), 
         decltype(val)>>::type{});
 }
 
 
 template <typename FwdIter>
-using _Use_memset_value_construct_t
+using UseMemsetValueConstructType
     = typename conjunction<
         is_pointer<FwdIter>,
-        is_scalar<_Iterator_value_t<FwdIter>>,
-        negation<is_volatile<_Iterator_value_t<FwdIter>>>,
-        negation<is_member_pointer<_Iterator_value_t<FwdIter>>>
+        is_scalar<IteratorValueType<FwdIter>>,
+        negation<is_volatile<IteratorValueType<FwdIter>>>,
+        negation<is_member_pointer<IteratorValueType<FwdIter>>>
     >::type;
 
 template <typename FwdIter>
-inline FwdIter __Zero_memset_range(FwdIter first, FwdIter last) 
+inline FwdIter zeroMemsetRangeAux(FwdIter first, FwdIter last) 
 {
     char* const first_ch = reinterpret_cast<char*>(first);
     char* const last_ch = reinterpret_cast<char*>(last);
-    _CSTD memset(first_ch, 0, last_ch - first_ch);
+    ::memset(first_ch, 0, last_ch - first_ch);
     return last;
 }
 
 template <typename FwdIter, typename Size, typename Alloc>
-inline FwdIter __Uninit_alloc_default_n(FwdIter first, Size n, 
-                                        Alloc&, true_type) 
+inline FwdIter uninitAllocDefaultNAux(FwdIter first, Size n, 
+                                      Alloc&, true_type) 
 {
-    return __Zero_memset_range(first, first + n);
+    return zeroMemsetRangeAux(first, first + n);
 }
 
 template <typename FwdIter, typename Size, typename Alloc>
-inline FwdIter __Uninit_alloc_default_n(FwdIter first, Size n,
-                                        Alloc& alloc, false_type) 
+inline FwdIter uninitAllocDefaultNAux(FwdIter first, Size n,
+                                      Alloc& alloc, false_type) 
 {
     alloc.construct(tiny_stl::addressof(*first));
     return first;
 }
 
 template <typename FwdIter, typename Size, typename Alloc> 
-inline FwdIter _Uninitialized_alloc_default_n(FwdIter first, Size n,
-                                        Alloc& alloc) 
+inline FwdIter uninitializedAllocDefaultN(FwdIter first, Size n,
+                                          Alloc& alloc) 
 {
-    return __Uninit_alloc_default_n(first, n, alloc,
-        typename conjunction<_Use_memset_value_construct_t<FwdIter>,
-        _Use_default_construct<Alloc, 
+    return uninitAllocDefaultNAux(first, n, alloc,
+        typename conjunction<UseMemsetValueConstructType<FwdIter>,
+        UseDefaultConstruct<Alloc, 
             decltype(tiny_stl::addressof(*first))>>::type{});
 }
 
 template <typename InIter, typename FwdIter, typename Alloc>
-inline FwdIter __Uninitialized_alloc_copy_helper(InIter first, InIter last,
-                                FwdIter newFirst, Alloc&, true_type/*pod*/)
+inline FwdIter uninitializedAllocCopyAux(InIter first, InIter last,
+                                         FwdIter newFirst, Alloc&, 
+                                         true_type/*pod*/)
 {
     for (; first != last; ++first, ++newFirst) 
         *newFirst = *first;
@@ -359,8 +360,9 @@ inline FwdIter __Uninitialized_alloc_copy_helper(InIter first, InIter last,
 }
 
 template <typename InIter, typename FwdIter, typename Alloc>
-inline FwdIter __Uninitialized_alloc_copy_helper(InIter first, InIter last,
-                                FwdIter newFirst, Alloc& alloc, false_type) 
+inline FwdIter uninitializedAllocCopyAux(InIter first, InIter last,
+                                         FwdIter newFirst, Alloc& alloc, 
+                                         false_type) 
 {
 
     for (; first != last; ++first, ++newFirst) 
@@ -370,16 +372,16 @@ inline FwdIter __Uninitialized_alloc_copy_helper(InIter first, InIter last,
 }
 
 template <typename InIter, typename FwdIter, typename Alloc>
-inline FwdIter _Uninitialized_alloc_copy(InIter first, InIter last,
+inline FwdIter uninitializedAllocCopy(InIter first, InIter last,
                                         FwdIter newFirst, Alloc& alloc) 
 {
     using T = typename iterator_traits<InIter>::value_type;
-    return __Uninitialized_alloc_copy_helper(first, last, newFirst, alloc,
+    return uninitializedAllocCopyAux(first, last, newFirst, alloc,
         bool_constant<is_pod<T>::value>{});
 }
 
 template <typename InIter, typename FwdIter, typename Alloc>
-inline FwdIter _Uninitialized_alloc_move(InIter first, InIter last,
+inline FwdIter uninitializedAllocMove(InIter first, InIter last,
                                         FwdIter newFirst, Alloc& alloc) 
 {
 
@@ -396,61 +398,61 @@ inline FwdIter _Uninitialized_alloc_move(InIter first, InIter last,
 
 
 template <typename T>
-struct _Get_first_parameter;
+struct GetFirstParameter;
 
 template <template <typename, typename...> class T,
     typename First,
     typename... Rest>
-struct _Get_first_parameter<T<First, Rest...>> 
+struct GetFirstParameter<T<First, Rest...>> 
 {
     using type = First;
 };
 
 template <typename T, typename = void>
-struct _Get_element_type 
+struct GetElementType 
 {
-    using type = typename _Get_first_parameter<T>::type;
+    using type = typename GetFirstParameter<T>::type;
 };
 
 template <typename T>
-struct _Get_element_type<T, void_t<typename T::element_type>>
+struct GetElementType<T, void_t<typename T::element_type>>
 {
     using type = typename T::element_type;
 };
 
 template <typename T, typename = void>
-struct _Get_ptr_difference_type 
+struct GetPtrDifferenceType 
 {
     using type = ptrdiff_t;
 };
 
 template <typename T>
-struct _Get_ptr_difference_type<T, void_t<typename T::difference_type>> 
+struct GetPtrDifferenceType<T, void_t<typename T::difference_type>> 
 {
     using type = typename T::difference_type;
 };
 
 
 template <typename NewFirst, typename T> 
-struct _Replace_first_parameter;
+struct ReplaceFirstParameter;
 
 template <typename NewFirst, 
     template <typename, typename...> class T,
     typename First,
     typename... Rest>
-struct _Replace_first_parameter<NewFirst, T<First, Rest...>> 
+struct ReplaceFirstParameter<NewFirst, T<First, Rest...>> 
 {
     using type = T<NewFirst, Rest...>;
 };
 
 template <typename T, typename Other, typename = void>
-struct _Get_rebind_type 
+struct GetRebindType 
 {
-    using type = typename _Replace_first_parameter<Other, T>::type;
+    using type = typename ReplaceFirstParameter<Other, T>::type;
 };
 
 template <typename T, typename Other>
-struct _Get_rebind_type<T, Other, void_t<typename T::template rebind<Other>>> 
+struct GetRebindType<T, Other, void_t<typename T::template rebind<Other>>> 
 {
     using type = typename T::template rebind<Other>;
 };
@@ -461,16 +463,16 @@ template <typename Ptr>
 struct pointer_traits 
 {
     using pointer         = Ptr;
-    using element_type    = typename _Get_element_type<Ptr>::type;
-    using difference_type = typename _Get_ptr_difference_type<Ptr>::type;
+    using element_type    = typename GetElementType<Ptr>::type;
+    using difference_type = typename GetPtrDifferenceType<Ptr>::type;
 
     template <typename Other>
-    using rebind = typename _Get_rebind_type<Ptr, Other>::type;
+    using rebind = typename GetRebindType<Ptr, Other>::type;
 
-    using _Reftype = conditional_t<is_void<element_type>::value,
+    using RefType = conditional_t<is_void<element_type>::value,
         char&, add_lvalue_reference_t<element_type>>;
 
-    static pointer pointer_to(_Reftype val) 
+    static pointer pointer_to(RefType val) 
     {
         return Ptr::pointer_to(val);
     }
@@ -486,10 +488,10 @@ struct pointer_traits<T*>
     template <typename Other>
     using rebind = Other*;
 
-    using _Reftype = conditional_t<is_void<T>::value,
+    using RefType = conditional_t<is_void<T>::value,
         char&, add_lvalue_reference_t<T>>;
 
-    static pointer pointer_to(_Reftype val)
+    static pointer pointer_to(RefType val)
     {
         return tiny_stl::addressof(val);
     }
@@ -498,143 +500,143 @@ struct pointer_traits<T*>
 
 // for allocator_traits type helper 
 template <typename Alloc, typename = void>
-struct _Get_pointer 
+struct GetPointer 
 {
     using type = typename Alloc::value_type*;
 };
 
 template <typename Alloc>
-struct _Get_pointer<Alloc, void_t<typename Alloc::pointer>> 
+struct GetPointer<Alloc, void_t<typename Alloc::pointer>> 
 {
     using type = typename Alloc::pointer;
 };
 
 template <typename Alloc, typename = void>
-struct _Get_const_pointer 
+struct GetConstPointer 
 {
-    using _Ptr = typename _Get_pointer<Alloc>::type;
-    using _Val = typename Alloc::value_type;
-    using type = typename pointer_traits<_Ptr>::template rebind<const _Val>;
+    using Ptr = typename GetPointer<Alloc>::type;
+    using Val = typename Alloc::value_type;
+    using type = typename pointer_traits<Ptr>::template rebind<const Val>;
 };
 
 template <typename Alloc>
-struct _Get_const_pointer<Alloc, void_t<typename Alloc::const_pointer>> 
+struct GetConstPointer<Alloc, void_t<typename Alloc::const_pointer>> 
 {
     using type = typename Alloc::const_pointer;
 };
 
 template <typename Alloc, typename = void>
-struct _Get_void_pointer 
+struct GetVoidPointer 
 {
-    using _Ptr = typename _Get_pointer<Alloc>::type;
-    using type = typename pointer_traits<_Ptr>::template rebind<void>;
+    using Ptr = typename GetPointer<Alloc>::type;
+    using type = typename pointer_traits<Ptr>::template rebind<void>;
 };
 
 template <typename Alloc>
-struct _Get_void_pointer<Alloc, void_t<typename Alloc::void_pointer>> 
+struct GetVoidPointer<Alloc, void_t<typename Alloc::void_pointer>> 
 {
     using type = typename Alloc::void_pointer;
 };
 
 template <typename Alloc, typename = void>
-struct _Get_const_void_pointer 
+struct GetConstVoidPointer 
 {
-    using _Ptr = typename _Get_pointer<Alloc>::type;
-    using type = typename pointer_traits<_Ptr>::template rebind<const void>;
+    using Ptr = typename GetPointer<Alloc>::type;
+    using type = typename pointer_traits<Ptr>::template rebind<const void>;
 };
 
 template <typename Alloc>
-struct _Get_const_void_pointer<Alloc, void_t<typename Alloc::const_void_pointer>> 
+struct GetConstVoidPointer<Alloc, void_t<typename Alloc::const_void_pointer>> 
 {
     using type = typename Alloc::const_void_pointer;
 };
 
 template <typename Alloc, typename = void>
-struct _Get_difference_type
+struct GetDifferenceType
 {
-    using _Ptr = typename _Get_pointer<Alloc>::type;
-    using type = typename pointer_traits<_Ptr>::difference_type;
+    using Ptr = typename GetPointer<Alloc>::type;
+    using type = typename pointer_traits<Ptr>::difference_type;
 };
 
 template <typename Alloc>
-struct _Get_difference_type<Alloc, void_t<typename Alloc::difference_type>>
+struct GetDifferenceType<Alloc, void_t<typename Alloc::difference_type>>
 {
     using type = typename Alloc::difference_type;
 };
 
 template <typename Alloc, typename = void>
-struct _Get_size_type 
+struct GetSizeType 
 {
-    using _Diff = typename _Get_difference_type<Alloc>::type;
-    using type = make_unsigned_t<_Diff>;
+    using Diff = typename GetDifferenceType<Alloc>::type;
+    using type = make_unsigned_t<Diff>;
 };
 
 template <typename Alloc>
-struct _Get_size_type<Alloc, void_t<typename Alloc::size_type>>
+struct GetSizeType<Alloc, void_t<typename Alloc::size_type>>
 {
     using type = typename Alloc::size_type;
 };
 
 template <typename Alloc, typename = void>
-struct _Get_propagate_on_container_copy 
+struct GetPropagateOnContainerCopy 
 {
     using type = false_type;
 };
 
 template <typename Alloc>
-struct _Get_propagate_on_container_copy<Alloc, void_t<
+struct GetPropagateOnContainerCopy<Alloc, void_t<
         typename Alloc::propagate_on_container_copy_assignment>> 
 {
     using type = typename Alloc::propagate_on_container_copy_assignment;
 };
 
 template <typename Alloc, typename = void>
-struct _Get_propagate_on_container_move 
+struct GetPropagateOnContainerMove 
 {
     using type = false_type;
 };
 
 template <typename Alloc>
-struct _Get_propagate_on_container_move<Alloc, void_t<
+struct GetPropagateOnContainerMove<Alloc, void_t<
         typename Alloc::propagate_on_container_move_assignment>> 
 {
     using type = typename Alloc::propagate_on_container_move_assignment;
 };
 
 template<class Alloc, typename = void>
-struct _Get_propagate_on_container_swap 
+struct GetPropagateOnContainerSwap 
 {
     using type = false_type;
 };
 
 template<class Alloc>
-struct _Get_propagate_on_container_swap<Alloc, void_t<
+struct GetPropagateOnContainerSwap<Alloc, void_t<
         typename Alloc::propagate_on_container_swap>>
 {
     using type = typename Alloc::propagate_on_container_swap;
 };
 
 template<class Alloc, typename = void>
-struct _Get_is_always_equal 
+struct GetIsAlwaysEqual 
 {
     using type = typename is_empty<Alloc>::type;
 };
 
 template<class Alloc>
-struct _Get_is_always_equal<Alloc, void_t<
+struct GetIsAlwaysEqual<Alloc, void_t<
         typename Alloc::is_always_equal>> 
 {
     using type = typename Alloc::is_always_equal;
 };
 
 template <typename Alloc, typename Other, typename = void>
-struct _Get_bind_type 
+struct GetBindType 
 {
-    using type = typename _Replace_first_parameter<Other, Alloc>::type;
+    using type = typename ReplaceFirstParameter<Other, Alloc>::type;
 };
 
 template <typename Alloc, typename Other>
-struct _Get_bind_type<Alloc, Other, void_t<
+struct GetBindType<Alloc, Other, void_t<
         typename Alloc::template rebind<Other>::other>>
 {
     using type = typename Alloc::template rebind<Other>::other;
@@ -642,11 +644,11 @@ struct _Get_bind_type<Alloc, Other, void_t<
 
 template <typename Alloc, typename Size_type,
     typename Const_void_pointer, typename = void>
-struct _Has_allocate_hint : false_type { };
+struct HasAllocateHint : false_type { };
 
 template <typename Alloc, typename Size_type,
     typename Const_void_pointer>
-struct _Has_allocate_hint<Alloc, Size_type, Const_void_pointer, void_t<
+struct HasAllocateHint<Alloc, Size_type, Const_void_pointer, void_t<
     decltype(tiny_stl::declval<Alloc&>().allocate(
         tiny_stl::declval<const Size_type&>(),
         tiny_stl::declval<const Const_void_pointer&>()))>>
@@ -654,18 +656,18 @@ struct _Has_allocate_hint<Alloc, Size_type, Const_void_pointer, void_t<
 
 
 template <typename Alloc, typename = void>
-struct _Has_max_size  : false_type { };
+struct HasMaxSize  : false_type { };
 
 template <typename Alloc>
-struct _Has_max_size<Alloc, void_t<
+struct HasMaxSize<Alloc, void_t<
     decltype(tiny_stl::declval<const Alloc&>().max_size())>> 
     : true_type { };
 
 template <typename Alloc, typename = void>
-struct _Has_select_on_container_copy_construction : false_type { };
+struct HasSelectOnContainerCopyConstruction : false_type { };
 
 template <typename Alloc>
-struct _Has_select_on_container_copy_construction<Alloc, void_t<
+struct HasSelectOnContainerCopyConstruction<Alloc, void_t<
     decltype(tiny_stl::declval<const Alloc&>().select_on_container_copy_construction())>>  
     : true_type { };
 
@@ -675,24 +677,24 @@ struct allocator_traits
 {
     using allocator_type     = Alloc;
     using value_type         = typename Alloc::value_type;
-    using pointer            = typename _Get_pointer<Alloc>::type;
-    using const_pointer      = typename _Get_const_pointer<Alloc>::type;
-    using void_pointer       = typename _Get_void_pointer<Alloc>::type;
-    using const_void_pointer = typename _Get_const_void_pointer<Alloc>::type;
-    using size_type          = typename _Get_size_type<Alloc>::type;
-    using difference_type    = typename _Get_difference_type<Alloc>::type;
+    using pointer            = typename GetPointer<Alloc>::type;
+    using const_pointer      = typename GetConstPointer<Alloc>::type;
+    using void_pointer       = typename GetVoidPointer<Alloc>::type;
+    using const_void_pointer = typename GetConstVoidPointer<Alloc>::type;
+    using size_type          = typename GetSizeType<Alloc>::type;
+    using difference_type    = typename GetDifferenceType<Alloc>::type;
 
     using propagate_on_container_copy_assignment
-        = typename _Get_propagate_on_container_copy<Alloc>::type;
+        = typename GetPropagateOnContainerCopy<Alloc>::type;
     using propagate_on_container_move_assignment 
-        = typename _Get_propagate_on_container_move<Alloc>::type;
+        = typename GetPropagateOnContainerMove<Alloc>::type;
     using propagate_on_container_swap
-        = typename _Get_propagate_on_container_swap<Alloc>::type;
+        = typename GetPropagateOnContainerSwap<Alloc>::type;
     using is_always_equal
-        = typename _Get_is_always_equal<Alloc>::type;
+        = typename GetIsAlwaysEqual<Alloc>::type;
 
     template <typename Other>
-    using rebind_alloc = typename _Get_bind_type<Alloc, Other>::type;
+    using rebind_alloc = typename GetBindType<Alloc, Other>::type;
 
     template <typename Other>
     using rebind_traits = allocator_traits<rebind_alloc<Other>>;
@@ -702,14 +704,14 @@ struct allocator_traits
         return a.allocate(n);
     }
 
-    static pointer _Allocate(Alloc& a, const size_type n,
-                    const_void_pointer hint, true_type)
+    static pointer allocateAux(Alloc& a, const size_type n,
+                               const_void_pointer hint, true_type)
     {
         return a.allocate(n, hint);
     }
 
-    static pointer _Allocate(Alloc& a, const size_type n,
-                    const_void_pointer hint, false_type) 
+    static pointer allocateAux(Alloc& a, const size_type n,
+                               const_void_pointer hint, false_type) 
     {
         return a.allocate(n);
     }
@@ -717,8 +719,8 @@ struct allocator_traits
     static pointer allocate(Alloc& a, const size_type n,
                             const_void_pointer hint) 
     {
-        return _Allocate(a, n, hint, 
-            _Has_allocate_hint<Alloc, size_type, const_void_pointer>{});
+        return allocateAux(a, n, hint, 
+            HasAllocateHint<Alloc, size_type, const_void_pointer>{});
     }
 
     static void deallocate(Alloc& a, pointer ptr, size_type n) 
@@ -727,13 +729,13 @@ struct allocator_traits
     }
 
     template <typename T, typename... Args>
-    static void _Construct(true_type, Alloc&, T* ptr, Args&&... args)
+    static void constructHelper(true_type, Alloc&, T* ptr, Args&&... args)
     {
         new (static_cast<void*>(ptr)) T(tiny_stl::forward<Args>(args)...);
     }
 
     template <typename T, typename... Args>
-    static void _Construct(false_type, Alloc& a, T* ptr, Args&&... args)
+    static void constructHelper(false_type, Alloc& a, T* ptr, Args&&... args)
     {
         a.construct(ptr, tiny_stl::forward<Args>(args)...);
     }
@@ -741,18 +743,18 @@ struct allocator_traits
     template <typename Obj, typename... Args>
     static void construct(Alloc& a, Obj* ptr, Args&&... args)
     {
-        _Construct(_Use_default_construct<Alloc, Obj*, Args...>{}, a, ptr,
+        constructHelper(UseDefaultConstruct<Alloc, Obj*, Args...>{}, a, ptr,
             tiny_stl::forward<Args>(args)...);
     }
 
     template <typename T>
-    static void _Destroy(Alloc& a, T* ptr, true_type) 
+    static void destroyAux(Alloc& a, T* ptr, true_type) 
     {
         ptr->~T();
     }
 
     template <typename T>
-    static void _Destroy(Alloc& a, T* ptr, false_type) 
+    static void destroyAux(Alloc& a, T* ptr, false_type) 
     {
         a.destroy(ptr);
     }
@@ -760,49 +762,49 @@ struct allocator_traits
     template <typename T>
     static void destroy(Alloc& a, T* ptr) 
     {
-        _Destroy(a, ptr, _Use_default_destroy<Alloc, T*>{});
+        destroyAux(a, ptr, UseDefaultDestroy<Alloc, T*>{});
     }
 
-    static size_type _Max_size(const Alloc& a, true_type) 
+    static size_type maxSizeAux(const Alloc& a, true_type) 
     {
         return a.max_size();
     }
 
-    static size_type _Max_size(const Alloc& a, false_type)
+    static size_type maxSizeAux(const Alloc& a, false_type)
     {
         return std::numeric_limits<size_type>::max() / sizeof(value_type);
     }
 
     static size_type max_size(const Alloc& a) 
     {
-        return _Max_size(a, _Has_max_size<Alloc>{});
+        return maxSizeAux(a, HasMaxSize<Alloc>{});
     }
 
 
-    static Alloc _Select_on_container_copy_construction(const Alloc& a, true_type)
+    static Alloc selectOnContainerCopyConstructionAux(const Alloc& a, true_type)
     {
         return a.select_on_container_copy_construction();
     }
 
-    static Alloc _Select_on_container_copy_construction(const Alloc& a, false_type)
+    static Alloc selectOnContainerCopyConstructionAux(const Alloc& a, false_type)
     {
         return a;
     }
 
     static Alloc select_on_container_copy_construction(const Alloc& a)
     {
-        return _Select_on_container_copy_construction(a, 
-            _Has_select_on_container_copy_construction<Alloc>{});
+        return selectOnContainerCopyConstructionAux(a, 
+            HasSelectOnContainerCopyConstruction<Alloc>{});
     }
 };  // class allocator_traits<Alloc>
 
 template <typename Con, typename Alloc, typename = void>
-struct _Has_allocator_type : false_type 
+struct HasAllocatorType : false_type 
 {
 };
 
 template <typename Con, typename Alloc>
-struct _Has_allocator_type<Con, Alloc, 
+struct HasAllocatorType<Con, Alloc, 
     void_t<typename Con::allocator_type>> 
 : is_convertible<Alloc, typename Con::allocator_type>::type
 {
@@ -810,7 +812,7 @@ struct _Has_allocator_type<Con, Alloc,
 
 
 template <typename Con, typename Alloc>
-struct uses_allocator : _Has_allocator_type<Con, Alloc>::type 
+struct uses_allocator : HasAllocatorType<Con, Alloc>::type 
 {    
 };
 
@@ -867,12 +869,12 @@ public:
 private:
     extra::compress_pair<Deleter, pointer> m_pair;
 
-    pointer& _Get_ptr() noexcept 
+    pointer& getPtr() noexcept 
     {
         return m_pair.get_second();
     }
 
-    const pointer& _Get_ptr() const noexcept 
+    const pointer& getPtr() const noexcept 
     {
         return m_pair.get_second();
     }
@@ -960,13 +962,13 @@ public:
    
     pointer get() const noexcept
     {
-        return _Get_ptr();
+        return getPtr();
     }
 
     pointer release() noexcept 
     {
         pointer ret = get();
-        _Get_ptr() = pointer();
+        getPtr() = pointer();
         return ret;
     }
 
@@ -985,8 +987,8 @@ public:
 
     void swap(unique_ptr& rhs) noexcept
     {
-        _Swap_ADL(_Get_ptr(), rhs._Get_ptr());
-        _Swap_ADL(get_deleter(), rhs.get_deleter());
+        swapADL(getPtr(), rhs.getPtr());
+        swapADL(get_deleter(), rhs.get_deleter());
     }
 
     ~unique_ptr() noexcept 
@@ -1003,7 +1005,7 @@ public:
 
     pointer operator->() const noexcept 
     {
-        return _Get_ptr();
+        return getPtr();
     }
 };  // unique_ptr<T, Deleter>
 
@@ -1018,19 +1020,19 @@ public:
 private:
     extra::compress_pair<Deleter, pointer> m_pair;
 
-    pointer& _Get_ptr() noexcept 
+    pointer& getPtr() noexcept 
     {
         return m_pair.get_second();
     }
 
-    const pointer& _Get_ptr() const noexcept 
+    const pointer& getPtr() const noexcept 
     {
         return m_pair.get_second();
     }
 
     template <typename U,
         typename Is_nullptr = is_same<U, nullptr_t>>
-    using _Enalble_ctor = enable_if_t<
+    using EnableCtor = enable_if_t<
         is_same<U, pointer>::value
         || Is_nullptr::value
         || (is_same<pointer, element_type*>::value
@@ -1047,7 +1049,7 @@ public:
     }
 
 
-    template <typename U, typename = _Enalble_ctor<U>>              // (2)
+    template <typename U, typename = EnableCtor<U>>              // (2)
     explicit unique_ptr(U p) noexcept 
     : m_pair(delete_type(), p) 
     {
@@ -1055,12 +1057,12 @@ public:
             && !is_pointer<Deleter>::value, "unique construct error");
     }
 
-    template <typename U, typename = _Enalble_ctor<U>>              // (3)
+    template <typename U, typename = EnableCtor<U>>              // (3)
     unique_ptr(U p, conditional_t<is_reference<Deleter>::value, Deleter,
         const remove_const_t<Deleter>&> del) noexcept 
     : m_pair(tiny_stl::forward<decltype(del)>(del), p) { }
 
-    template <typename U, typename = _Enalble_ctor<U>>              // (4)
+    template <typename U, typename = EnableCtor<U>>              // (4)
     unique_ptr(U p, remove_reference_t<Deleter>&& del) noexcept 
     : m_pair(tiny_stl::forward<decltype(del)>(del), p)
     {
@@ -1125,22 +1127,22 @@ public:
 
     pointer get() const noexcept
     {
-        return _Get_ptr();
+        return getPtr();
     }
 
     pointer release() noexcept
     {
         pointer ret = get();
-        _Get_ptr() = pointer();
+        getPtr() = pointer();
         return ret;
     }
 
     template <typename U, 
-        typename = _Enalble_ctor<U, false_type>>
+        typename = EnableCtor<U, false_type>>
     void reset(U p) noexcept 
     {
         pointer old = get();
-        _Get_ptr() = p;
+        getPtr() = p;
         if (old != nullptr)
             get_deleter()(old);
     }
@@ -1157,8 +1159,8 @@ public:
 
     void swap(unique_ptr& rhs) noexcept 
     {
-        _Swap_ADL(_Get_ptr(), rhs._Get_ptr());
-        _Swap_ADL(get_deleter(), rhs.get_deleter());
+        swapADL(getPtr(), rhs.getPtr());
+        swapADL(get_deleter(), rhs.get_deleter());
     }
 
     ~unique_ptr() noexcept
@@ -1337,22 +1339,22 @@ class weak_ptr;
 // reference MSVC implement
 
 // reference count abstract base class
-class _Ref_count_base
+class RefCountBase
 {
 protected:
-    using _Atomic_counter_t = unsigned long;
+    using AtomicCounterType = unsigned long;
 private:
-    virtual void _Destroy() noexcept = 0;
-    virtual void _Delete_this() noexcept = 0;
+    virtual void destroyAux() noexcept = 0;
+    virtual void deleteThis() noexcept = 0;
     
 private:
     // assure use count operation is threads safe
     // why not use atomic
-    _Atomic_counter_t mUses;
-    _Atomic_counter_t mWeaks;
+    AtomicCounterType mUses;
+    AtomicCounterType mWeaks;
 
 protected:
-    _Ref_count_base()
+    RefCountBase()
         : mUses(1), mWeaks(1)   // no-atomic initialization
     {
         // constructor
@@ -1360,18 +1362,18 @@ protected:
 
 public:
 
-    virtual ~_Ref_count_base() noexcept
+    virtual ~RefCountBase() noexcept
     {
     }
 
-    bool _IncRefNotZero()
+    bool increaseRefNotZero()
     {
         // increment use count if not zero, return true if successful
         for (;;)
         {
             // loop until state is known
-            _Atomic_counter_t count = 
-                static_cast<volatile _Atomic_counter_t&>(mUses);
+            AtomicCounterType count = 
+                static_cast<volatile AtomicCounterType&>(mUses);
             if (count == 0)
             {
                 return false;
@@ -1379,7 +1381,7 @@ public:
 
             // _InterlockedCompareExchange is Microsoft Specific
             // so the code is not able to cross platform
-            if (static_cast<_Atomic_counter_t>(_InterlockedCompareExchange(
+            if (static_cast<AtomicCounterType>(_InterlockedCompareExchange(
                     reinterpret_cast<volatile long*>(&mUses),
                     count + 1, count)) == count)
             {
@@ -1388,71 +1390,71 @@ public:
         }
     }
 
-    long _AtomicInc(_Atomic_counter_t& c)
+    long atomicIncrease(AtomicCounterType& c)
     {
         return _InterlockedIncrement(reinterpret_cast<volatile long*>(&c));
     }
 
-    long _AtomicDec(_Atomic_counter_t& c)
+    long atomicDecrease(AtomicCounterType& c)
     {
         return _InterlockedDecrement(reinterpret_cast<volatile long*>(&c));
     }
 
-    void _IncRef()
+    void increaseRef()
     {
-        _AtomicInc(mUses);
+        atomicIncrease(mUses);
     }
 
-    void _IncWref()
+    void increaseWRef()
     {
-        _AtomicInc(mWeaks);
+        atomicIncrease(mWeaks);
     }
 
-    void _DecRef()
+    void decreaseRef()
     {
-        if (_AtomicDec(mUses) == 0)
+        if (atomicDecrease(mUses) == 0)
         {
             // destroy managed resource, decrement the weak reference count
-            _Destroy();
-            _DecWref();
+            destroyAux();
+            decreaseWRef();
         }
     }
 
-    void _DecWref()
+    void decreaseWRef()
     {
-        if (_AtomicDec(mWeaks) == 0)
+        if (atomicDecrease(mWeaks) == 0)
         {
-            _Delete_this();
+            deleteThis();
         }
     }
 
-    long _Use_count() const noexcept
+    long useCount() const noexcept
     {
         return static_cast<long>(mUses);
     }
 
-    virtual void* _Get_deleter(const type_info&) const noexcept
+    virtual void* getDeleter(const type_info&) const noexcept
     {
         return nullptr;
     }
 };
 
 template <typename T>
-class _Ref_count : public _Ref_count_base
+class RefCount : public RefCountBase
 {
 public:
-    explicit _Ref_count(T* p)
-        : _Ref_count_base(), mPtr(p)
+    explicit RefCount(T* p)
+        : RefCountBase(), mPtr(p)
     {
     }
 
 private:
-    virtual void _Destroy() noexcept override
+    virtual void destroyAux() noexcept override
     {
         delete mPtr;
     }
 
-    virtual void _Delete_this() noexcept override
+    virtual void deleteThis() noexcept override
     {
         delete this;
     }
@@ -1463,15 +1465,15 @@ private:
 
 // handle reference counting for object with deleter
 template <typename T, typename D>
-class _Ref_count_resource : public _Ref_count_base
+class RefCountResource : public RefCountBase
 {
 public:
-    _Ref_count_resource(T p, D d)
-        : _Ref_count_base(), mPair(tiny_stl::move(d), p)
+    RefCountResource(T p, D d)
+        : RefCountBase(), mPair(tiny_stl::move(d), p)
     {
     }
 
-    virtual void* _Get_deleter(const type_info& type) const noexcept override
+    virtual void* getDeleter(const type_info& type) const noexcept override
     {
         if (type == typeid(D))
         {
@@ -1482,12 +1484,12 @@ public:
     }
 
 private:
-    virtual void _Destroy() noexcept override
+    virtual void destroyAux() noexcept override
     {
         mPair.get_first()(mPair.get_second());
     }
 
-    virtual void _Delete_this() noexcept override
+    virtual void deleteThis() noexcept override
     {
         delete this;
     }
@@ -1499,18 +1501,18 @@ private:
 
 // handle refernece counting for object with deleter and allocator
 template <typename T, typename D, typename Alloc>
-class _Ref_count_resource_alloc : public _Ref_count_base
+class refCountResourceAlloc : public RefCountBase
 {
 private:
     // allocator<_Ref_count_resource_alloc>
-    using _MyAlty = _Get_bind_type<Alloc, _Ref_count_resource_alloc>;
+    using AllocType = GetBindType<Alloc, refCountResourceAlloc>;
 public:
-    _Ref_count_resource_alloc(T p, D d, const Alloc& alloc)
-        : _Ref_count_base()
+    refCountResourceAlloc(T p, D d, const Alloc& alloc)
+        : RefCountBase()
     {
     }
 
-    virtual void* _Get_deleter(const type_info& type) const noexcept override
+    virtual void* getDeleter(const type_info& type) const noexcept override
     {
         if (type == typeid(D))
         {
@@ -1521,27 +1523,27 @@ public:
     }
 
 private:
-    virtual void _Destroy() noexcept override
+    virtual void destroyAux() noexcept override
     {
         mPair.get_first()(mPair.get_second().get_second());
     }
 
-    virtual void _Delete_this() noexcept override
+    virtual void deleteThis() noexcept override
     {
-        _MyAlty alloc = mPair.get_second().get_first();
-        allocator_traits<_MyAlty>::destroy(alloc, this);
-        allocator_traits<_MyAlty>::deallocate(alloc, this, 1);
+        AllocType alloc = mPair.get_second().get_first();
+        allocator_traits<AllocType>::destroy(alloc, this);
+        allocator_traits<AllocType>::deallocate(alloc, this, 1);
     }
 
 private:
-    extra::compress_pair<D, extra::compress_pair<_MyAlty, T>> mPair;
+    extra::compress_pair<D, extra::compress_pair<AllocType, T>> mPair;
 };
 
 namespace 
 {
 
 template <typename T, typename = void>
-struct _Can_enable_shared : false_type
+struct CanEnableShared : false_type
 {
 };
 
@@ -1554,13 +1556,13 @@ struct IsFunctionObject<F, Arg,
 
 // derived class is convertible to base class
 template <typename T>
-struct _Can_enable_shared<T, void_t<typename T::_Esft_unique_type>>
-    : is_convertible<remove_cv_t<T>*, typename T::_Esft_unique_type*>::type
+struct CanEnableShared<T, void_t<typename T::Esft_unique_type>>
+    : is_convertible<remove_cv_t<T>*, typename T::Esft_unique_type*>::type
 {
 };
 
 template <typename Other, typename U>
-void _Enable_shared_from_this_base(const shared_ptr<Other>& sp, U* ptr, true_type)
+void enableSharedFromThisBase(const shared_ptr<Other>& sp, U* ptr, true_type)
 {
     if (ptr && ptr->mWptr.expired())
     {
@@ -1570,23 +1572,23 @@ void _Enable_shared_from_this_base(const shared_ptr<Other>& sp, U* ptr, true_typ
 }
 
 template <typename Other, typename U>
-void _Enable_shared_from_this_base(const shared_ptr<Other>&, U*, false_type)
+void enableSharedFromThisBase(const shared_ptr<Other>&, U*, false_type)
 {
 }
 
 } // unnamed namespace
 
-  // no c++17 TODO
+  // TODO: C++17
 template <typename Other, typename U>
-void _Enable_shared_from_this(const shared_ptr<Other>& sp, U* ptr)
+void enableSharedFromThis(const shared_ptr<Other>& sp, U* ptr)
 {
-    _Enable_shared_from_this_base(sp, ptr,
-        _Can_enable_shared<U>{});
+    enableSharedFromThisBase(sp, ptr,
+        CanEnableShared<U>{});
 }
 
 // base class for shared_ptr and weak_ptr 
 template <typename T>
-class _Ptr_base
+class PtrBase
 {
 public:
 #ifdef TINY_STL_CXX17
@@ -1598,11 +1600,11 @@ public:
 public:
     long use_count() const noexcept
     {
-        return mRep ? mRep->_Use_count() : 0;
+        return mRep ? mRep->useCount() : 0;
     }
 
     template <typename U>
-    bool owner_before(const _Ptr_base<U>& rhs) const noexcept
+    bool owner_before(const PtrBase<U>& rhs) const noexcept
     {
         // compare the be managed object pointer
         return mPtr < rhs.mPtr;
@@ -1613,16 +1615,16 @@ public:
         return mPtr;
     }
 
-    _Ptr_base(const _Ptr_base&) = delete;
-    _Ptr_base& operator=(const _Ptr_base&) = delete;
+    PtrBase(const PtrBase&) = delete;
+    PtrBase& operator=(const PtrBase&) = delete;
 
 protected:
     
-    constexpr _Ptr_base() noexcept = default;
-    ~_Ptr_base() = default;
+    constexpr PtrBase() noexcept = default;
+    ~PtrBase() = default;
 
     template <typename U>
-    void _Move_construct_from(_Ptr_base<U>&& rhs)
+    void constructMove(PtrBase<U>&& rhs)
     {
         // implement shared_ptr's move ctor and weak_ptr's move ctor
         mPtr = rhs.mPtr;
@@ -1633,12 +1635,12 @@ protected:
     }
 
     template <typename U>
-    void _Copy_construct_from(const shared_ptr<U>& rhs)
+    void constructCopy(const shared_ptr<U>& rhs)
     {
         // implement shared_ptr's copy ctor
         if (rhs.mRep)
         {
-            rhs.mRep->_IncRef();
+            rhs.mRep->increaseRef();
         }
         
         mPtr = rhs.mPtr;
@@ -1646,12 +1648,12 @@ protected:
     }
 
     template <typename U>
-    void _Alias_construct_from(const shared_ptr<U>& rhs, element_type* p)
+    void constructFromAlias(const shared_ptr<U>& rhs, element_type* p)
     {
         // implement shared_ptr's aliasing ctor 
         if (rhs.mRep)
         {
-            rhs.mRep->_IncRef();
+            rhs.mRep->increaseRef();
         }
 
         mPtr = p;
@@ -1662,9 +1664,9 @@ protected:
     friend class weak_ptr;
 
     template <typename U>
-    bool _Construct_from_weak(const weak_ptr<U>& rhs)
+    bool constructFromWeak(const weak_ptr<U>& rhs)
     {
-        if (rhs.mRep && rhs.mRep->_IncRefNotZero())
+        if (rhs.mRep && rhs.mRep->increaseRefNotZero())
         {
             mPtr = rhs.mPtr;
             mRep = rhs.mRep;
@@ -1674,41 +1676,41 @@ protected:
         return false;
     }
 
-    void _DecRef()
+    void decreaseRef()
     {
         if (mRep)
         {
-            mRep->_DecRef();
+            mRep->decreaseRef();
         }
     }
     
-    void _DecWref()
+    void decreaseWRef()
     {
         if (mRep)
         {
-            mRep->_DecWref();
+            mRep->decreaseWRef();
         }
     }
 
-    void _Swap(_Ptr_base& rhs) noexcept
+    void swapAux(PtrBase& rhs) noexcept
     {
         tiny_stl::swap(mPtr, rhs.mPtr);
         tiny_stl::swap(mRep, rhs.mRep);
     }
 
-    void _Set_ptr_rep(element_type* ptr, _Ref_count_base* rep)
+    void setPtrRep(element_type* ptr, RefCountBase* rep)
     {
         mPtr = ptr;
         mRep = rep;
     }
 
     template <typename U>
-    void _Weakly_construct_from(const _Ptr_base<U>& rhs)
+    void weaklyConstructFrom(const PtrBase<U>& rhs)
     {
         // implement weak_ptr's ctor
         if (rhs.mRep)
         {
-            rhs.mRep->_IncWref();
+            rhs.mRep->increaseWRef();
         }
 
         mPtr = rhs.mPtr;
@@ -1716,24 +1718,24 @@ protected:
     }
 
     template <typename U>
-    friend class _Ptr_base;
+    friend class PtrBase;
 
 private:
     element_type* mPtr{nullptr};
-    _Ref_count_base* mRep{ nullptr };
+    RefCountBase* mRep{ nullptr };
 
     template <typename D, typename U>
     friend D* get_deleter(const shared_ptr<U>& sp) noexcept;
 };
 
 template <typename T>
-class shared_ptr : public _Ptr_base<T>
+class shared_ptr : public PtrBase<T>
 {
 public:
 #ifdef TINY_STL_CXX17
     using weak_type = weak_ptr<T>;    
 #endif // TINY_STL_CXX17
-    using element_type = typename _Ptr_base<T>::element_type;
+    using element_type = typename PtrBase<T>::element_type;
 
     constexpr shared_ptr() noexcept
     {
@@ -1749,7 +1751,7 @@ public:
     template <typename U, enable_if_t<is_convertible_v<U*, T*>, int> = 0>
     explicit shared_ptr(U* ptr)
     {
-        _Setp(ptr);
+        setPtr(ptr);
     }
 
     // c++17
@@ -1759,7 +1761,7 @@ public:
         IsFunctionObject<D&, U*&>>, int> = 0>
     shared_ptr(U* ptr, D d)
     {
-        _Setpd(ptr, tiny_stl::move(d));
+        setPtrDel(ptr, tiny_stl::move(d));
     }
 
     template <typename D, enable_if_t<conjunction_v<
@@ -1767,7 +1769,7 @@ public:
         IsFunctionObject<D&, std::nullptr_t&>>, int> = 0>
     shared_ptr(std::nullptr_t, D d)
     {
-        _Setpd(nullptr, tiny_stl::move(d));
+        setPtrDel(nullptr, tiny_stl::move(d));
     }
 
     template <typename U, typename D, typename Alloc, enable_if_t<conjunction_v<
@@ -1776,7 +1778,7 @@ public:
         IsFunctionObject<D&, U*&>>, int> = 0>
     shared_ptr(U* ptr, D d, Alloc alloc)
     {
-        _Setpda(ptr, tiny_stl::move(d), alloc);
+        setPtrDelAlloc(ptr, tiny_stl::move(d), alloc);
     }
 
     template <typename D, typename Alloc, enable_if_t<conjunction_v<
@@ -1784,44 +1786,44 @@ public:
         IsFunctionObject<D&, std::nullptr_t*&>>, int> = 0>
     shared_ptr(std::nullptr_t, D d, Alloc alloc)
     {
-        _Setpda(nullptr, tiny_stl::move(d), alloc);
+        setPtrDelAlloc(nullptr, tiny_stl::move(d), alloc);
     }
 
     template <typename U>
     shared_ptr(const shared_ptr<U>& rhs, element_type* ptr) noexcept
     {
-        this->_Alias_construct_from(rhs, ptr);
+        this->constructFromAlias(rhs, ptr);
     }
 
     shared_ptr(const shared_ptr& rhs) noexcept
     {
-        this->_Copy_construct_from(rhs);
+        this->constructCopy(rhs);
     }
 
     // no c++17
     template <typename U, enable_if_t<is_convertible_v<U*, T*>, int> = 0>
     shared_ptr(const shared_ptr<U>& rhs) noexcept
     {
-        this->_Copy_construct_from(rhs);
+        this->constructCopy(rhs);
     }
 
     shared_ptr(shared_ptr&& rhs) noexcept
     {
-        this->_Move_construct_from(tiny_stl::move(rhs));
+        this->constructMove(tiny_stl::move(rhs));
     }
 
     // no c++17
     template <typename U, enable_if_t<is_convertible_v<U*, T*>, int> = 0>
     shared_ptr(shared_ptr<U>&& rhs) noexcept
     {
-        this->_Move_construct_from(tiny_stl::move(rhs));
+        this->constructMove(tiny_stl::move(rhs));
     }
 
     // no c++17
     template <typename U, enable_if_t<is_convertible_v<U*, T*>, int> = 0>
     explicit shared_ptr(const weak_ptr<U>& other)
     {
-        if (!this->_Construct_from_weak(other))
+        if (!this->constructFromWeak(other))
         {
             throw std::bad_weak_ptr{};
         }
@@ -1840,15 +1842,15 @@ public:
 
         if (ptr)
         {
-            const auto pRcObj = new _Ref_count_resource<U*, Deleter>{ ptr, other.get_deleter() };
-            _Set_ptr_rep_and_enable_shared(ptr, pRcObj);
+            const auto pRcObj = new RefCountResource<U*, Deleter>{ ptr, other.get_deleter() };
+            setPtrRepAndEnableShared(ptr, pRcObj);
             other.release();
         }
     }
 
     ~shared_ptr() noexcept
     {
-        this->_DecRef();
+        this->decreaseRef();
     }
 
     shared_ptr& operator=(const shared_ptr& rhs) noexcept
@@ -1886,7 +1888,7 @@ public:
 
     void swap(shared_ptr& rhs) noexcept
     {
-        this->_Swap(rhs);
+        this->swapAux(rhs);
     }
 
     void reset() noexcept
@@ -1913,7 +1915,7 @@ public:
         shared_ptr{ ptr, d, alloc }.swap(*this);
     }
 
-    using _Ptr_base<T>::get;
+    using PtrBase<T>::get;
 
     // no c++17 TODO
     T& operator*() const noexcept
@@ -1942,12 +1944,12 @@ public:
 private:
     // TODO, support shared_ptr<T[]>
     template <typename U>
-    void _Setp(U* ptr)
+    void setPtr(U* ptr)
     {
         // strong exception guarantee
         try
         {
-            _Set_ptr_rep_and_enable_shared(ptr, new _Ref_count<U>(ptr));
+            setPtrRepAndEnableShared(ptr, new RefCount<U>(ptr));
         }
         catch (...)
         {
@@ -1957,12 +1959,12 @@ private:
     }
 
     template <typename UptrOrNullptr, typename D>
-    void _Setpd(UptrOrNullptr ptr, D d)
+    void setPtrDel(UptrOrNullptr ptr, D d)
     {
         try
         {
-            _Set_ptr_rep_and_enable_shared(ptr,
-                new _Ref_count_resource<UptrOrNullptr, D>);
+            setPtrRepAndEnableShared(ptr,
+                new RefCountResource<UptrOrNullptr, D>);
         }
         catch (...)
         {
@@ -1972,9 +1974,9 @@ private:
     }
 
     template <typename UptrOrNullptr, typename D, typename Alloc>
-    void _Setpda(UptrOrNullptr ptr, D d, Alloc alloc)
+    void setPtrDelAlloc(UptrOrNullptr ptr, D d, Alloc alloc)
     {
-        using RcObj = _Ref_count_resource_alloc<UptrOrNullptr, D, Alloc>;
+        using RcObj = refCountResourceAlloc<UptrOrNullptr, D, Alloc>;
         using Al_alloc = typename allocator_traits<Alloc>::template rebind_alloc<RcObj>;
         using Al_traits = allocator_traits<Al_alloc>;
 
@@ -1987,7 +1989,7 @@ private:
             try
             {
                 Al_traits::construct(alloc, pref, ptr, tiny_stl::move(d), alloc);
-                _Set_ptr_rep_and_enable_shared(ptr, pref);
+                setPtrRepAndEnableShared(ptr, pref);
             }
             catch (...)
             {
@@ -2002,15 +2004,15 @@ private:
     }
 
     template <typename U>
-    void _Set_ptr_rep_and_enable_shared(U* ptr, _Ref_count_base* rep)
+    void setPtrRepAndEnableShared(U* ptr, RefCountBase* rep)
     {
-        this->_Set_ptr_rep(ptr, rep);
-        _Enable_shared_from_this(*this, ptr);
+        this->setPtrRep(ptr, rep);
+        enableSharedFromThis(*this, ptr);
     }
 
-    void _Set_ptr_rep_and_enable_shared(nullptr_t, _Ref_count_base* rep)
+    void setPtrRepAndEnableShared(nullptr_t, RefCountBase* rep)
     {
-        this->_Set_ptr_rep(nullptr, rep);
+        this->setPtrRep(nullptr, rep);
     }
 
     template <typename T0, typename... Args>
@@ -2026,28 +2028,28 @@ namespace
 {
 
 template <typename T>
-class _Ref_count_obj : public _Ref_count_base
+class RefCountObj : public RefCountBase
 {
 public:
     template <typename... Args>
-    explicit _Ref_count_obj(Args&&... args) noexcept
-        : _Ref_count_base()
+    explicit RefCountObj(Args&&... args) noexcept
+        : RefCountBase()
     {
         ::new (static_cast<void*>(&mStroage)) 
             T(tiny_stl::forward<T>(args)...);
     }
 
-    T* _Get_ptr()
+    T* getPtr()
     {
         return reinterpret_cast<T*>(&mStroage);
     }
 private:
-    void _Destroy() noexcept override
+    void destroyAux() noexcept override
     {
-        _Get_ptr()->~T();
+        getPtr()->~T();
     }
 
-    void _Delete_this() noexcept override
+    void deleteThis() noexcept override
     {
         delete this;
     }
@@ -2061,10 +2063,10 @@ private:
 template <typename T, typename... Args>
 inline shared_ptr<T> make_shared(Args&&... args)
 {
-    const auto pRcX = new _Ref_count_obj<T>(tiny_stl::forward<Args>(args)...);
+    const auto pRcX = new RefCountObj<T>(tiny_stl::forward<Args>(args)...);
 
     shared_ptr<T> sp;
-    sp._Set_ptr_rep_and_enable_shared(pRcX->_Get_ptr(), pRcX);
+    sp.setPtrRepAndEnableShared(pRcX->getPtr(), pRcX);
     return sp;
 }
 
@@ -2072,38 +2074,38 @@ namespace
 {
 
 template <typename T, typename Alloc>
-class _Ref_count_obj_alloc : public _Ref_count_base
+class RefCountObjAlloc : public RefCountBase
 {
 public:
     template <typename... Args>
-    explicit _Ref_count_obj_alloc(const Alloc& al, Args&&... args)
+    explicit RefCountObjAlloc(const Alloc& al, Args&&... args)
     {
         ::new (static_cast<void*>(&mPair.get_second())) 
             T(tiny_stl::forward<Args>(args)...);
     }
 
-    T* _Get_ptr()
+    T* getPtr()
     {
         return reinterpret_cast<T*>(&mPair.get_second());
     }
 
 private:
-    using _MyAlty = typename allocator_traits<Alloc>::template 
-        rebind_alloc<_Ref_count_obj_alloc>;
+    using AllocType = typename allocator_traits<Alloc>::template 
+        rebind_alloc<RefCountObjAlloc>;
 
-    void _Destroy() noexcept override
+    void destroyAux() noexcept override
     {
-        _Get_ptr()->~T();
+        getPtr()->~T();
     }
 
-    void _Delete_this() noexcept override
+    void deleteThis() noexcept override
     {
-        _MyAlty al = mPair.get_first();
-        allocator_traits<_MyAlty>::destroy(al, this);
-        allocator_traits<_MyAlty>::deallocate(al, this, 1);
+        AllocType al = mPair.get_first();
+        allocator_traits<AllocType>::destroy(al, this);
+        allocator_traits<AllocType>::deallocate(al, this, 1);
     }
     
-    extra::compress_pair<_MyAlty, std::aligned_union_t<1, T>> mPair;
+    extra::compress_pair<AllocType, std::aligned_union_t<1, T>> mPair;
 };
 
 } // unnamed namespace
@@ -2111,7 +2113,7 @@ private:
 template <typename T, typename Alloc, typename... Args>
 shared_ptr<T> allocate_shared(const Alloc& alloc, Args&&... args)
 {
-    using RcAlX = _Ref_count_obj_alloc<T, Alloc>;
+    using RcAlX = RefCountObjAlloc<T, Alloc>;
     using Al_alloc = typename allocator_traits<Alloc>::template
         rebind_alloc<RcAlX>;
     using Al_traits = allocator_traits<Al_alloc>;
@@ -2131,7 +2133,7 @@ shared_ptr<T> allocate_shared(const Alloc& alloc, Args&&... args)
     }
 
     shared_ptr<T> sp;
-    sp._Set_ptr_rep_and_enable_shared(pRcAlX->_Get_ptr(), 
+    sp.setPtrRepAndEnableShared(pRcAlX->getPtr(), 
         tiny_stl::addressof(*pRcAlX));
     return sp;
 }
@@ -2179,7 +2181,7 @@ D* get_deleter(const shared_ptr<T>& sp) noexcept
 {
     if (sp->_Rep)
     {
-        return static_cast<D*>(sp._Rep->_Get_deleter(typeid(D)));
+        return static_cast<D*>(sp._Rep->getDeleter(typeid(D)));
     }
 
     return nullptr;
@@ -2309,7 +2311,7 @@ void swap(shared_ptr<T>& lhs, shared_ptr<T>& rhs) noexcept
 }
 
 template <typename T>
-class weak_ptr : public _Ptr_base<T>
+class weak_ptr : public PtrBase<T>
 {
 public:
     constexpr weak_ptr() noexcept 
@@ -2318,7 +2320,7 @@ public:
 
     weak_ptr(const weak_ptr& rhs) noexcept
     {
-        this->_Weakly_construct_from(rhs);
+        this->weaklyConstructFrom(rhs);
     }
 
     // TODO
@@ -2326,32 +2328,32 @@ public:
         is_convertible_v<U*, T*>, int> = 0>
     weak_ptr(const weak_ptr<U>& rhs) noexcept
     {
-        this->_Weakly_construct_from(rhs.lock());
+        this->weaklyConstructFrom(rhs.lock());
     }
 
     template <typename U, enable_if_t<
         is_convertible_v<U*, T*>, int> = 0>
     weak_ptr(const shared_ptr<U>& rhs) noexcept
     {
-        this->_Weakly_construct_from(rhs);
+        this->weaklyConstructFrom(rhs);
     }
 
     weak_ptr(weak_ptr&& rhs) noexcept
     {
-        this->_Move_construct_from(tiny_stl::move(rhs));
+        this->constructMove(tiny_stl::move(rhs));
     }
 
     template <typename U, enable_if_t<
         is_convertible_v<U*, T*>, int> = 0>
     weak_ptr(weak_ptr<U>&& rhs) noexcept
     {
-        this->_Weakly_construct_from(rhs.lock());
+        this->weaklyConstructFrom(rhs.lock());
         rhs.reset();
     }
 
     ~weak_ptr() noexcept
     {
-        this->_DecWref();
+        this->decreaseWRef();
     }
 
     weak_ptr& operator=(const weak_ptr& rhs) noexcept
@@ -2394,7 +2396,7 @@ public:
 
     void swap(weak_ptr& rhs) noexcept
     {
-        this->_Swap(rhs);
+        this->swapAux(rhs);
     }
 
     // use_count() in base class
@@ -2461,10 +2463,10 @@ protected:
 
 private:
     // helper type to determine if TYPE has inherited enable_from_this
-    using _Esft_unique_type = enable_shared_from_this;
+    using Esft_unique_type = enable_shared_from_this;
 
     template <typename Other, typename U>
-    friend void _Enable_shared_from_this(const shared_ptr<Other>& sp, U* ptr);
+    friend void enableSharedFromThis(const shared_ptr<Other>& sp, U* ptr);
 
     mutable weak_ptr<T> mWptr;
 };
