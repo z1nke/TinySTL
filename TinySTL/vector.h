@@ -225,7 +225,6 @@ inline VectorIterator<T> operator+(
     return iter += offset;
 }
 
-// no polymorphic_allocator
 template <typename T, typename Alloc>
 class VectorBase 
 {
@@ -332,7 +331,7 @@ private:
         return true;
     }
 
-    //  constrcut
+    // construct
     pointer fillHelper(pointer dest, size_type count, const_reference val)
     {
         return uninitializedAllocFillN(dest, count, val, this->alloc);
