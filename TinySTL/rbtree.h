@@ -108,7 +108,7 @@ inline void rbTreeRightRotate(RBTNode<T>*& root, RBTNode<T>* y)
 
 
 
-}   // unnamed namespace
+}   // namespace
 
 
 template <typename T>
