@@ -671,7 +671,7 @@ public:
         const T& val) 
     {
 
-        iterator p = makeIter(pos);   // for return value
+        iterator p = makeIter(pos); 
         if (p == begin())
         {
             insertN(pos, n, val);

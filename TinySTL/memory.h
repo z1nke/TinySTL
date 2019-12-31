@@ -108,7 +108,7 @@ inline void uninitializedFillNAux(FwdIt first, Size n, const T& x,
         *first = x;
 }
 
-}  // unnamed namespace
+}  // namespace
 
 template <typename InIter, typename FwdIter>
 inline FwdIter uninitialized_copy(InIter first, 
@@ -1576,7 +1576,7 @@ void enableSharedFromThisBase(const shared_ptr<Other>&, U*, false_type)
 {
 }
 
-} // unnamed namespace
+} // namespace
 
   // TODO: C++17
 template <typename Other, typename U>
@@ -2057,7 +2057,7 @@ private:
     std::aligned_union_t<1, T> mStroage;
 };
 
-} // unnamed namespace
+} // namespace
 
 
 template <typename T, typename... Args>
@@ -2108,7 +2108,7 @@ private:
     extra::compress_pair<AllocType, std::aligned_union_t<1, T>> mPair;
 };
 
-} // unnamed namespace
+} // namespace
 
 template <typename T, typename Alloc, typename... Args>
 shared_ptr<T> allocate_shared(const Alloc& alloc, Args&&... args)
