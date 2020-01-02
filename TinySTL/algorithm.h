@@ -689,7 +689,7 @@ inline void pop_heap(RanIter first, RanIter last, Cmp cmp)
     popHeapHelper(first, last, last, tiny_stl::move(val), cmp);
 }
 
-template <typename RanIter>                             // O(logn)
+template <typename RanIter>
 inline void pop_heap(RanIter first, RanIter last) 
 {
     pop_heap(first, last, tiny_stl::less<>{});
@@ -881,7 +881,7 @@ inline void quickSort(RanIter first, RanIter last, IterDiffType<RanIter> diff, C
     }
 }
 
-} // unnamed namespace
+} // namespace
 
 template <typename RanIter, typename Compare>
 inline void sort(RanIter first, RanIter last, Compare cmp)
