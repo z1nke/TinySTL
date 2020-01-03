@@ -351,11 +351,61 @@ public:
             typename iterator_traits<InIter>::iterator_category{});
     }
 
+    basic_string(const basic_string& rhs)
+        : basic_string(rhs, 
+            AllocTraits::select_on_container_copy_construction(rhs.getAlloc()))
+    {
+    }
+
+    basic_string(const basic_string& rhs, const Alloc& a)
+        : allocVal(a)
+    {
+        constructCopy(rhs);
+    }
+
+    //basic_string(basic_string&& rhs) noexcept
+    //{
+    //}
+
+    //basic_string(basic_string&& rhs, const Alloc& a)
+    //{
+    //}
+
+    //basic_string(std::initializer_list<value_type> ilist, const Alloc& a = Alloc())
+    //    : allocVal(a)
+    //{
+    //    initEmpty(); // for setting capacity
+    //}
+
     ~basic_string()
     {
         tidy();
     }
 
+
+private:
+    void constructCopy(const basic_string& rhs)
+    {
+        auto& rhsValue = rhs.getVal();
+        const size_type rhsSize = rhsValue.size;
+        const value_type* rhsPtr = rhsValue.getPtr();
+        auto& value = getVal();
+        if (rhsSize < StringValue::kBufferSize)
+        {
+            Traits::move(value.data.buf, rhsPtr, StringValue::kBufferSize);
+            value.size = rhsSize;
+            value.capacity = StringValue::kBufferSize - 1;
+            return;
+        }
+        auto& alloc = getAlloc();
+        const size_type newCapacity = tiny_stl::min(rhsSize | StringValue::kBufferMask,
+            max_size());
+        pointer newPtr = alloc.allocate(newCapacity + 1);
+        value.data.ptr = newPtr;
+        Traits::move(newPtr, rhsPtr, rhsSize + 1);
+        value.size = rhsSize;
+        value.capacity = newCapacity;
+    }
 
 public:
     allocator_type get_allocator() const noexcept
@@ -492,6 +542,38 @@ private:
         return *this;
     }
 
+    template <typename F, typename... Args>
+    basic_string& reallocAndAssignGrowBy(size_type growSize, F func, Args... args)
+    {
+        auto& value = getVal();
+        const size_type oldSize = value.size;
+        // check length
+        if (max_size() - oldSize < growSize)
+        {
+            xLength();
+        }
+
+        const size_type newSize = oldSize + growSize;
+        const size_type oldCapacity = value.capacity;
+        const size_type newCapacity = capacityGrowth(newSize);
+        auto& alloc = getAlloc();
+        pointer newPtr = alloc.allocate(newCapacity + 1);  // throws
+        value.size = newSize;
+        value.capacity = newCapacity;
+        if (oldCapacity >= StringValue::kBufferSize)
+        {
+            pointer oldPtr = value.data.ptr;
+            func(newPtr, oldPtr, oldSize, args...);
+            alloc.deallocate(oldPtr, oldCapacity + 1);
+        }
+        else
+        {
+            func(newPtr, value.data.buf, oldSize, args...);
+        }
+        value.data.ptr = newPtr;
+        return *this;
+    }
+
 
     Alloc& getAlloc() noexcept
     {
@@ -543,7 +625,7 @@ public:
     size_type max_size() const noexcept
     {
         return tiny_stl::min(static_cast<size_type>(-1) / sizeof(value_type) - 1,
-            std::numeric_limits<difference_type>::max());
+            static_cast<size_type>(std::numeric_limits<difference_type>::max()));
     }
 
     void reserve(size_type newCapacity = 0)
@@ -561,8 +643,12 @@ public:
 
         // reallocate memory if newCapacity > oldCapacity
         const size_type oldSize = getVal().size;
-        auto& value = getVal();
-        
+        reallocAndAssignGrowBy(newCapacity - oldSize,
+            [](value_type* newPtr, const value_type* oldPtr, const size_type oldSizeX)
+            {
+                Traits::move(newPtr, oldPtr, oldSizeX + 1);
+            });
+        getVal().size = oldSize;
     }
 
     size_type capacity() const noexcept
@@ -582,7 +668,6 @@ private:
         {
             xLength();
         }
-
     }
 
     size_type capacityGrowth(size_type newSize)
