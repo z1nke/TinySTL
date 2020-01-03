@@ -11,6 +11,7 @@
 #include <iostream>
 
 #include "array.h"
+#include "cow_string.h"
 #include "memory.h"
 #include "iterator.h"
 #include "type_traits.h"
@@ -20,10 +21,10 @@
 #include "stack.h"
 #include "queue.h"
 #include "forward_list.h"
-#include "cow_string.h"
 #include "string_view.h"
 #include "rbtree.h"
 #include "set.h"
+#include "string.h"
 #include "map.h"
 #include "tuple.h"
 #include "unordered_set.h"
@@ -801,7 +802,7 @@ void testStringView()
     UNIT_TEST(true, (std::is_same_v<decltype(str7), tiny_stl::string_view>));
 }
 
-void testString()
+void testCowString()
 {
     using std::cout;
     using std::endl;
@@ -928,6 +929,12 @@ void testString()
     llx = LLONG_MIN;
     s16 = tiny_stl::to_cow_string(llx);
     UNIT_TEST(tiny_stl::cow_string{ "-9223372036854775808" }, s16);
+}
+
+void testString()
+{
+    tiny_stl::string str1;
+    UNIT_TEST(true, str1.empty());
 }
 
 
@@ -1180,7 +1187,8 @@ void testAll()
     testForwardList();
     testDeque();
     testAdaptor();
-    testString();
+    testCowString();
+    //testString();
     testStringView();
     testRBTree();
     testSet();
