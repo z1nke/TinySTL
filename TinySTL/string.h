@@ -363,19 +363,26 @@ public:
         constructCopy(rhs);
     }
 
-    //basic_string(basic_string&& rhs) noexcept
-    //{
-    //}
+    basic_string(basic_string&& rhs) noexcept
+        : allocVal(tiny_stl::move(rhs.getAlloc()))
+    {
+        constructMove(tiny_stl::move(rhs));
+    }
 
-    //basic_string(basic_string&& rhs, const Alloc& a)
-    //{
-    //}
+    basic_string(basic_string&& rhs, const Alloc& a)
+        noexcept(AllocTraits::is_always_equal::value)
+        : allocVal(a)
+    {
+        constructMove(tiny_stl::move(rhs));
+    }
 
-    //basic_string(std::initializer_list<value_type> ilist, const Alloc& a = Alloc())
-    //    : allocVal(a)
-    //{
-    //    initEmpty(); // for setting capacity
-    //}
+    basic_string(std::initializer_list<value_type> ilist, const Alloc& a = Alloc())
+        : allocVal(a)
+    {
+        initEmpty(); // for setting capacity
+        checkLength(ilist.size());
+        init(ilist.begin(), ilist.size());
+    }
 
     ~basic_string()
     {
@@ -405,6 +412,26 @@ private:
         Traits::move(newPtr, rhsPtr, rhsSize + 1);
         value.size = rhsSize;
         value.capacity = newCapacity;
+    }
+
+    void constructMoveAux(basic_string&& rhs, true_type) noexcept
+    {
+        auto& value = getVal();
+        auto& rhsValue = rhs.getVal();
+        if (rhsValue.isShortString())
+        {
+            // copy short string
+            Traits::move(value.data.buf, rhsValue.data.buf, rhsValue.size + 1);
+        }
+        else
+        {
+            value.data.ptr = rhsValue.data.ptr;
+            rhsValue.data.ptr = pointer();
+        }
+
+        value.size = rhsValue.size;
+        value.capacity = rhsValue.capacity;
+        rhs.initEmpty();
     }
 
 public:
