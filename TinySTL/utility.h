@@ -17,6 +17,12 @@
 #   define XCONSTEXPR14 inline
 #endif // TINY_STL_CXX14
 
+#ifdef TINY_STL_CXX17
+#define IFCONSTEXPR constexpr
+#else 
+#define IFCONSTEXPR
+#endif // TINY_STL_CXX17
+
 namespace tiny_stl
 {
 
