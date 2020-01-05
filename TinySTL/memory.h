@@ -630,13 +630,13 @@ struct GetIsAlwaysEqual<Alloc, void_t<
 };
 
 template <typename Alloc, typename Other, typename = void>
-struct GetBindType 
+struct GetAllocBindType 
 {
     using type = typename ReplaceFirstParameter<Other, Alloc>::type;
 };
 
 template <typename Alloc, typename Other>
-struct GetBindType<Alloc, Other, void_t<
+struct GetAllocBindType<Alloc, Other, void_t<
         typename Alloc::template rebind<Other>::other>>
 {
     using type = typename Alloc::template rebind<Other>::other;
@@ -694,7 +694,7 @@ struct allocator_traits
         = typename GetIsAlwaysEqual<Alloc>::type;
 
     template <typename Other>
-    using rebind_alloc = typename GetBindType<Alloc, Other>::type;
+    using rebind_alloc = typename GetAllocBindType<Alloc, Other>::type;
 
     template <typename Other>
     using rebind_traits = allocator_traits<rebind_alloc<Other>>;
@@ -810,6 +810,9 @@ struct HasAllocatorType<Con, Alloc,
 {
 };
 
+template <typename Alloc, typename ValueType>
+using RebindAllocType = typename 
+    allocator_traits<Alloc>::template rebind_alloc<ValueType>;
 
 template <typename Con, typename Alloc>
 struct uses_allocator : HasAllocatorType<Con, Alloc>::type 
@@ -1505,7 +1508,7 @@ class refCountResourceAlloc : public RefCountBase
 {
 private:
     // allocator<_Ref_count_resource_alloc>
-    using AllocType = GetBindType<Alloc, refCountResourceAlloc>;
+    using AllocType = GetAllocBindType<Alloc, refCountResourceAlloc>;
 public:
     refCountResourceAlloc(T p, D d, const Alloc& alloc)
         : RefCountBase()

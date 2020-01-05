@@ -226,6 +226,9 @@ public:
     using reverse_iterator       = tiny_stl::reverse_iterator<iterator>;
     using const_reverse_iterator = tiny_stl::reverse_iterator<const_iterator>;
     using AllocTraits            = allocator_traits<Alloc>;
+
+    using Alty                   = RebindAllocType<Alloc, value_type>;
+
 public:
     static const size_type npos  = static_cast<size_type>(-1);
 
@@ -366,14 +369,22 @@ public:
     basic_string(basic_string&& rhs) noexcept
         : allocVal(tiny_stl::move(rhs.getAlloc()))
     {
-        constructMove(tiny_stl::move(rhs));
+        constructMove(rhs);
     }
 
     basic_string(basic_string&& rhs, const Alloc& a)
         noexcept(AllocTraits::is_always_equal::value)
         : allocVal(a)
     {
-        constructMove(tiny_stl::move(rhs));
+        if IFCONSTEXPR(AllocTraits::is_always_equal::value)
+        {
+            if (getAlloc() != rhs.getAlloc())
+            {
+                constructCopy(rhs);
+                return;
+            }
+        }
+        constructMove(rhs);
     }
 
     basic_string(std::initializer_list<value_type> ilist, const Alloc& a = Alloc())
@@ -389,6 +400,127 @@ public:
         tidy();
     }
 
+public:
+    basic_string& operator=(const basic_string& rhs)
+    {
+        if (this != tiny_stl::addressof(rhs))
+        {
+            copyAlloc(getAlloc(), rhs.getAlloc());
+            init(rhs.getVal().getPtr(), rhs.getVal().size);
+        }
+
+        return *this;
+    }
+
+    basic_string& operator=(basic_string&& rhs)
+        noexcept(noexcept(assignMove(rhs, AllocMoveType<Alty>)))
+    {
+        if (this != tiny_stl::addressof(rhs))
+        {
+            assignMove(rhs, AllocMoveType<Alty>{});
+        }
+
+        return *this;
+    }
+
+    basic_string& operator=(const value_type* str)
+    {
+        return init(str);
+    }
+
+    basic_string& operator=(value_type ch)
+    {
+        getVal().size = 1;
+        pointer ptr = getVal().getPtr();
+        Traits::assign(ptr[0], ch);
+        Traits::assign(ptr[1], value_type{});
+        return *this;
+    }
+
+    basic_string& operator=(std::initializer_list<CharT> ilist)
+    {
+        checkLength(ilist.size());
+        return init(ilist.begin(), ilist.size());
+    }
+
+private:
+    template <typename AllocX>
+    void copyAllocAux(AllocX& lhs, const AllocX& rhs, true_type) noexcept
+    {
+        lhs = rhs;
+    }
+
+    template <typename AllocX>
+    void copyAllocAux(AllocX& lhs, const AllocX& rhs, false_type) noexcept
+    {
+    }
+
+    template <typename AllocX>
+    void copyAlloc(AllocX& lhs, const AllocX& rhs) noexcept
+    {
+        copyAllocAux(lhs, rhs,
+            typename allocator_traits<AllocX>::propagate_on_container_copy_assignment{});
+    }
+
+    template <typename AllocX>
+    void moveAllocAux(AllocX& lhs, AllocX& rhs, true_type) noexcept
+    {
+        lhs = tiny_stl::move(rhs);
+    }
+
+    template <typename AllocX>
+    void moveAllocAux(AllocX& lhs, AllocX& rhs, false_type) noexcept 
+    {
+    }
+
+    template <typename AllocX>
+    void moveAlloc(AllocX& lhs, AllocX& rhs)
+    {
+        typename allocator_traits<AllocX>::propagate_on_container_move_assignment tag{};
+        moveAllocAux(lhs, rhs, tag);
+    }
+
+    struct EqualAllocator {};
+    using PropagateAllocator   = true_type;
+    using NoPropagateAllocator = false_type;
+
+    template <typename AllocX>
+    using AllocMoveType = conditional_t<allocator_traits<AllocX>::is_always_equal::value,
+        EqualAllocator,
+        typename allocator_traits<AllocX>::propagate_on_container_move_assignment::type>;
+
+
+    void assignMove(basic_string& rhs, EqualAllocator) noexcept
+    {
+        tidy();
+        moveAlloc(getAlloc(), rhs.getAlloc());
+        constructMove(rhs);
+    }
+
+    void assignMove(basic_string& rhs, PropagateAllocator) noexcept
+    {
+        if (getAlloc() == rhs.getAlloc())
+        {
+            assignMove(rhs, EqualAllocator{});
+        }
+        else
+        {
+            moveAlloc(getAlloc(), rhs.getAlloc());
+            constructMove(rhs);
+        }
+    }
+
+    void assignMove(basic_string& rhs, NoPropagateAllocator)
+    {
+        if (getAlloc() == rhs.getAlloc())
+        {
+            assignMove(rhs, EqualAllocator{});
+        }
+        else
+        {
+            init(rhs.getVal().getPtr(), rhs.getVal().size);
+        }
+    }
 
 private:
     void constructCopy(const basic_string& rhs)
@@ -414,7 +546,7 @@ private:
         value.capacity = newCapacity;
     }
 
-    void constructMoveAux(basic_string&& rhs, true_type) noexcept
+    void constructMove(basic_string& rhs) noexcept
     {
         auto& value = getVal();
         auto& rhsValue = rhs.getVal();
@@ -479,7 +611,7 @@ private:
 
     basic_string& init(const value_type* str, size_type count)
     {
-        if (count <= getVal().capacity())
+        if (count <= getVal().capacity)
         {
             value_type* const ptr = getVal().getPtr();
             getVal().size = count;
@@ -493,7 +625,7 @@ private:
             [](value_type* const dst, size_type count, const value_type* src)
             {
                 Traits::move(dst, src, count);
-                Traits::move(dst[count], value_type());
+                Traits::assign(dst[count], value_type());
             },
             str);
     }
@@ -634,6 +766,17 @@ private:
     }
 
 public:
+    const CharT* c_str() const noexcept
+    {
+        return getVal().getPtr();
+    }
+
+    const CharT* data() const noexcept
+    {
+        return c_str();
+    }
+
+public:
     bool empty() const noexcept
     {
         return size() == 0;
@@ -726,6 +869,17 @@ private:
         throw "invalid tiny_stl::basic_string<CharT> index";
     }
 };
+
+template <typename CharT, typename Traits, typename Alloc>
+std::basic_ostream<CharT, Traits>& operator<<(
+    std::basic_ostream<CharT, Traits>& os,
+    const basic_string<CharT, Traits, Alloc>& str)
+{
+    // no format output
+    os << str.c_str();
+    return os;
+}
+
 
 using string     = basic_string<char>;
 using wstring    = basic_string<wchar_t>;
