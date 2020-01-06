@@ -345,11 +345,12 @@ public:
     }
 
     template<typename InIter,
-        typename = enable_if_t<is_iterator<Initer>::value>>
+        typename = enable_if_t<is_iterator<InIter>::value>>
     basic_string(InIter first, InIter last, const Alloc& a = Alloc())
         : allocVal(a)
     {
         initEmpty(); // for setting capacity
+        // TODO: if InIter is not [const] value_type*
         constructRange(first, last,
             typename iterator_traits<InIter>::iterator_category{});
     }
@@ -441,6 +442,54 @@ public:
     {
         checkLength(ilist.size());
         return init(ilist.begin(), ilist.size());
+    }
+
+    basic_string& assign(size_type count, value_type ch)
+    {
+        init(count, ch);
+    }
+
+    basic_string& assign(const basic_string& rhs)
+    {
+        *this = rhs;
+        return *this;
+    }
+
+    basic_string& assign(const basic_string& rhs, size_type pos,
+                         size_type count = npos)
+    {
+        init(rhs, pos, count);
+    }
+
+    basic_string& assing(basic_string&& rhs)
+        noexcept(noexcept(*this = tiny_stl::move(rhs)))
+    {
+        *this = tiny_stl::move(rhs);
+        return *this;
+    }
+
+    basic_string& assign(const value_type* str, size_type count)
+    {
+        init(str, count);
+    }
+
+    basic_string& assign(const value_type* str)
+    {
+        init(str);
+    }
+
+    template <typename InIter, typename = enable_if_t<is_iterator_v<InIter>>>
+    basic_string& assign(InIter first, InIter last)
+    {
+        // TODO: if InIter is not [const] value_type*
+        constructRange(first, last,
+            typename iterator_traits<InIter>::iterator_category{});
+    }
+
+    basic_string& assign(std::initializer_list<value_type> ilist)
+    {
+        checkLength(ilist.size());
+        return assign(ilist.begin(), ilist.size());
     }
 
 private:
@@ -604,7 +653,7 @@ private:
 
     basic_string& init(const basic_string& rhs, size_type pos, size_type count = npos)
     {
-        rhs.getVal().checkIndex(pos);
+        rhs.checkOffset(pos);
         count = tiny_stl::min(count, rhs.getVal().size - pos);
         return init(rhs.getVal().getPtr(), count);
     }
@@ -832,7 +881,7 @@ public:
     }
 
 private:
-    void checkLength(size_type newSize)
+    void checkLength(size_type newSize) const
     {
         if (newSize >= max_size())
         {
@@ -840,7 +889,15 @@ private:
         }
     }
 
-    size_type capacityGrowth(size_type newSize)
+    void checkOffset(size_type offset) const
+    {
+        if (offset > size())
+        {
+            xRange();
+        }
+    }
+
+    size_type capacityGrowth(size_type newSize) const
     {
         const size_type oldSize = allocVal.get_second().size;
         const size_type masked = newSize | StringValue::kBufferMask;
