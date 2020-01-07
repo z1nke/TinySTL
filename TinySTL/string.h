@@ -815,14 +815,128 @@ private:
     }
 
 public:
-    const CharT* c_str() const noexcept
+    reference at(size_type pos)
+    {
+        checkOffset(pos);
+        return operator[](pos);
+    }
+
+    const_reference at(size_type pos) const
+    {
+        checkLength(pos);
+        return operator[](pos);
+    }
+
+    reference operator[](size_type pos)
+    {
+        return getVal().getPtr()[pos];
+    }
+
+    const_reference operator[](size_type pos) const
+    {
+        return getVal().getPtr()[pos];
+    }
+
+    value_type& front()
+    {
+        return operator[0];
+    }
+
+    const value_type& front() const
+    {
+        return operator[0];
+    }
+
+    value_type& back()
+    {
+        return operator[size() - 1];
+    }
+
+    const value_type& back() const
+    {
+        return operator[size() - 1];
+    }
+
+    const value_type* data() const noexcept
     {
         return getVal().getPtr();
     }
 
-    const CharT* data() const noexcept
+    value_type* data() noexcept
     {
-        return c_str();
+        return getVal().getPtr();
+    }
+
+    const value_type* c_str() const noexcept
+    {
+        return data();
+    }
+
+    operator basic_string_view<value_type, Traits>() const noexcept
+    {
+        return basic_string_view<value_type, Traits>(data(), size());
+    }
+public:
+    iterator begin() noexcept
+    {
+        return iterator(getVal().getPtr());
+    }
+
+    const_iterator begin() const noexcept
+    {
+        return const_iterator(getVal().getPtr());
+    }
+
+    const_iterator cbegin() const noexcept
+    {
+        return begin();
+    }
+
+    iterator end() noexcept
+    {
+        return iterator(getVal().getPtr() + 
+            static_cast<difference_type>(getVal().size));
+    }
+
+    const_iterator end() const noexcept
+    {
+        return const_iterator(getVal().getPtr() +
+            static_cast<difference_type>(getVal().size));
+    }
+
+    const_iterator cend() const noexcept
+    {
+        return end();
+    }
+
+    reverse_iterator rbegin() noexcept
+    {
+        return reverse_iterator(end());
+    }
+
+    const_reverse_iterator rbegin() const noexcept
+    {
+        return const_reverse_iterator(end());
+    }
+
+    const_reverse_iterator crbegin() const noexcept
+    {
+        return rbegin();
+    }
+
+    reverse_iterator rend() noexcept
+    {
+        return reverse_iterator(begin());
+    }
+
+    const_reverse_iterator rend() const noexcept
+    {
+        return const_reverse_iterator(begin());
+    }
+
+    const_reverse_iterator crend() const noexcept
+    {
+        return rend();
     }
 
 public:
@@ -926,6 +1040,146 @@ private:
         throw "invalid tiny_stl::basic_string<CharT> index";
     }
 };
+
+template <typename CharT, typename Traits, typename Alloc>
+inline bool operator==(const basic_string<CharT, Traits, Alloc>& lhs,
+                       const basic_string<CharT, Traits, Alloc>& rhs) noexcept
+{
+    return lhs.size() == rhs.size()
+        && tiny_stl::equal(lhs.begin(), lhs.end(), rhs.begin());
+}
+
+template <typename CharT, typename Traits, typename Alloc>
+inline bool operator!=(const basic_string<CharT, Traits, Alloc>& lhs,
+                       const basic_string<CharT, Traits, Alloc>& rhs) noexcept
+{
+    return !(lhs == rhs);
+}
+
+template <typename CharT, typename Traits, typename Alloc>
+inline bool operator<(const basic_string<CharT, Traits, Alloc>& lhs,
+                      const basic_string<CharT, Traits, Alloc>& rhs) noexcept
+{
+    return tiny_stl::lexicographical_compare(lhs.begin(), lhs.end(),
+                                             rhs.begin(), rhs.end());
+}
+
+template <typename CharT, typename Traits, typename Alloc>
+inline bool operator>(const basic_string<CharT, Traits, Alloc>& lhs,
+                      const basic_string<CharT, Traits, Alloc>& rhs) noexcept
+{
+    return rhs < lhs;
+}
+
+template <typename CharT, typename Traits, typename Alloc>
+inline bool operator<=(const basic_string<CharT, Traits, Alloc>& lhs,
+                       const basic_string<CharT, Traits, Alloc>& rhs) noexcept
+{
+    return !(rhs < lhs);
+}
+
+template <typename CharT, typename Traits, typename Alloc>
+inline bool operator>=(const basic_string<CharT, Traits, Alloc>& lhs,
+                       const basic_string<CharT, Traits, Alloc>& rhs) noexcept
+{
+    return !(lhs < rhs);
+}
+
+template <typename CharT, typename Traits, typename Alloc>
+inline bool operator==(const CharT* lstr,
+                       const basic_string<CharT, Traits, Alloc>& rhs) noexcept
+{
+    tiny_stl::basic_string<CharT, Traits, Alloc> lhs{ lstr };
+    return lhs == rhs;
+}
+
+template <typename CharT, typename Traits, typename Alloc>
+inline bool operator==(const basic_string<CharT, Traits, Alloc>& lhs,
+                       const CharT* rstr) noexcept
+{
+    tiny_stl::basic_string<CharT, Traits, Alloc> rhs{ rstr };
+    return lhs == rhs;
+}
+
+template <typename CharT, typename Traits, typename Alloc>
+inline bool operator!=(const CharT* lstr,
+                       const basic_string<CharT, Traits, Alloc>& rhs) noexcept
+{
+    tiny_stl::basic_string<CharT, Traits, Alloc> lhs{ lstr };
+    return lhs != rhs;
+}
+
+template <typename CharT, typename Traits, typename Alloc>
+inline bool operator!=(const basic_string<CharT, Traits, Alloc>& lhs,
+                       const CharT* rstr) noexcept
+{
+    tiny_stl::basic_string<CharT, Traits, Alloc> rhs{ rstr };
+    return lhs != rhs;
+}
+
+template <typename CharT, typename Traits, typename Alloc>
+inline bool operator<(const CharT* lstr,
+                      const basic_string<CharT, Traits, Alloc>& rhs) noexcept
+{
+    tiny_stl::basic_string<CharT, Traits, Alloc> lhs{ lstr };
+    return lhs < rhs;
+}
+
+template <typename CharT, typename Traits, typename Alloc>
+inline bool operator<(const basic_string<CharT, Traits, Alloc>& lhs,
+                      const CharT* rstr) noexcept
+{
+    tiny_stl::basic_string<CharT, Traits, Alloc> rhs{ rstr };
+    return lhs < rhs;
+}
+
+template <typename CharT, typename Traits, typename Alloc>
+inline bool operator>(const CharT* lstr,
+                      const basic_string<CharT, Traits, Alloc>& rhs) noexcept
+{
+    tiny_stl::basic_string<CharT, Traits, Alloc> lhs{ lstr };
+    return lhs > rhs;
+}
+
+template <typename CharT, typename Traits, typename Alloc>
+inline bool operator>(const basic_string<CharT, Traits, Alloc>& lhs,
+                      const CharT* rstr) noexcept
+{
+    tiny_stl::basic_string<CharT, Traits, Alloc> rhs{ rstr };
+    return lhs > rhs;
+}
+
+template <typename CharT, typename Traits, typename Alloc>
+inline bool operator<=(const CharT* lstr,
+                       const basic_string<CharT, Traits, Alloc>& rhs) noexcept
+{
+    tiny_stl::basic_string<CharT, Traits, Alloc> lhs{ lstr };
+    return lhs <= rhs;
+}
+
+template <typename CharT, typename Traits, typename Alloc>
+inline bool operator<=(const basic_string<CharT, Traits, Alloc>& lhs,
+                       const CharT* rstr) noexcept
+{
+    tiny_stl::basic_string<CharT, Traits, Alloc> rhs{ rstr };
+    return lhs <= rhs;
+}
+
+template <typename CharT, typename Traits, typename Alloc>
+inline bool operator>=(const CharT* lstr,
+                       const basic_string<CharT, Traits, Alloc>& rhs) noexcept
+{
+    tiny_stl::basic_string<CharT, Traits, Alloc> lhs{ lstr };
+    return lhs >= rhs;
+}
+
+template <typename CharT, typename Traits, typename Alloc>
+inline bool operator!=(const basic_string<CharT, Traits, Alloc>& lhs,
+                       const CharT* rstr) noexcept
+{
+    tiny_stl::basic_string<CharT, Traits, Alloc> rhs{ rstr };
+    return lhs >= rhs;
+}
 
 template <typename CharT, typename Traits, typename Alloc>
 std::basic_ostream<CharT, Traits>& operator<<(
