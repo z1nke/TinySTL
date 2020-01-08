@@ -1158,7 +1158,7 @@ public:
 
     void swap(RBTree& rhs) 
         noexcept(AlTraits::is_always_equal::value 
-            && is_nothrow_swappable<Compare>::value)
+            && std::_Is_nothrow_swappable<Compare>::value)
     {
         assert(this->alloc == rhs.alloc);
 

@@ -510,8 +510,7 @@ public:
     }
 
     // O(n)
-    void swap(array<T, Size>& other)
-        noexcept(is_nothrow_swappable<T>::value)
+    void swap(array<T, Size>& other) noexcept(std::_Is_nothrow_swappable<T>::value) 
     {
         swap_ranges(elements, elements + Size, other.elements);
     }
@@ -755,10 +754,9 @@ constexpr const T&& get(const array<T, Size>&& arr) noexcept
     return tiny_stl::move(arr.elements[Idx]);
 }
 
-template <typename T, size_t Size,
-    typename = enable_if_t<Size == 0 || is_swappable<T>::value>>
-void swap(array<T, Size>& lhs, array<T, Size>& rhs)
-    noexcept(noexcept(lhs.swap(rhs)))
+template <typename T, size_t Size, 
+    typename = enable_if_t<Size == 0 || std::_Is_swappable<T>::value>>
+void swap(array<T, Size>& lhs, array<T, Size>& rhs) noexcept(noexcept(lhs.swap(rhs))) 
 {
     return lhs.swap(rhs);
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "string_view.h"
 #include "memory.h"
 #include <initializer_list>
 
@@ -839,22 +840,22 @@ public:
 
     value_type& front()
     {
-        return operator[0];
+        return operator[](0);
     }
 
     const value_type& front() const
     {
-        return operator[0];
+        return operator[](0);
     }
 
     value_type& back()
     {
-        return operator[size() - 1];
+        return operator[](size() - 1);
     }
 
     const value_type& back() const
     {
-        return operator[size() - 1];
+        return operator[](size() - 1);
     }
 
     const value_type* data() const noexcept
@@ -872,10 +873,6 @@ public:
         return data();
     }
 
-    operator basic_string_view<value_type, Traits>() const noexcept
-    {
-        return basic_string_view<value_type, Traits>(data(), size());
-    }
 public:
     iterator begin() noexcept
     {
@@ -992,6 +989,58 @@ public:
     void shrink_to_fit()
     {
         // do nothing
+    }
+
+private:
+    void swapShortWithLong(StringValue& shortVal, StringValue& longVal) noexcept
+    {
+        pointer ptr = longVal.data.ptr;
+        Traits::move(longVal.data.buf, shortVal.data.buf, StringValue::kBufferSize);
+        shortVal.data.ptr = ptr;
+    }
+
+    void swapAux(basic_string& rhs) noexcept
+    {
+        auto& lhsVal = getVal();
+        auto& rhsVal = rhs.getVal();
+        const bool isShortLhs = lhsVal.isShortString();
+        const bool isShortRhs = rhsVal.isShortString();
+
+        if (isShortLhs)
+        {
+            if (isShortRhs)
+                swapADL(lhsVal.data.ptr, rhsVal.data.ptr);
+            else
+                swapShortWithLong(lhsVal, rhsVal);
+        }
+        else // lhs is long string
+        {
+            if (isShortRhs)
+            {
+                swapShortWithLong(rhsVal, lhsVal);
+            }
+            else
+            {
+                value_type tmpBuf[StringValue::kBufferSize];
+                Traits::move(tmpBuf, lhsVal.data.buf, StringValue::kBufferSize);
+                Traits::move(lhsVal.data.buf, rhsVal.data.buf, StringValue::kBufferSize);
+                Traits::move(rhsVal.data.buf, tmpBuf, StringValue::kBufferSize);
+            }
+        }
+
+        swapADL(lhsVal.size, rhsVal.size);
+        swapADL(lhsVal.capacity, rhsVal.capacity);
+    }
+
+public:
+    void swap(basic_string& rhs) 
+        noexcept(allocator_traits<Alloc>::propagate_on_container_swap::value ||
+                 allocator_traits<Alloc>::is_always_equal::value)
+    {
+        assert(getAlloc() == rhs.getAlloc());
+        if (this != tiny_stl::addressof(rhs)) {
+            swapAux(rhs);
+        }
     }
 
 private:
@@ -1174,11 +1223,19 @@ inline bool operator>=(const CharT* lstr,
 }
 
 template <typename CharT, typename Traits, typename Alloc>
-inline bool operator!=(const basic_string<CharT, Traits, Alloc>& lhs,
+inline bool operator>=(const basic_string<CharT, Traits, Alloc>& lhs,
                        const CharT* rstr) noexcept
 {
     tiny_stl::basic_string<CharT, Traits, Alloc> rhs{ rstr };
     return lhs >= rhs;
+}
+
+template <typename CharT, typename Traits, typename Alloc>
+void swap(basic_string<CharT, Traits, Alloc>& lhs,
+          basic_string<CharT, Traits, Alloc>& rhs)
+    noexcept(noexcept(lhs.swap(rhs)))
+{
+    lhs.swap(rhs);
 }
 
 template <typename CharT, typename Traits, typename Alloc>
@@ -1191,10 +1248,146 @@ std::basic_ostream<CharT, Traits>& operator<<(
     return os;
 }
 
+template <typename CharT, typename Traits, typename Alloc>
+std::basic_istream<CharT, Traits>& operator>>(
+    std::basic_istream<CharT, Traits>& is,
+    basic_string<CharT, Traits, Alloc>& str)
+{
+    // no format input
+    is >> str.data();
+
+    return is;
+}
+
+template <typename CharT, typename Traits, typename Alloc>
+struct hash<basic_string<CharT, Traits, Alloc>>
+{
+    using argument_type = basic_string<CharT, Traits, Alloc>;
+    using result_type = size_t;
+
+    size_t operator()(const basic_string<CharT, Traits, Alloc>& str) const noexcept
+    {
+        return tiny_stl::hashFNV(str.c_str(), str.size());
+    }
+};
+
+namespace 
+{
+
+template <typename E, typename T>
+static basic_string<E> IntegerToString(T val) 
+{
+    static_assert(is_integral_v<T>, "T must be integral");
+    static const char digits[] = "9876543210123456789";
+    static const char* zero = digits + 9;
+    bool isNegative = val < 0;
+    E buffer[21]; // -2^63 ~ 2^64-1
+    E* ptr = buffer;
+    do {
+        int lp = static_cast<int>(val % 10);
+        val /= 10;
+        *ptr++ = zero[lp];
+    } while (val);
+
+
+    if (isNegative) {
+        *ptr++ = '-';
+    }
+    *ptr = '\0';
+    reverse(buffer, ptr);
+    return basic_string<E>{buffer};
+}
+
+} // namespace
 
 using string     = basic_string<char>;
 using wstring    = basic_string<wchar_t>;
 using u16string  = basic_string<char16_t>;
 using u32string  = basic_string<char32_t>;
+
+
+string to_string(int value)
+{
+    return IntegerToString<char>(value);
+}
+
+string to_string(long value)
+{
+    return IntegerToString<char>(value);
+}
+
+string to_string(unsigned value)
+{
+    return IntegerToString<char>(value);
+}
+
+string to_string(unsigned long value)
+{
+    return IntegerToString<char>(value);
+}
+
+string to_string(long long value)
+{
+    return IntegerToString<char>(value);
+}
+
+string to_string(unsigned long long value)
+{
+    return IntegerToString<char>(value);
+}
+
+wstring to_wstring(int value)
+{
+    return IntegerToString<wchar_t>(value);
+}
+
+wstring to_wstring(long value)
+{
+    return IntegerToString<wchar_t>(value);
+}
+
+wstring to_wstring(unsigned value)
+{
+    return IntegerToString<wchar_t>(value);
+}
+
+wstring to_wstring(unsigned long value)
+{
+    return IntegerToString<wchar_t>(value);
+}
+
+wstring to_wstring(long long value)
+{
+    return IntegerToString<wchar_t>(value);
+}
+
+wstring to_wstring(unsigned long long value)
+{
+    return IntegerToString<wchar_t>(value);
+}
+
+
+#pragma warning(push)
+#pragma warning(disable: 4455)
+string operator""s(const char* str, std::size_t len)
+{
+    return string{ str, len };
+}
+
+wstring operator""s(const wchar_t* str, std::size_t len)
+{
+    return wstring{ str, len };
+}
+
+u16string operator""s(const char16_t* str, std::size_t len)
+{
+    return u16string{ str, len };
+}
+
+u32string operator""s(const char32_t* str, std::size_t len)
+{
+    return u32string{ str, len };
+}
+#pragma warning(pop)
 
 } // namespace tiny_stl
