@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "memory.h"
-#include <initializer_list> // for std::initializer_list
+#include <initializer_list>
 
 namespace tiny_stl 
 {

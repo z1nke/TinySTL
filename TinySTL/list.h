@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include <initializer_list> // for std::initializer_list
+#include <initializer_list>
 
 #include "memory.h"
 
@@ -636,7 +636,7 @@ private:
 
     void insertN(const_iterator pos, size_type n, const T& val)
     {
-        size_type origin_n = n;     // for exception
+        size_type originN = n;
 
         for (; n > 0; --n)
             insertAux(pos, val);
@@ -1112,7 +1112,7 @@ inline bool operator<(const list<T, Alloc>& lhs,
                       const list<T, Alloc>& rhs) 
 {
     return tiny_stl::lexicographical_compare(lhs.begin(), lhs.end(),
-                                            rhs.begin(), rhs.end());
+                                             rhs.begin(), rhs.end());
 }
 
 template <typename T, typename Alloc>
@@ -1145,5 +1145,5 @@ inline void swap(list<T, Alloc>& lhs, list<T, Alloc>& rhs)
 }
 
 
-}   // namespace tiny_stl
+}  // namespace tiny_stl
 

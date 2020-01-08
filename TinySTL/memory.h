@@ -16,10 +16,10 @@ namespace
 {
 
 template <typename T, typename... Args>
-inline void constructInPlace(T& dest, Args&&... args) 
+inline void constructInPlace(T& dst, Args&&... args) 
     noexcept((is_nothrow_constructible<T, Args...>::value)) 
 {
-    ::new (static_cast<void*>(&dest))
+    ::new (static_cast<void*>(&dst))
         T(tiny_stl::forward<Args>(args)...);
 }
 
@@ -34,49 +34,51 @@ inline void destroyInPlace(T& obj) noexcept
 
 template <typename InIt, typename FwdIt>
 inline FwdIt uninitializedCopyAux(InIt first, InIt last,
-                                  FwdIt dest, false_type /*no special optimization*/) 
+                                  FwdIt dst,
+                                  false_type /* no special optimization */) 
 {
-    for (; first != last; ++dest, ++first) 
-        constructInPlace(*dest, *first);
+    for (; first != last; ++dst, ++first) 
+        constructInPlace(*dst, *first);
     
-    return dest;
+    return dst;
 }
 
 template <typename InIt, typename FwdIt>
 inline FwdIt uninitializedCopyAux(InIt first, InIt last,
-                                  FwdIt dest, true_type /*is pod -- assign*/) 
+                                  FwdIt dst,
+                                  true_type /* is pod -- assign */) 
 {
-    for (; first != last; ++first, ++dest) 
-        *dest = *first;
+    for (; first != last; ++first, ++dst) 
+        *dst = *first;
 
-    return dest;
+    return dst;
 }
 
 template <typename InIt, typename Size, typename FwdIt>
 inline FwdIt uninitializedCopyNAux(InIt first, Size n,
-                                   FwdIt dest, 
-                                   false_type /*no special optimization*/) 
+                                   FwdIt dst, 
+                                   false_type /* no special optimization */) 
 {
-    for (; n > 0; ++dest, ++first, --n) 
-        constructInPlace(*dest, *first);
+    for (; n > 0; ++dst, ++first, --n) 
+        constructInPlace(*dst, *first);
 
-    return dest;
+    return dst;
 }
 
 template <typename InIt, typename Size, typename FwdIt>
 inline FwdIt uninitializedCopyNAux(InIt first, Size n, 
-                                   FwdIt dest, 
-                                   true_type /*is pod -- assign*/) 
+                                   FwdIt dst, 
+                                   true_type /* is pod -- assign */) 
 {
-    for (; n > 0; ++first, ++dest, --n) 
-        *dest = *first;
+    for (; n > 0; ++first, ++dst, --n) 
+        *dst = *first;
     
-    return dest;
+    return dst;
 }
 
 template <typename FwdIt, typename T>
 inline void uninitializedFillAux(FwdIt first, FwdIt last, const T& x, 
-                                 false_type /*is not pod type*/) 
+                                 false_type /* is not pod type */) 
 {
 
     for (; first != last; ++first) 
@@ -85,7 +87,7 @@ inline void uninitializedFillAux(FwdIt first, FwdIt last, const T& x,
 
 template <typename FwdIt, typename T>
 inline void uninitializedFillAux(FwdIt first, FwdIt last, const T& x,
-                                 true_type /*is pod -- assign*/ )
+                                 true_type /* is pod -- assign */ )
 {
     for (; first != last; ++first) 
         *first = x;
@@ -93,7 +95,7 @@ inline void uninitializedFillAux(FwdIt first, FwdIt last, const T& x,
 
 template <typename FwdIt, typename Size, typename T>
 inline void uninitializedFillNAux(FwdIt first, Size n, const T& x, 
-                                  false_type/*is not pod type*/) 
+                                  false_type /* is not pod type */) 
 {
 
     for (; n--; ++first) 
@@ -102,7 +104,7 @@ inline void uninitializedFillNAux(FwdIt first, Size n, const T& x,
 
 template <typename FwdIt, typename Size, typename T> 
 inline void uninitializedFillNAux(FwdIt first, Size n, const T& x,
-                                  true_type /*is pod -- copy*/) 
+                                  true_type /* is pod -- copy */) 
 {
     for (; n--; ++first) 
         *first = x;
@@ -113,51 +115,51 @@ inline void uninitializedFillNAux(FwdIt first, Size n, const T& x,
 template <typename InIter, typename FwdIter>
 inline FwdIter uninitialized_copy(InIter first, 
                                   InIter last,
-                                  FwdIter dest) 
+                                  FwdIter dst) 
 {
     using T = typename iterator_traits<InIter>::value_type;
-    return uninitializedCopyAux(first, last, dest, 
+    return uninitializedCopyAux(first, last, dst, 
         bool_constant<is_pod<T>::value>{});
 }
 
 // const char* and const wchar_t* version
 inline char* uninitialized_copy(const char* first, const char* last, 
-                                char* dest) 
+                                char* dst) 
 {
-    memmove(dest, first, sizeof(char) * (last - first));
-    return dest + (last - first);
+    memmove(dst, first, sizeof(char) * (last - first));
+    return dst + (last - first);
 }
 
 inline wchar_t* uninitialized_copy(const wchar_t* first, 
                                    const wchar_t* last,
-                                   wchar_t* dest) 
+                                   wchar_t* dst) 
 {
-    memmove(dest, first, sizeof(wchar_t) * (last - first));
-    return dest + (last - first);
+    memmove(dst, first, sizeof(wchar_t) * (last - first));
+    return dst + (last - first);
 }
 
 template <typename InIter, typename Size, 
     typename FwdIter>
 inline FwdIter uninitialized_copy_n(InIter first, Size n,
-                                    FwdIter dest) 
+                                    FwdIter dst) 
 {
     using T = typename iterator_traits<InIter>::value_type;
-    return uninitializedCopyNAux(first, n, dest, 
+    return uninitializedCopyNAux(first, n, dst, 
         integral_constant<bool, is_pod_v<T>>{});
 }
 
 inline char* uninitialized_copy_n(const char* first, 
-                                size_t n, char* dest) 
+                                size_t n, char* dst) 
 {
-    memmove(dest, first, n);
-    return dest + n;
+    memmove(dst, first, n);
+    return dst + n;
 }
 
 inline wchar_t* uninitialized_copy_n(const wchar_t* first, 
-                                size_t n, wchar_t* dest) 
+                                size_t n, wchar_t* dst) 
 {
-    memmove(dest, first, n * sizeof(wchar_t));
-    return dest + n;
+    memmove(dst, first, n * sizeof(wchar_t));
+    return dst + n;
 }
 
 // use x to construct [first, last)
@@ -498,7 +500,7 @@ struct pointer_traits<T*>
 };
 
 
-// for allocator_traits type helper 
+// allocator_traits type helper 
 template <typename Alloc, typename = void>
 struct GetPointer 
 {
@@ -2396,7 +2398,7 @@ public:
 
     // use_count() in base class
 
-    // for checking validity of the pointer
+    // checking validity of the pointer
     bool expired() const noexcept
     {
         return this->use_count() == 0;

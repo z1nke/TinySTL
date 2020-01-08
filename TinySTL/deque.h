@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include <initializer_list> // for std::initializer_list
+#include <initializer_list>
 
 #include "memory.h"
 

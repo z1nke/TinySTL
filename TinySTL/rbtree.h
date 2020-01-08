@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include <initializer_list> // for std::initializer_list
+#include <initializer_list> 
 
 #include "memory.h"
 
@@ -108,7 +108,7 @@ inline void rbTreeRightRotate(RBTNode<T>*& root, RBTNode<T>* y)
 
 
 
-}   // namespace
+} // namespace
 
 
 template <typename T>

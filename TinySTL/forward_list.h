@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include <initializer_list> // for std::initializer_list
+#include <initializer_list>
 
 #include "memory.h"
 
@@ -545,7 +545,7 @@ public:
         ++pos;
         NodePtr pFree = pos.ptr;
         cur->next = pFree->next;
-        ++pos;                      // for return value
+        ++pos; // return value
         this->freeNode(pFree);
 
         return makeIter(pos);

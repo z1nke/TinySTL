@@ -289,7 +289,7 @@ struct AddPointer<T(Args...), true>
 template <typename T, typename... Args>
 struct AddPointer<T(Args..., ...), true> { };
 
-}   // namespace
+} // namespace
 
 template <typename T>
 struct add_lvalue_reference 

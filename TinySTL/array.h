@@ -2,7 +2,7 @@
 
 #include "iterator.h"
 #include "algorithm.h"
-#include "memory.h"	    // for pointer_traits
+#include "memory.h"
 
 namespace tiny_stl 
 {
