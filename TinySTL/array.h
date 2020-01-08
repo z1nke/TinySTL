@@ -747,7 +747,6 @@ constexpr const T& get(const array<T, Size>& arr) noexcept
     return arr.elements[Idx];
 }
 
-// C++ 17
 template <size_t Idx, typename T, size_t Size>
 constexpr const T&& get(const array<T, Size>&& arr) noexcept 
 {
