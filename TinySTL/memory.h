@@ -1581,7 +1581,6 @@ void enableSharedFromThisBase(const shared_ptr<Other>&, U*, false_type)
 
 } // namespace
 
-  // TODO: C++17
 template <typename Other, typename U>
 void enableSharedFromThis(const shared_ptr<Other>& sp, U* ptr)
 {
@@ -1748,16 +1747,14 @@ public:
     {
     }
     
-    // no c++17, in other words, no shared_ptr<T[]>
-    // I can't implement it
-    // TODO: support c++17
+    // no C++17, in other words, no shared_ptr<T[]>
+    // TODO: support C++17
     template <typename U, enable_if_t<is_convertible_v<U*, T*>, int> = 0>
     explicit shared_ptr(U* ptr)
     {
         setPtr(ptr);
     }
 
-    // c++17
     template <typename U, typename D, enable_if_t<conjunction_v<
         std::is_move_constructible<D>, 
         is_convertible<U, T>,
@@ -1803,7 +1800,6 @@ public:
         this->constructCopy(rhs);
     }
 
-    // no c++17
     template <typename U, enable_if_t<is_convertible_v<U*, T*>, int> = 0>
     shared_ptr(const shared_ptr<U>& rhs) noexcept
     {
@@ -1815,14 +1811,12 @@ public:
         this->constructMove(tiny_stl::move(rhs));
     }
 
-    // no c++17
     template <typename U, enable_if_t<is_convertible_v<U*, T*>, int> = 0>
     shared_ptr(shared_ptr<U>&& rhs) noexcept
     {
         this->constructMove(tiny_stl::move(rhs));
     }
 
-    // no c++17
     template <typename U, enable_if_t<is_convertible_v<U*, T*>, int> = 0>
     explicit shared_ptr(const weak_ptr<U>& other)
     {
@@ -1832,7 +1826,6 @@ public:
         }
     }
 
-    // no c++17
     template <typename U, typename D, enable_if_t<
         is_convertible_v<typename unique_ptr<U, D>::pointer, T*>, int> = 0>
     shared_ptr(unique_ptr<U, D>&& other)
@@ -1920,7 +1913,6 @@ public:
 
     using PtrBase<T>::get;
 
-    // no c++17 TODO
     T& operator*() const noexcept
     {
         return *get();
