@@ -2,7 +2,7 @@
 
 #include "utility.h"
 
-#include <cstddef>  // for ptrdiff_t
+#include <cstddef>
 
 namespace tiny_stl 
 {

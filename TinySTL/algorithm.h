@@ -1,8 +1,9 @@
 ﻿#pragma once
 
-#include <cassert>          // for assert
-#include <cmath>            // for std::ceil
-#include <initializer_list> // for std::initializer_list
+#include <cassert>
+#include <cmath>
+#include <cstring>
+#include <initializer_list>
 #include <random>
 
 #include "functional.h"
@@ -176,36 +177,36 @@ fillMemsetIsSafe(const FwdIter&, const T&)
 }
 
 template <typename OutIter, typename Diff, typename T>
-inline OutIter fillNHelper(OutIter dest, Diff n, const T& val, 
+inline OutIter fillNHelper(OutIter dst, Diff n, const T& val, 
                            true_type /* fill memset is safe*/) 
 {
     if (n > 0) 
     {
-        ::memset(dest, val, n);
-        return dest + n;
+        std::memset(dst, val, n);
+        return dst + n;
     }
-    return dest;
+    return dst;
 }
 
 template <typename OutIter, typename Diff, typename T>
-inline OutIter fillNHelper(OutIter dest, Diff n, const T& val, 
-                           false_type) 
+inline OutIter fillNHelper(OutIter dst, Diff n, const T& val, 
+                           false_type /* fill memset is unsafe */)
 {
-    for (; n > 0; --n, ++dest)
-        *dest = val;
-    return dest;
+    for (; n > 0; --n, ++dst)
+        *dst = val;
+    return dst;
 }
 
 template <typename OutIter, typename Diff, typename T>
-inline OutIter fill_n(OutIter dest, Diff n, const T& val) 
+inline OutIter fill_n(OutIter dst, Diff n, const T& val) 
 {
-    return fillNHelper(dest, n, val, fillMemsetIsSafe(dest, val));
+    return fillNHelper(dst, n, val, fillMemsetIsSafe(dst, val));
 }
 
 template <typename FwdIter, typename T>
 inline void fillHelper(FwdIter first, FwdIter last, const T& val, true_type) 
 {
-    ::memset(first, last - first, val);
+    std::memset(first, last - first, val);
 }
 
 template <typename FwdIter, typename T>
@@ -243,41 +244,41 @@ OutIter generate_n(OutIter first, Size n, Func f)
 }
 
 template <typename InIter, typename OutIter, typename UnaryOp>
-OutIter transform(InIter first1, InIter last1, OutIter dst_first, UnaryOp op)
+OutIter transform(InIter first1, InIter last1, OutIter dstFirst, UnaryOp op)
 {
-    for (; first1 != last1; ++first1, ++dst_first)
-        *dst_first = op(*first1);
+    for (; first1 != last1; ++first1, ++dstFirst)
+        *dstFirst = op(*first1);
 
-    return dst_first;
+    return dstFirst;
 }
 
 template <typename InIter, typename OutIter, typename BinOp>
 OutIter transform(InIter first1, InIter last1, 
-                  InIter first2, OutIter dst_first, BinOp op)
+                  InIter first2, OutIter dstFirst, BinOp op)
 {
-    for (; first1 != last1; ++first1, ++first2, ++dst_first)
-        *dst_first = op(*first1, *first2);
+    for (; first1 != last1; ++first1, ++first2, ++dstFirst)
+        *dstFirst = op(*first1, *first2);
 
-    return dst_first;
+    return dstFirst;
 }
 
 template <typename InIter, typename OutIter, typename UnaryPred>
-inline OutIter copy_if(InIter first, InIter last, OutIter dest, UnaryPred pred) 
+inline OutIter copy_if(InIter first, InIter last, OutIter dst, UnaryPred pred) 
 {
     for (; first != last; ++first) 
         if (pred(*first))
-            *dest++ = *first;
+            *dst++ = *first;
 
-    return dest;        // new last
+    return dst;        // new last
 }
 
 template <typename InIter, typename OutIter>
-inline OutIter copy(InIter first, InIter last, OutIter dest) 
+inline OutIter copy(InIter first, InIter last, OutIter dst) 
 {
     for (; first != last; ++first) 
-        *dest++ = *first;
+        *dst++ = *first;
 
-    return dest;
+    return dst;
 }
 
 template <typename InIter, typename Size, typename OutIter>
@@ -293,31 +294,31 @@ OutIter copy_n(InIter src, Size count, OutIter dst)
 }
 
 template <typename BidIter1, typename BidIter2>
-inline BidIter2 copy_backward(BidIter1 first, BidIter1 last, BidIter2 dest_last) 
+inline BidIter2 copy_backward(BidIter1 first, BidIter1 last, BidIter2 dstLast) 
 {
     for (; first != last; ) 
-        *(--dest_last) = *(--last);
+        *(--dstLast) = *(--last);
 
-    return dest_last;
+    return dstLast;
 }
 
 template <typename InIter, typename OutIter>
-inline OutIter move(InIter first, InIter last, OutIter dest_first) 
+inline OutIter move(InIter first, InIter last, OutIter dstFirst) 
 {
     for (; first != last; ) 
-        *(dest_first++) = tiny_stl::move(*first++);
+        *(dstFirst++) = tiny_stl::move(*first++);
 
-    return dest_first;
+    return dstFirst;
 }
 
 
 template <typename BidIter1, typename BidIter2>
-inline BidIter2 move_backward(BidIter1 first, BidIter1 last, BidIter2 dest_last) 
+inline BidIter2 move_backward(BidIter1 first, BidIter1 last, BidIter2 dstLast) 
 {
     for (; first != last; ) 
-        *(--dest_last) = tiny_stl::move(*(--last));
+        *(--dstLast) = tiny_stl::move(*(--last));
 
-    return dest_last;
+    return dstLast;
 }
 
 template <typename FwdIter1, typename FwdIter2>
@@ -672,10 +673,10 @@ inline void adjustHeapHelper(RanIter first, Diff hole, Diff len, T&& val, Cmp& c
 }
 
 template <typename RanIter, typename T, typename Cmp>
-inline void popHeapHelper(RanIter first, RanIter last, RanIter dest, T&& val, Cmp& cmp) 
+inline void popHeapHelper(RanIter first, RanIter last, RanIter dst, T&& val, Cmp& cmp) 
 {
     using Diff = typename iterator_traits<RanIter>::difference_type;
-    *dest = tiny_stl::move(*first);     // move the first to tail, hole is 0
+    *dst = tiny_stl::move(*first);     // move the first to tail, hole is 0
     
     adjustHeapHelper(first, static_cast<Diff>(0), static_cast<Diff>(last - first),
         tiny_stl::move(val), cmp);

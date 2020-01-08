@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include <initializer_list> // for std::initializer_list
-#include <string>           // for std::char_traits, basic_iostream
+#include <initializer_list>
+#include <string>
 
 #include "memory.h"
 

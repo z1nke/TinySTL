@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "type_traits.h"
-#include <type_traits>   // for the need to use but not implement
+#include <type_traits>
 
 #if _MSVC_LANG >= 201402L
 #   define TINY_STL_CXX14
@@ -604,7 +604,7 @@ public:
 }   // extra namespace
 
 template <typename T>
-struct TidyRAII { // for strong exception guarantee
+struct TidyRAII { // strong exception guarantee
     T* obj;
     ~TidyRAII()
     {

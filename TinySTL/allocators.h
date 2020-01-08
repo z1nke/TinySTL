@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include <cassert>  // for assert
-#include <cstddef>  // for ptrdiff_t, size_t
-#include <cstdlib>  // for exit
-#include <new>      // for placement new 
+#include <cassert>
+#include <cstddef>
+#include <cstdlib>
+#include <new>
 
 #include "utility.h"
 
@@ -33,7 +33,7 @@ template <typename T, typename... Args>
 inline void constructHelper(T* p, Args&&... args) 
 {
     new (const_cast<void*>(static_cast<const volatile void*>(p)))
-        T(tiny_stl::forward<Args>(args)...);            // placement new, ctor T
+        T(tiny_stl::forward<Args>(args)...); // placement new, ctor T
 }
 
 template <typename T>

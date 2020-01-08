@@ -350,7 +350,7 @@ public:
         : allocVal(a)
     {
         initEmpty(); // for setting capacity
-        // TODO: if InIter is not [const] value_type*
+        // FIXME: if InIter is not [const] value_type*
         constructRange(first, last,
             typename iterator_traits<InIter>::iterator_category{});
     }
@@ -481,7 +481,7 @@ public:
     template <typename InIter, typename = enable_if_t<is_iterator_v<InIter>>>
     basic_string& assign(InIter first, InIter last)
     {
-        // TODO: if InIter is not [const] value_type*
+        // FIXME: if InIter is not [const] value_type*
         constructRange(first, last,
             typename iterator_traits<InIter>::iterator_category{});
     }
