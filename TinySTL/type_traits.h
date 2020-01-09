@@ -1,11 +1,13 @@
 ﻿#pragma once
 
+#include <type_traits>
+
 namespace tiny_stl
-{ 
+{
 // wraps a static constant of specified type.
 // as the base class for trait types.
 template <typename T, T val>
-struct integral_constant 
+struct integral_constant
 {
     static constexpr T value = val;
     using value_type         = T;
@@ -129,7 +131,7 @@ using void_t = void;
 
 
 template <typename T>
-struct remove_extent 
+struct remove_extent
 {
     using type = T;
 };
@@ -141,7 +143,7 @@ struct remove_extent<T[]>
 };
 
 template <typename T, size_t N>
-struct remove_extent<T[N]> 
+struct remove_extent<T[N]>
 {
     using type = T;
 };
@@ -151,13 +153,13 @@ using remove_extent_t = typename remove_extent<T>::type;
 
 // remove top level cv qualifiers
 template <typename T>
-struct remove_const 
+struct remove_const
 {
     using type = T;
 };
 
 template <typename T>
-struct remove_const<const T> 
+struct remove_const<const T>
 {
     using type = T;
 };
@@ -172,7 +174,7 @@ struct remove_volatile
 };
 
 template <typename T>
-struct remove_volatile<volatile T> 
+struct remove_volatile<volatile T>
 {
     using type = T;
 };
@@ -181,7 +183,7 @@ template <typename T>
 using remove_volatile_t = typename remove_volatile<T>::type;
 
 template <typename T>
-struct remove_cv 
+struct remove_cv
 {
     using type = typename remove_const<
                     typename remove_volatile<T>::type>::type;
@@ -191,19 +193,19 @@ template <typename T>
 using remove_cv_t = typename remove_cv<T>::type;
 
 template <typename T>
-struct remove_reference 
+struct remove_reference
 {
     using type = T;
 };
 
 template <typename T>
-struct remove_reference<T&> 
+struct remove_reference<T&>
 {
     using type = T;
 };
 
 template <typename T>
-struct remove_reference<T&&> 
+struct remove_reference<T&&>
 {
     using type = T;
 };
@@ -215,7 +217,7 @@ template <typename T>
 struct remove_pointer { };
 
 template <typename T>
-struct remove_pointer<T*> 
+struct remove_pointer<T*>
 {
     using type = T;
 };
@@ -225,7 +227,7 @@ using remove_pointer_t = typename remove_pointer<T>::type;
 
 // add top level cv qualifiers
 template <typename T>
-struct add_const 
+struct add_const
 {
     using type = const T;
 };
@@ -234,7 +236,7 @@ template <typename T>
 using add_const_t = typename add_const<T>::type;
 
 template <typename T>
-struct add_volatile 
+struct add_volatile
 {
     using type = volatile T;
 };
@@ -243,7 +245,7 @@ template <typename T>
 using add_volatile_t = typename add_volatile<T>::type;
 
 template <typename T>
-struct add_cv 
+struct add_cv
 {
     using type = const volatile T;
 };
@@ -251,10 +253,10 @@ struct add_cv
 template <typename T>
 using add_cv_t = typename add_cv<T>::type;
 
-namespace 
+namespace
 {
 template <typename T, typename = void>
-struct AddReference 
+struct AddReference
 {
     using Lvalue = T;
     using Rvalue = T;
@@ -262,13 +264,13 @@ struct AddReference
 
 template <typename T>
 struct AddReference<T, void_t<T&>> // void_t<T&> avoid void&
-{  
+{
     using Lvalue = T&;
     using Rvalue = T&&;
 };
 
 template <typename T, bool is_function_type = false>
-struct AddPointer 
+struct AddPointer
 {
     using type = typename remove_reference<T>::type*;
 };
@@ -292,17 +294,17 @@ struct AddPointer<T(Args..., ...), true> { };
 } // namespace
 
 template <typename T>
-struct add_lvalue_reference 
+struct add_lvalue_reference
 {
     using type = typename AddReference<T>::Lvalue;
 };
 
 template <typename T>
-using add_lvalue_reference_t 
+using add_lvalue_reference_t
     = typename add_lvalue_reference<T>::type;
 
 template <typename T>
-struct add_rvalue_reference 
+struct add_rvalue_reference
 {
     using type = typename AddReference<T>::Rvalue;
 };
@@ -322,7 +324,7 @@ template <bool B, typename T = void>
 struct enable_if {};
 
 template <typename T>
-struct enable_if<true, T> 
+struct enable_if<true, T>
 {
     using type = T;
 };
@@ -339,7 +341,7 @@ struct conditional
 };
 
 template <typename T, typename F>
-struct conditional<false, T, F> 
+struct conditional<false, T, F>
 {
     using type = F;
 };
@@ -356,7 +358,7 @@ struct conjunction<B> : B {};
 
 template <typename B1, typename... Bn>
 struct conjunction<B1, Bn...>
-    : conditional_t<static_cast<bool>(B1::value), 
+    : conditional_t<static_cast<bool>(B1::value),
         conjunction<Bn...>, B1> { };
 
 template <typename... B>
@@ -372,7 +374,7 @@ struct disjunction<B> : B {};
 
 template <typename B1, typename... Bn>
 struct disjunction<B1, Bn...>
-    : conditional_t<static_cast<bool>(B1::value), 
+    : conditional_t<static_cast<bool>(B1::value),
                     B1, disjunction<Bn...>> { };
 
 template <typename... B>
@@ -399,25 +401,25 @@ template <typename T>
 constexpr bool is_array_v = is_array<T>::value;
 
 template <typename T>
-struct is_class : integral_constant<bool, __is_class(T)> { };
+using is_class = std::is_class<T>;
 
 template <typename T>
 constexpr bool is_class_v = is_class<T>::value;
 
 template <typename T>
-struct is_union : bool_constant<__is_union(T)> { };
+using is_union = std::is_union<T>;
 
 template <typename T>
 constexpr bool is_union_v = is_union<T>::value;
 
 template <typename T>
-struct is_enum : integral_constant<bool, __is_enum(T)> { };
+using is_enum = std::is_enum<T>;
 
 template <typename T>
 constexpr bool is_enum_v = is_enum<T>::value;
 
 template <typename T>
-struct is_final : bool_constant<__is_final(T)> { };
+using is_final = std::is_final<T>;
 
 template <typename T>
 constexpr bool is_final_v = is_final<T>::value;
@@ -435,7 +437,7 @@ template <>
 struct IsFloatingPoint<long double> : true_type { };
 
 template <typename T>
-struct is_floating_point 
+struct is_floating_point
     : IsFloatingPoint<remove_cv_t<T>>::type { };
 
 template <typename T>
@@ -448,7 +450,7 @@ struct IsIntegral : false_type { };
 template <>
 struct IsIntegral<bool> : true_type { };
 
-template <> 
+template <>
 struct IsIntegral<char> : true_type { };
 
 template <>
@@ -522,7 +524,7 @@ constexpr bool is_unsigned_v = is_unsigned<T>::value;
 
 
 template <typename T>
-struct ChangeSign 
+struct ChangeSign
 {
     static_assert((is_integral<T>::value && !is_same<bool, remove_cv_t<T>>::value)
                 || is_enum<T>::value,
@@ -545,7 +547,7 @@ struct ChangeSign
                                     conditional_t<sizeof(T) == sizeof(long), long,
                                     long long
     >>>>>>>>>;
-                
+
 
     using Unsigned =
     conditional_t<is_same<Signed, signed char>::value, unsigned char,
@@ -557,28 +559,28 @@ struct ChangeSign
 };
 
 template <typename T>
-struct ChangeSign<const T> 
+struct ChangeSign<const T>
 {
     using Signed = const typename ChangeSign<T>::Signed;
     using Unsigned = const typename ChangeSign<T>::Unsigned;
 };
 
 template<typename T>
-struct ChangeSign<volatile T> 
-{	
+struct ChangeSign<volatile T>
+{
     using Signed = volatile typename ChangeSign<T>::Signed;
     using Unsigned = volatile typename ChangeSign<T>::Unsigned;
 };
 
 template<typename T>
 struct ChangeSign<const volatile T>
-{	
+{
     using Signed = const volatile typename ChangeSign<T>::Signed;
     using Unsigned = const volatile typename ChangeSign<T>::Unsigned;
 };
 
 template <typename T>
-struct make_signed 
+struct make_signed
 {
     using type = typename ChangeSign<T>::Signed;
 };
@@ -587,7 +589,7 @@ template <typename T>
 using make_signed_t = typename make_signed<T>::type;
 
 template <typename T>
-struct make_unsigned 
+struct make_unsigned
 {
     using type = typename ChangeSign<T>::Unsigned;
 };
@@ -597,13 +599,13 @@ using make_unsigned_t = typename make_unsigned<T>::type;
 
 
 template <typename T>
-struct is_pod : integral_constant<bool, __is_pod(T)> { };
+using is_pod = std::is_pod;
 
 template <typename T>
 constexpr bool is_pod_v = is_pod<T>::value;
 
 template <typename T>
-struct is_empty : integral_constant<bool, __is_empty(T)> { };
+using is_empty = std::is_empty<T>;
 
 template <typename T>
 constexpr bool is_empty_v = is_empty<T>::value;
@@ -641,7 +643,7 @@ template <typename T>
 struct IsPointer<T*> : true_type { };
 
 template <typename T>
-struct is_pointer 
+struct is_pointer
     : IsPointer<typename remove_cv<T>::type> { };
 
 template <typename T>
@@ -661,7 +663,7 @@ template <typename T>
 struct is_lvalue_reference<T&> : true_type { };
 
 template <typename T>
-constexpr bool is_lvalue_reference_v 
+constexpr bool is_lvalue_reference_v
                 = is_lvalue_reference<T>::value;
 
 template <typename T>
@@ -671,12 +673,12 @@ template <typename T>
 struct is_rvalue_reference<T&&> : true_type { };
 
 template <typename T>
-constexpr bool is_rvalue_reference_v 
+constexpr bool is_rvalue_reference_v
                 = is_rvalue_reference<T>::value;
 
 template <typename T>
-struct is_reference 
-    : bool_constant<is_lvalue_reference<T>::value 
+struct is_reference
+    : bool_constant<is_lvalue_reference<T>::value
         || is_rvalue_reference<T>::value> { };
 
 template <typename T>
@@ -696,17 +698,16 @@ template <typename T>
 struct is_volatile : false_type { };
 
 template <typename T>
-struct is_volatile<volatile T> : true_type { }; 
+struct is_volatile<volatile T> : true_type { };
 
 template <typename T>
 constexpr bool is_volatile_v = is_volatile<T>::value;
 
 template <typename T, typename... Args>
-struct is_constructible 
-    : bool_constant<__is_constructible(T, Args...)> { };
+using is_constructible = std::is_constructible<T, Args...>;
 
 template <typename T, typename... Args>
-constexpr bool is_constructible_v 
+constexpr bool is_constructible_v
                 = is_constructible<T, Args...>::value;
 
 template <typename T>
@@ -714,33 +715,31 @@ struct is_default_constructible
     : is_constructible<T>::type { };
 
 template <typename T>
-constexpr bool is_default_constructible_v 
+constexpr bool is_default_constructible_v
                 = is_default_constructible<T>::value;
 
 template <typename T>
-struct is_copy_constructible 
-    : is_constructible<T, 
+struct is_copy_constructible
+    : is_constructible<T,
         add_lvalue_reference_t<const T>
     >::type { };
 
 template <typename T>
-constexpr bool is_copy_constructible_v 
+constexpr bool is_copy_constructible_v
                 = is_copy_constructible<T>::value;
 
 template <typename T>
-struct is_trivially_destructible
-    : bool_constant<__has_trivial_destructor(T)> { };
+using is_trivially_destructible = std::is_trivially_destructible<T>;
 
 template <typename T>
-constexpr bool is_trivially_destructible_v 
+constexpr bool is_trivially_destructible_v
                 = is_trivially_destructible<T>::value;
 
 template <typename T, typename... Args>
-struct is_nothrow_constructible 
-    : bool_constant<__is_nothrow_constructible(T, Args...)> { };
+using is_nothrow_constructible = std::is_nothrow_constructible<T, Args...>;
 
 template <typename T, typename... Args>
-constexpr bool is_nothrow_constructible_v 
+constexpr bool is_nothrow_constructible_v
                 = is_nothrow_constructible<T, Args...>::value;
 
 template <typename T>
@@ -748,26 +747,25 @@ struct is_nothrow_move_constructible
     : is_nothrow_constructible<T, T>::type { };
 
 template <typename T>
-constexpr bool is_nothrow_move_constructible_v 
+constexpr bool is_nothrow_move_constructible_v
                 = is_nothrow_move_constructible<T>::value;
 
 template <typename From, typename To>
-struct is_convertible 
-    : bool_constant<__is_convertible_to(From, To)> { };
+using is_convertible = std::is_convertible<From, To>;
 
 template <typename From, typename To>
-constexpr bool is_convertible_v 
+constexpr bool is_convertible_v
                 = is_convertible<From, To>::value;
 
 template<typename To, typename From>
-struct is_assignable : bool_constant<__is_assignable(To, From)> { };
+using is_assignable = std::is_assignable<To, From>;
 
 template<class To, class From>
 constexpr bool is_assignable_v = is_assignable<To, From>::value;
 
 template <typename T>
 struct is_arithmetic : bool_constant<
-    is_integral<T>::value       || 
+    is_integral<T>::value       ||
     is_floating_point<T>::value> { };
 
 template <typename T>
@@ -787,7 +785,7 @@ constexpr bool is_scalar_v = is_scalar<T>::value;
 template <typename T>
 struct is_object : bool_constant<
     is_scalar<T>::value ||
-    is_array<T>::value  || 
+    is_array<T>::value  ||
     is_union<T>::value  ||
     is_class<T>::value> { };
 
@@ -799,7 +797,7 @@ constexpr bool is_object_v = is_object<T>::value;
 // function -> pointer
 // remove_cv
 template <typename T>
-struct decay 
+struct decay
 {
 private:
     using U = typename remove_reference<T>::type;
@@ -817,7 +815,7 @@ public:
 
 template <typename T>
 using decay_t = typename decay<T>::type;
-    
+
 
 template <typename T>
 add_rvalue_reference_t<T> declval() noexcept;
@@ -825,15 +823,15 @@ add_rvalue_reference_t<T> declval() noexcept;
 template <typename>
 struct result_of;
 
-template <typename F, typename... Args> 
-struct result_of<F(Args...)> 
+template <typename F, typename... Args>
+struct result_of<F(Args...)>
 {
     using type = decltype(declval<F>()(declval<Args>()...));
 };
 
 
 template <typename T>
-class reference_wrapper 
+class reference_wrapper
 {
 private:
     T* ptr;
@@ -850,19 +848,19 @@ public:
     reference_wrapper& operator=(const reference_wrapper&)
         noexcept = default;
 
-    operator T&() const noexcept 
+    operator T&() const noexcept
     {
         return *ptr;
     }
 
-    T& get() const noexcept 
+    T& get() const noexcept
     {
         return *ptr;
     }
 
     template <typename... Args>
     typename result_of<T&(Args&&...)>::type
-    operator()(Args&&... args) const 
+    operator()(Args&&... args) const
     {
         return std::invoke(get(), tiny_stl::forward<Args>(args)...);
     }
@@ -913,4 +911,61 @@ struct AssociatedTypeHelper<T, false>    // set
     using mapped_type = void;
 };
 
-} // namespace tiny_stl 
+template <typename T>
+struct is_nothrow_swappable;
+
+template <typename T>
+void swap(T& lhs, T& rhs)
+    noexcept(is_nothrow_move_constructible_v<T> &&
+             is_nothrow_move_assignable_v<T>);
+
+template <typename T, std::size_t Size>
+void swap(T(&lhs)[Size], T(&rhs)[Size])
+    noexcept(is_nothrow_swappable<T>::value);
+
+template <typename T, typename U, typename = void>
+struct SwappableHelper : false_type {};
+
+template <typename T, typename U, void_t<
+    decltype(swap(tiny_stl::declval<T>(),
+                  tiny_stl::declval<U>()))>> : true_type {};
+
+template <typename T, typename U>
+struct is_swappable_with : bool_constant<conjunction_v<
+    SwappableHelper<T1, T2>,
+    SwappableHelper<T2, T1>>> {};
+
+template <typename T>
+struct is_swappable : is_swappable_with<
+    add_lvalue_reference_t<T>,
+    add_lvalue_reference_t<T>>::type {};
+
+template <typename T, typename U>
+struct SwapNoThrow : bool_constant<
+    noexcept(swap(tiny_stl::declval<T>(), tiny_stl::declval<U>())) &&
+    noexcept(swap(tiny_stl::declval<U>(), tiny_stl::declval<T>()))> {};
+
+template <typename T, typename U>
+struct is_nothrow_swappable_with : bool_constant<conjunction_v<
+    is_swappable_with<T, U>,
+    SwapNoThrow<T1, T2>>> {};
+
+template <typename T>
+struct is_nothrow_swappable : is_nothrow_swappable_with<
+    add_lvalue_reference_t<T>,
+    add_lvalue_reference_t<T>>::type {};
+
+template <typename T, typename U>
+constexpr bool is_swappable_with_v = is_swappable_with<T, U>::value;
+
+template <typename T>
+constexpr bool is_swappable_v = is_swappable<T>::value;
+
+template <typename T, typename U>
+constexpr bool is_nothrow_swappable_with_v =
+    is_nothrow_swappable_with<T, U>::value;
+
+template <typename T>
+struct is_nothrow_swappable_v = is_nothrow_swappable<T>::value;
+
+} // namespace tiny_stl
