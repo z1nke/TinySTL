@@ -59,8 +59,8 @@ const T* addressof(const T&&) = delete;
 
 template <typename T>
 inline void swap(T& lhs, T& rhs)
-        noexcept(is_nothrow_move_constructible<T>::value
-            && std::is_nothrow_move_assignable<T>::value)
+        noexcept(is_nothrow_move_constructible_v<T> &&
+                 is_nothrow_move_assignable_v<T>)
 {
     T tmp = tiny_stl::move(lhs);
     lhs   = tiny_stl::move(rhs);
@@ -236,8 +236,8 @@ struct pair
     }
 
     pair& operator=(pair&& rhs)             // (3)
-        noexcept(std::is_nothrow_move_assignable<T1>::value
-            && std::is_nothrow_move_assignable<T2>::value)
+        noexcept(is_nothrow_move_assignable<T1>::value &&
+                 is_nothrow_move_assignable<T2>::value)
     {
         first  = tiny_stl::forward<T1>(rhs.first);
         second = tiny_stl::forward<T2>(rhs.second);
@@ -628,7 +628,7 @@ struct in_place_type_t
 };
 
 template <typename T>
-constexpr in_place_t<T> in_place_type{};
+constexpr in_place_type_t<T> in_place_type{};
 
 template <std::size_t I>
 struct in_place_index_t
