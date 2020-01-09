@@ -13,13 +13,13 @@
 
 #ifdef TINY_STL_CXX14
 #   define XCONSTEXPR14 constexpr
-#else 
+#else
 #   define XCONSTEXPR14 inline
 #endif // TINY_STL_CXX14
 
 #ifdef TINY_STL_CXX17
 #define IFCONSTEXPR constexpr
-#else 
+#else
 #define IFCONSTEXPR
 #endif // TINY_STL_CXX17
 
@@ -28,26 +28,26 @@ namespace tiny_stl
 
 template <typename T>
 constexpr remove_reference_t<T>&&
-move(T&& param) noexcept 
+move(T&& param) noexcept
 {
     return static_cast<remove_reference_t<T>&&>(param);
 }
 
 template <typename T>
-constexpr T&& forward(remove_reference_t<T>& param) noexcept 
+constexpr T&& forward(remove_reference_t<T>& param) noexcept
 {
     return static_cast<T&&>(param);
 }
 
 template <typename T>
-constexpr T&& forward(remove_reference_t<T>&& param) noexcept 
+constexpr T&& forward(remove_reference_t<T>&& param) noexcept
 {
     return static_cast<T&&>(param);
 }
 
 
 template <typename T>
-constexpr T* addressof(T& val) noexcept 
+constexpr T* addressof(T& val) noexcept
 {
     return reinterpret_cast<T*>(
         &const_cast<char&>(
@@ -58,9 +58,9 @@ template <typename T>
 const T* addressof(const T&&) = delete;
 
 template <typename T>
-inline void swap(T& lhs, T& rhs) 
+inline void swap(T& lhs, T& rhs)
         noexcept(is_nothrow_move_constructible<T>::value
-            && std::is_nothrow_move_assignable<T>::value) 
+            && std::is_nothrow_move_assignable<T>::value)
 {
     T tmp = tiny_stl::move(lhs);
     lhs   = tiny_stl::move(rhs);
@@ -68,7 +68,7 @@ inline void swap(T& lhs, T& rhs)
 }
 
 template <typename FwdIter1, typename FwdIter2>
-inline void iter_swap(FwdIter1 lhs, FwdIter2 rhs) 
+inline void iter_swap(FwdIter1 lhs, FwdIter2 rhs)
 {
     swap(*lhs, *rhs);
 }
@@ -76,15 +76,15 @@ inline void iter_swap(FwdIter1 lhs, FwdIter2 rhs)
 // swap array lhs and rhs
 template <typename T, size_t N>
 inline void swap(T(&lhs)[N], T(&rhs)[N])
-        noexcept(std::_Is_nothrow_swappable<T>::value) 
+        noexcept(is_nothrow_swappable<T>::value)
 {
-    if (&lhs != &rhs) 
+    if (&lhs != &rhs)
     {
         T* first1 = lhs;
         T* last1  = lhs + N;
         T* first2 = rhs;
 
-        for (; first1 != last1; ++first1, ++first2) 
+        for (; first1 != last1; ++first1, ++first2)
         {
             tiny_stl::iter_swap(first1, first2);
         }
@@ -92,19 +92,19 @@ inline void swap(T(&lhs)[N], T(&rhs)[N])
 }
 
 template <typename T>
-inline void swapADL(T& lhs, T& rhs) 
-    noexcept(std::_Is_nothrow_swappable<T>::value) 
+inline void swapADL(T& lhs, T& rhs)
+    noexcept(is_nothrow_swappable<T>::value)
 {
     // ADL: argument-dependent lookup
     swap(lhs, rhs);
     // std::swap(a, b);
-    // maybe => 
+    // maybe =>
     // using std::swap;
     // swap(a, b);
 }
 
 
-struct piecewise_construct_t 
+struct piecewise_construct_t
 {
     explicit piecewise_construct_t() = default;
 };
@@ -116,7 +116,7 @@ template <typename...>
 class tuple;
 
 template <typename T1, typename T2>
-struct pair 
+struct pair
 {
     using first_type  = T1;
     using second_type = T2;
@@ -129,7 +129,7 @@ struct pair
         typename U2 = T2,
         typename = enable_if_t<is_default_constructible<U1>::value
                         && is_default_constructible<U2>::value>>
-    /*explicit*/constexpr pair() 
+    /*explicit*/constexpr pair()
         : first(), second() { }
 
     template <typename U1 = T1,             // (2)
@@ -140,14 +140,14 @@ struct pair
             || !is_convertible<const U2&, U2>::value, int> = 0>
     constexpr explicit pair(const T1& f, const T2& s)
         : first(f), second(s) {}
-    
+
     template <typename U1 = T1,             // (2)
         typename U2 = T2,
         typename = enable_if_t<is_copy_constructible<U1>::value
                         && is_copy_constructible<U2>::value>,
         enable_if_t<is_convertible<const U1&, U1>::value
             && is_convertible<const U2&, U2>::value, int> = 0>
-    constexpr pair(const T1& f, const T2& s) 
+    constexpr pair(const T1& f, const T2& s)
         : first(f), second(s) {}
 
     template <typename U1,                  // (3)
@@ -156,10 +156,10 @@ struct pair
                         && is_constructible<T2, U2&&>::value>,
         enable_if_t<!is_convertible<U1&&, T1>::value
             || !is_convertible<U2&&, T2>::value, int> = 0>
-    constexpr explicit pair(U1&& f, U2&& s) 
+    constexpr explicit pair(U1&& f, U2&& s)
         : first(tiny_stl::forward<U1>(f)),
             second(tiny_stl::forward<U2>(s)) {}
-    
+
     template <typename U1,                  // (3)
         typename U2,
         typename = enable_if_t<is_constructible<T1, U1&&>::value
@@ -170,7 +170,7 @@ struct pair
         : first(tiny_stl::forward<U1>(f)),
             second(tiny_stl::forward<U2>(s)) {}
 
-    template <typename U1,                  // (4) 
+    template <typename U1,                  // (4)
         typename U2,
         typename = enable_if_t<is_constructible<T1, const U1&>::value
                         && is_constructible<T2, const U2&>::value>,
@@ -179,13 +179,13 @@ struct pair
     constexpr explicit pair(const pair<U1, U2>& rhs)
         : first(rhs.first), second(rhs.second) {}
 
-    template <typename U1,                  // (4) 
+    template <typename U1,                  // (4)
         typename U2,
         typename = enable_if_t<is_constructible<T1, const U1&>::value
                         && is_constructible<T2, const T2&>::value>,
         enable_if_t<is_convertible<const U1&, T1>::value
             && is_convertible<const U2&, T2>::value, int> = 0>
-    constexpr pair(const pair<U1, U2>& rhs) 
+    constexpr pair(const pair<U1, U2>& rhs)
         : first(rhs.first), second(rhs.second) {}
 
     template <typename U1,                  // (5)
@@ -194,21 +194,21 @@ struct pair
                         && is_constructible<T2, U2&&>::value>,
         enable_if_t<!is_convertible<U1&&, T1>::value
             || !is_convertible<U1&&, T1>::value, int> = 0>
-    constexpr explicit pair(pair<U1, U2>&& rhs) 
+    constexpr explicit pair(pair<U1, U2>&& rhs)
         : first(tiny_stl::forward<U1>(rhs.first)),
             second(tiny_stl::forward<U2>(rhs.second)) {}
-    
+
     template <typename U1,                  // (5)
         typename U2,
         typename = enable_if_t<is_constructible<T1, U1&&>::value
                         && is_constructible<T2, U2&&>::value>,
         enable_if_t<is_convertible<U1&&, T1>::value
             && is_convertible<U1&&, T1>::value, int> = 0>
-    constexpr pair(pair<U1, U2>&& rhs) 
+    constexpr pair(pair<U1, U2>&& rhs)
         : first(tiny_stl::forward<U1>(rhs.first)),
             second(tiny_stl::forward<U2>(rhs.second)) {}
 
-    template <typename... Args1,            // (6)  
+    template <typename... Args1,            // (6)
         typename... Args2>
     pair(piecewise_construct_t,
         tuple<Args1...> t1,
@@ -221,14 +221,14 @@ struct pair
 
     // operator=()
     pair& operator=(const pair& rhs)        // (1)
-    {     
+    {
         first  = rhs.first;
         second = rhs.second;
         return *this;
     }
 
     template <typename U1, typename U2>     // (2)
-    pair& operator=(const pair<U1, U2>& rhs) 
+    pair& operator=(const pair<U1, U2>& rhs)
     {
         first  = rhs.first;
         second = rhs.second;
@@ -237,7 +237,7 @@ struct pair
 
     pair& operator=(pair&& rhs)             // (3)
         noexcept(std::is_nothrow_move_assignable<T1>::value
-            && std::is_nothrow_move_assignable<T2>::value) 
+            && std::is_nothrow_move_assignable<T2>::value)
     {
         first  = tiny_stl::forward<T1>(rhs.first);
         second = tiny_stl::forward<T2>(rhs.second);
@@ -245,18 +245,18 @@ struct pair
     }
 
     template <typename U1, typename U2>     // (4)
-    pair& operator=(pair<U1, U2>&& rhs) 
+    pair& operator=(pair<U1, U2>&& rhs)
     {
         first  = tiny_stl::forward<T1>(rhs.first);
         second = tiny_stl::forward<T2>(rhs.second);
     }
 
 
-    void swap(pair& rhs) 
-        noexcept(std::_Is_nothrow_swappable<first_type>::value
-            && std::_Is_nothrow_swappable<second_type>::value) 
+    void swap(pair& rhs)
+        noexcept(is_nothrow_swappable<first_type>::value
+            && is_nothrow_swappable<second_type>::value)
     {
-        if (this != tiny_stl::addressof(rhs)) 
+        if (this != tiny_stl::addressof(rhs))
         {
             swapADL(first, rhs.first);
             swapADL(second, rhs.second);
@@ -270,7 +270,7 @@ struct pair
 template <typename T1, typename T2>
 constexpr pair<typename UnRefWrap<T1>::type,
                typename UnRefWrap<T2>::type>
-make_pair(T1&& t1, T2&& t2) 
+make_pair(T1&& t1, T2&& t2)
 {
     using Type_pair = pair<
         typename UnRefWrap<T1>::type,
@@ -280,51 +280,51 @@ make_pair(T1&& t1, T2&& t2)
 }
 
 template <typename T1, typename T2>
-constexpr bool operator==(const pair<T1, T2>& lhs, 
-                          const pair<T1, T2>& rhs) 
+constexpr bool operator==(const pair<T1, T2>& lhs,
+                          const pair<T1, T2>& rhs)
 {
     return (lhs.first == rhs.first && lhs.second == lhs.second);
 }
 
 template <typename T1, typename T2>
 constexpr bool operator!=(const pair<T1, T2>& lhs,
-                          const pair<T1, T2>& rhs) 
+                          const pair<T1, T2>& rhs)
 {
     return (!(lhs == rhs));
 }
 
 template <typename T1, typename T2>
 constexpr bool operator<(const pair<T1, T2>& lhs,
-                         const pair<T1, T2>& rhs) 
+                         const pair<T1, T2>& rhs)
 {
     return (lhs.first < rhs.first) ||
         (!(lhs.first < rhs.first) && lhs.second < rhs.second);
 }
 
 template <typename T1, typename T2>
-constexpr bool operator<=(const pair<T1, T2>& lhs, 
-                          const pair<T1, T2>& rhs) 
+constexpr bool operator<=(const pair<T1, T2>& lhs,
+                          const pair<T1, T2>& rhs)
 {
     return (!(rhs < lhs));
 }
 
 template <typename T1, typename T2>
 constexpr bool operator>(const pair<T1, T2>& lhs,
-                         const pair<T1, T2>& rhs) 
+                         const pair<T1, T2>& rhs)
 {
     return (rhs < lhs);
 }
 
 template <typename T1, typename T2>
-constexpr bool operator>=(const pair<T1, T2>& lhs, 
-                          const pair<T1, T2>& rhs) 
+constexpr bool operator>=(const pair<T1, T2>& lhs,
+                          const pair<T1, T2>& rhs)
 {
     return (!(lhs < rhs));
 }
 
 template <typename T1, typename T2>
-inline void swap(pair<T1, T2>& lhs, pair<T1, T2>& rhs) 
-    noexcept(noexcept(lhs.swap(rhs))) 
+inline void swap(pair<T1, T2>& lhs, pair<T1, T2>& rhs)
+    noexcept(noexcept(lhs.swap(rhs)))
 {
     lhs.swap(rhs);
 }
@@ -335,12 +335,12 @@ struct tuple_size;
 
 // tuple_size to pair
 template <typename T1, typename T2>
-struct tuple_size<pair<T1, T2>> 
+struct tuple_size<pair<T1, T2>>
     : integral_constant<size_t, 2> {};
 
 // tuple_size to tuple
 template <typename... Ts>
-struct tuple_size<tuple<Ts...>> 
+struct tuple_size<tuple<Ts...>>
     : integral_constant<size_t, sizeof...(Ts)> { };
 
 template <typename T>
@@ -367,13 +367,13 @@ struct tuple_element;
 
 // tuple_element to tuple
 template <size_t Idx>
-struct tuple_element<Idx, tuple<>> 
+struct tuple_element<Idx, tuple<>>
 {
-    static_assert(AlwaysFalse<integral_constant<size_t, Idx>>::value, 
+    static_assert(AlwaysFalse<integral_constant<size_t, Idx>>::value,
         "tuple index out of range");
 };
 
-template <typename Head, typename... Tail> 
+template <typename Head, typename... Tail>
 struct tuple_element<0, tuple<Head, Tail...>>
 {
     using type = Head;
@@ -386,14 +386,14 @@ struct tuple_element<Idx, tuple<Head, Tail...>>
 
 template <size_t Idx, typename Tuple>
 struct tuple_element<Idx, const Tuple>
-    : tuple_element<Idx, Tuple> 
+    : tuple_element<Idx, Tuple>
 {
     using BaseType = tuple_element<Idx, Tuple>;
     using type = add_const_t<typename BaseType::type>;
 };
 
 template <size_t Idx, typename Tuple>
-struct tuple_element<Idx, volatile Tuple> 
+struct tuple_element<Idx, volatile Tuple>
     : tuple_element<Idx, Tuple>
 {
     using BaseType = tuple_element<Idx, Tuple>;
@@ -402,7 +402,7 @@ struct tuple_element<Idx, volatile Tuple>
 
 template <size_t Idx, typename Tuple>
 struct tuple_element<Idx, const volatile Tuple>
-    : tuple_element<Idx, Tuple> 
+    : tuple_element<Idx, Tuple>
 {
     using BaseType = tuple_element<Idx, Tuple>;
     using type = add_cv_t<typename BaseType::type>;
@@ -411,13 +411,13 @@ struct tuple_element<Idx, const volatile Tuple>
 
 // tuple_element to pair
 template <typename T1, typename T2>
-struct tuple_element<0, pair<T1, T2>> 
+struct tuple_element<0, pair<T1, T2>>
 {
     using type = T1;
 };
 
 template <typename T1, typename T2>
-struct tuple_element<1, pair<T1, T2>> 
+struct tuple_element<1, pair<T1, T2>>
 {
     using type = T2;
 };
@@ -427,7 +427,7 @@ using tuple_element_t = typename tuple_element<Idx, T>::type;
 
 template <typename Ret, typename Pair>
 constexpr Ret pairGetHelper(Pair& p,
-    integral_constant<size_t, 0>) noexcept 
+    integral_constant<size_t, 0>) noexcept
 {
     return (p.first);
 }
@@ -441,8 +441,8 @@ constexpr Ret pairGetHelper(Pair& p,
 
 // get<Idx>(pair<T1, T2>)
 template <size_t Idx, typename T1, typename T2>     // (1) C++ 14
-constexpr tuple_element_t<Idx, pair<T1, T2>>& 
-get(pair<T1, T2>& p) noexcept 
+constexpr tuple_element_t<Idx, pair<T1, T2>>&
+get(pair<T1, T2>& p) noexcept
 {
     using Ret = tuple_element_t<Idx, pair<T1, T2>>&;
     return pairGetHelper<Ret>(p, integral_constant<size_t, Idx>{});
@@ -450,7 +450,7 @@ get(pair<T1, T2>& p) noexcept
 
 template <size_t Idx, typename T1, typename T2>     // (2) C++ 14
 constexpr const tuple_element_t<Idx, pair<T1, T2>>&
-get(const pair<T1, T2>& p) noexcept 
+get(const pair<T1, T2>& p) noexcept
 {
     using Ret = const tuple_element_t<Idx, pair<T1, T2>>&;
     return pairGetHelper<Ret>(p, integral_constant<size_t, Idx>{});
@@ -458,7 +458,7 @@ get(const pair<T1, T2>& p) noexcept
 
 template <size_t Idx, typename T1, typename T2>     // (3) C++ 14
 constexpr tuple_element_t<Idx, pair<T1, T2>>&&
-get(pair<T1, T2>&& p) noexcept 
+get(pair<T1, T2>&& p) noexcept
 {
     using Ret = tuple_element_t<Idx, pair<T1, T2>>&&;
     return tiny_stl::forward<Ret>(get<Idx>(p));
@@ -466,67 +466,67 @@ get(pair<T1, T2>&& p) noexcept
 
 template <size_t Idx, typename T1, typename T2>     // (4) C++ 17
 constexpr const tuple_element_t<Idx, pair<T1, T2>>&&
-get(const pair<T1, T2>&& p) noexcept 
+get(const pair<T1, T2>&& p) noexcept
 {
     using Ret = const tuple_element_t<Idx, pair<T1, T2>>&&;
     return tiny_stl::forward<Ret>(get<Idx>(p));
 }
 
 template <typename T1, typename T2>                 // (5) C++ 14
-constexpr T1& get(pair<T1, T2>& p) noexcept 
+constexpr T1& get(pair<T1, T2>& p) noexcept
 {
     return get<0>(p);
 }
 
 template <typename T1, typename T2>                 // (6) C++ 14
-constexpr const T1& get(const pair<T1, T2>& p) noexcept 
+constexpr const T1& get(const pair<T1, T2>& p) noexcept
 {
     return get<0>(p);
 }
 
 template <typename T1, typename T2>                 // (7) C++ 14
-constexpr T1&& get(pair<T1, T2>&& p) noexcept 
+constexpr T1&& get(pair<T1, T2>&& p) noexcept
 {
     return get<0>(tiny_stl::move(p));
 }
 
 template <typename T1, typename T2>                 // (8) C++ 17
-constexpr const T1&& get(const pair<T1, T2>&& p) noexcept 
+constexpr const T1&& get(const pair<T1, T2>&& p) noexcept
 {
     return get<0>(tiny_stl::move(p));
 }
 
 template <typename T1, typename T2>                 // (9) C++ 14
-constexpr T1& get(pair<T2, T1>& p) noexcept 
+constexpr T1& get(pair<T2, T1>& p) noexcept
 {
     return get<1>(p);
 }
 
 template <typename T1, typename T2>                 // (10) C++ 14
-constexpr const T1& get(const pair<T2, T1>& p) noexcept 
+constexpr const T1& get(const pair<T2, T1>& p) noexcept
 {
     return get<1>(p);
 }
 
 template <typename T1, typename T2>                 // (11) C++ 14
-constexpr T1&& get(pair<T2, T1>&& p) noexcept 
+constexpr T1&& get(pair<T2, T1>&& p) noexcept
 {
     return get<1>(tiny_stl::move(p));
 }
 
 template <typename T1, typename T2>                 // (12) C++ 17
-constexpr const T1&& get(const pair<T2, T1>&& p) noexcept 
+constexpr const T1&& get(const pair<T2, T1>&& p) noexcept
 {
     return get<1>(tiny_stl::move(p));
 }
 
-namespace extra 
-{ 
+namespace extra
+{
 
 // compress pair
-template <typename T1, typename T2, 
+template <typename T1, typename T2,
     bool = is_empty<T1>::value && !is_final<T1>::value>
-class compress_pair final : private T1 
+class compress_pair final : private T1
 {
 public:
     using first_type  = T1;
@@ -539,20 +539,20 @@ public:
     constexpr explicit compress_pair() : T1(), second() { }
 
     template <typename U1, typename... U2>
-    compress_pair(U1&& f, U2&&... s) 
+    compress_pair(U1&& f, U2&&... s)
     : T1(tiny_stl::forward<U1>(f)), second(tiny_stl::forward<U2>(s)...) { }
 
-    T1& get_first() noexcept 
+    T1& get_first() noexcept
     {
         return *this;
     }
 
-    const T1& get_first() const noexcept 
+    const T1& get_first() const noexcept
     {
         return *this;
     }
 
-    T2& get_second() noexcept 
+    T2& get_second() noexcept
     {
         return second;
     }
@@ -576,26 +576,26 @@ public:
     constexpr explicit compress_pair() : first(), second() { }
 
     template <typename U1, typename... U2>
-    compress_pair(U1&& f, U2&&... s) 
+    compress_pair(U1&& f, U2&&... s)
     : first(tiny_stl::forward<U1>(f)), second(tiny_stl::forward<U2>(s)...) { }
 
 
-    T1& get_first() noexcept 
+    T1& get_first() noexcept
     {
         return first;
     }
 
-    const T1& get_first() const noexcept 
+    const T1& get_first() const noexcept
     {
         return first;
     }
 
-    T2& get_second() noexcept 
+    T2& get_second() noexcept
     {
         return second;
     }
 
-    const T2& get_second() const noexcept 
+    const T2& get_second() const noexcept
     {
         return second;
     }
@@ -614,6 +614,30 @@ struct TidyRAII { // strong exception guarantee
         }
     }
 };
+
+struct in_place_t
+{
+    explicit in_place_t() = default;
+};
+constexpr in_place_t in_place{};
+
+template <typename T>
+struct in_place_type_t
+{
+    explicit in_place_type_t() = default;
+};
+
+template <typename T>
+constexpr in_place_t<T> in_place_type{};
+
+template <std::size_t I>
+struct in_place_index_t
+{
+    explicit in_place_index_t() = default;
+};
+
+template <std::size_t I>
+constexpr in_place_index_t<I> in_place_index{};
 
 
 }   // tiny_stl namespace

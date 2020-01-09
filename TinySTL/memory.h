@@ -1329,7 +1329,7 @@ inline bool operator>=(nullptr_t, const unique_ptr<T, D>& rhs)
 
 
 template <typename T, typename D, 
-    typename = enable_if_t<std::_Is_swappable<D>::value>>
+    typename = enable_if_t<is_swappable<D>::value>>
 inline void swap(unique_ptr<T, D>& lhs, unique_ptr<T, D>& rhs) noexcept 
 {
     lhs.swap(rhs);

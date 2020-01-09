@@ -105,7 +105,7 @@ public:
     }
 
     void swap(stack& rhs) 
-        noexcept(std::_Is_nothrow_swappable<Container>::value)
+        noexcept(is_nothrow_swappable<Container>::value)
     {
         swapADL(this->cont, rhs.cont);
     }

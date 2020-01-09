@@ -169,8 +169,8 @@ public:
     }
 
     void swap(tuple& rhs)
-        noexcept(conjunction<std::_Is_nothrow_swappable<Head>, 
-            std::_Is_nothrow_swappable<Tail>...>::value)
+        noexcept(conjunction<is_nothrow_swappable<Head>,
+            is_nothrow_swappable<Tail>...>::value)
     {
         tiny_stl::swapADL(get_head(), rhs.get_head());
         Base::swap(rhs.get_tail());

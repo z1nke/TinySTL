@@ -112,7 +112,7 @@ public:
     }
 
     void swap(queue& rhs) 
-        noexcept(std::_Is_nothrow_swappable<Container>::value)
+        noexcept(is_nothrow_swappable<Container>::value)
     {
         swapADL(cont, rhs.cont);
     }
@@ -320,8 +320,8 @@ public:
     }
 
     void swap(priority_queue& rhs)
-        noexcept(std::_Is_nothrow_swappable<Container>::value
-            && std::_Is_nothrow_swappable<Compare>::value)
+        noexcept(is_nothrow_swappable<Container>::value
+            && is_nothrow_swappable<Compare>::value)
     {
         swapADL(comp, rhs.comp);
         swapADL(cont, rhs.cont);
