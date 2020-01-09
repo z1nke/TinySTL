@@ -314,6 +314,7 @@ public:
     basic_string(size_type count, value_type ch, const Alloc& a = Alloc())
         : allocVal(a)
     {
+        initEmpty();
         init(count, ch);
     }
 
@@ -644,7 +645,7 @@ private:
 
         // allocate and assign
         return reallocAndAssign(count,
-            [](value_type* const dst, size_type count, const value_type* const src)
+            [](value_type* const dst, size_type count, value_type ch)
             {
                 Traits::assign(dst, count, ch);
                 Traits::assign(dst[count], value_type());
