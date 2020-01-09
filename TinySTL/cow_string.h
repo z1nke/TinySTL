@@ -1884,12 +1884,13 @@ using cow_u32string = cow_basic_string<char32_t>;
 namespace 
 {
 
-const char digits[] = "9876543210123456789";
-const char* zero = digits + 9;
+
 template <typename E, typename T>
 cow_basic_string<E> IntegerToCowString(T val) 
 {
     static_assert(is_integral_v<T>, "T must be integral");
+    static const char digits[] = "9876543210123456789";
+    static const char* zero = digits + 9;
     bool isNegative = val < 0;
     E buffer[21]; // -2^63 ~ 2^64-1
     E* ptr = buffer;
@@ -1969,29 +1970,6 @@ cow_wstring to_cow_wstring(unsigned long long value)
 {
     return IntegerToCowString<wchar_t>(value);
 }
-
-#pragma warning(push)
-#pragma warning(disable: 4455)
-cow_string operator""s(const char* str, std::size_t len)
-{
-    return cow_string{ str, len };
-}
-
-cow_wstring operator""s(const wchar_t* str, std::size_t len)
-{
-    return cow_wstring{ str, len };
-}
-
-cow_u16string operator""s(const char16_t* str, std::size_t len)
-{
-    return cow_u16string{ str, len };
-}
-
-cow_u32string operator""s(const char32_t* str, std::size_t len)
-{
-    return cow_u32string{ str, len };
-}
-#pragma warning(pop)
 
 // const cow_string is effective
 // non-const cow_string as far as possible use operations of const version 
