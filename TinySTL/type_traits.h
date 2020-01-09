@@ -729,6 +729,15 @@ constexpr bool is_copy_constructible_v
                 = is_copy_constructible<T>::value;
 
 template <typename T>
+using is_trivially_constructible = std::is_trivially_constructible<T>;
+
+template <typename T>
+using is_destructible = std::is_destructible<T>;
+
+template <typename T>
+constexpr bool is_destructible_v = is_destructible<T>::value;
+
+template <typename T>
 using is_trivially_destructible = std::is_trivially_destructible<T>;
 
 template <typename T>
@@ -743,8 +752,23 @@ constexpr bool is_nothrow_constructible_v
                 = is_nothrow_constructible<T, Args...>::value;
 
 template <typename T>
+struct is_move_constructible
+    : is_constructible<T, add_rvalue_reference_t<T>> {};
+
+template <typename T>
+constexpr bool is_move_constructible_v = is_move_constructible<T>::value;
+
+template <typename T>
+struct is_trivially_move_constructible
+    : is_trivially_constructible<T, add_rvalue_reference_t<T>> {};
+
+template <typename T>
+constexpr bool is_trivially_move_constructible_v =
+    is_trivially_move_constructible<T>::value;
+
+template <typename T>
 struct is_nothrow_move_constructible
-    : is_nothrow_constructible<T, T>::type { };
+    : is_nothrow_constructible<T, add_rvalue_reference_t<T>> {};
 
 template <typename T>
 constexpr bool is_nothrow_move_constructible_v
