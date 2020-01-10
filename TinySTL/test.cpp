@@ -3,9 +3,6 @@
 #include <crtdbg.h>
 #endif
 
-#include <SDKDDKVer.h>
-#include <tchar.h>
-
 #include <chrono>
 #include <ctime>
 #include <iostream>
@@ -808,7 +805,7 @@ void testCowString()
     using std::endl;
 
     tiny_stl::cow_string s0;
-    //UNIT_TEST(true, s0.empty());
+    UNIT_TEST(true, s0.empty());
 
     tiny_stl::cow_string s1 = "1234";
     UNIT_TEST(4, s1.size());
@@ -935,6 +932,47 @@ void testString()
 {
     tiny_stl::string str1;
     UNIT_TEST(true, str1.empty());
+    UNIT_TEST(0, str1.size());
+
+    tiny_stl::string str2(8, 'a');
+    UNIT_TEST(false, str2.empty());
+    UNIT_TEST(8, str2.size());
+    
+    tiny_stl::string str3(20, 'a');
+    UNIT_TEST(false, str3.empty());
+    UNIT_TEST(20, str3.size());
+
+    tiny_stl::string str4{ str2 };
+    UNIT_TEST(8, str4.size());
+
+    tiny_stl::string str5{ str2, 3 };
+    UNIT_TEST(5, str5.size());
+
+    tiny_stl::string str6{ str3, 1, 17 };
+    UNIT_TEST(17, str6.size());
+
+    tiny_stl::string str7 = "abcdefg";
+    UNIT_TEST(7, str7.size());
+    UNIT_TEST('a', str7.front());
+    UNIT_TEST('g', str7.back());
+
+    tiny_stl::string str8 = "000111222333444555666777888999";
+    UNIT_TEST(30, str8.size());
+    UNIT_TEST('1', str8[4]);
+    UNIT_TEST('3', str8.at(10));
+
+    str3 = str7;
+    UNIT_TEST(7, str3.size());
+    UNIT_TEST('a', *str3.begin());
+    UNIT_TEST('b', *tiny_stl::next(str3.begin()));
+
+    str3.push_back('h');
+    UNIT_TEST(8, str3.size());
+    UNIT_TEST('h', str3.back());
+
+    str8.push_back('a');
+    UNIT_TEST(31, str8.size());
+    UNIT_TEST('a', str8.back());
 }
 
 
@@ -1188,7 +1226,7 @@ void testAll()
     testDeque();
     testAdaptor();
     testCowString();
-    //testString();
+    testString();
     testStringView();
     testRBTree();
     testSet();
