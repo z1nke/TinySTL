@@ -1276,7 +1276,7 @@ namespace
 {
 
 template <typename E, typename T>
-static basic_string<E> IntegerToString(T val) 
+inline basic_string<E> IntegerToString(T val) 
 {
     static_assert(is_integral_v<T>, "T must be integral");
     static const char digits[] = "9876543210123456789";
@@ -1307,62 +1307,62 @@ using u16string  = basic_string<char16_t>;
 using u32string  = basic_string<char32_t>;
 
 
-string to_string(int value)
+inline string to_string(int value)
 {
     return IntegerToString<char>(value);
 }
 
-string to_string(long value)
+inline string to_string(long value)
 {
     return IntegerToString<char>(value);
 }
 
-string to_string(unsigned value)
+inline string to_string(unsigned value)
 {
     return IntegerToString<char>(value);
 }
 
-string to_string(unsigned long value)
+inline string to_string(unsigned long value)
 {
     return IntegerToString<char>(value);
 }
 
-string to_string(long long value)
+inline string to_string(long long value)
 {
     return IntegerToString<char>(value);
 }
 
-string to_string(unsigned long long value)
+inline string to_string(unsigned long long value)
 {
     return IntegerToString<char>(value);
 }
 
-wstring to_wstring(int value)
+inline wstring to_wstring(int value)
 {
     return IntegerToString<wchar_t>(value);
 }
 
-wstring to_wstring(long value)
+inline wstring to_wstring(long value)
 {
     return IntegerToString<wchar_t>(value);
 }
 
-wstring to_wstring(unsigned value)
+inline wstring to_wstring(unsigned value)
 {
     return IntegerToString<wchar_t>(value);
 }
 
-wstring to_wstring(unsigned long value)
+inline wstring to_wstring(unsigned long value)
 {
     return IntegerToString<wchar_t>(value);
 }
 
-wstring to_wstring(long long value)
+inline wstring to_wstring(long long value)
 {
     return IntegerToString<wchar_t>(value);
 }
 
-wstring to_wstring(unsigned long long value)
+inline wstring to_wstring(unsigned long long value)
 {
     return IntegerToString<wchar_t>(value);
 }
@@ -1370,22 +1370,22 @@ wstring to_wstring(unsigned long long value)
 
 #pragma warning(push)
 #pragma warning(disable: 4455)
-string operator""s(const char* str, std::size_t len)
+inline string operator""s(const char* str, std::size_t len)
 {
     return string{ str, len };
 }
 
-wstring operator""s(const wchar_t* str, std::size_t len)
+inline wstring operator""s(const wchar_t* str, std::size_t len)
 {
     return wstring{ str, len };
 }
 
-u16string operator""s(const char16_t* str, std::size_t len)
+inline u16string operator""s(const char16_t* str, std::size_t len)
 {
     return u16string{ str, len };
 }
 
-u32string operator""s(const char32_t* str, std::size_t len)
+inline u32string operator""s(const char32_t* str, std::size_t len)
 {
     return u32string{ str, len };
 }

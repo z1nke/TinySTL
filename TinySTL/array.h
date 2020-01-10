@@ -518,10 +518,7 @@ public:
 };  // array<T, Size>
 
 
-namespace 
-{
 #define ARRAY0_OUT_OF_RANGE false
-}   // namespace
 
 template <typename T>
 class array<T, 0> 

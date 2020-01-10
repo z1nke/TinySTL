@@ -224,7 +224,7 @@ inline void fill(FwdIter first, FwdIter last, const T& val)
 
 
 template <typename FwdIter, typename Func>
-void generate(FwdIter first, FwdIter last, Func f)
+inline void generate(FwdIter first, FwdIter last, Func f)
 {
     for (; first != last; ++first)
     {
@@ -233,7 +233,7 @@ void generate(FwdIter first, FwdIter last, Func f)
 }
 
 template <typename OutIter, typename Size, typename Func>
-OutIter generate_n(OutIter first, Size n, Func f)
+inline OutIter generate_n(OutIter first, Size n, Func f)
 {
     for (Size i = 0; i < n; ++i)
     {
@@ -244,7 +244,7 @@ OutIter generate_n(OutIter first, Size n, Func f)
 }
 
 template <typename InIter, typename OutIter, typename UnaryOp>
-OutIter transform(InIter first1, InIter last1, OutIter dstFirst, UnaryOp op)
+inline OutIter transform(InIter first1, InIter last1, OutIter dstFirst, UnaryOp op)
 {
     for (; first1 != last1; ++first1, ++dstFirst)
         *dstFirst = op(*first1);
@@ -253,7 +253,7 @@ OutIter transform(InIter first1, InIter last1, OutIter dstFirst, UnaryOp op)
 }
 
 template <typename InIter, typename OutIter, typename BinOp>
-OutIter transform(InIter first1, InIter last1, 
+inline OutIter transform(InIter first1, InIter last1, 
                   InIter first2, OutIter dstFirst, BinOp op)
 {
     for (; first1 != last1; ++first1, ++first2, ++dstFirst)
@@ -282,7 +282,7 @@ inline OutIter copy(InIter first, InIter last, OutIter dst)
 }
 
 template <typename InIter, typename Size, typename OutIter>
-OutIter copy_n(InIter src, Size count, OutIter dst)
+inline OutIter copy_n(InIter src, Size count, OutIter dst)
 {
     if (count > 0)
     {
@@ -801,7 +801,7 @@ namespace
 
 // insert_sort
 template <typename RanIter, typename Compare>
-void insertSort(RanIter first, RanIter last, Compare& cmp)
+inline void insertSort(RanIter first, RanIter last, Compare& cmp)
 {
     if (first == last) return;
 
@@ -851,7 +851,7 @@ inline RanIter quickSortPartition(RanIter first, RanIter last, Compare& cmp)
     return i;
 }
 
-const std::ptrdiff_t INSERT_SORT_MAX = 32;
+static const std::ptrdiff_t INSERT_SORT_MAX = 32;
 
 template <typename RanIter, typename Compare>
 inline void quickSort(RanIter first, RanIter last, IterDiffType<RanIter> diff, Compare& cmp)
