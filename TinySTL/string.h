@@ -1034,6 +1034,45 @@ private:
     }
 
 public:
+    void clear() noexcept
+    {
+        tidy();
+    }
+
+    void push_back(value_type ch)
+    {
+        const size_type oldCapacity = capacity();
+        const size_type oldSize = size();
+        auto& val = getVal();
+        if (oldSize < oldCapacity) // has enough space
+        {
+            ++val.size;
+            pointer ptr = val.getPtr();
+            Traits::assign(ptr[oldSize], ch);
+            Traits::assign(ptr[oldSize + 1], value_type());
+        }
+
+        // reallocate and assign
+        reallocAndAssignGrowBy(1,
+            [](value_type* newPtr, const value_type* oldPtr,
+               const size_type xOldSize, const value_type ch)
+            {
+                Traits::move(newPtr, oldPtr, xOldSize);
+                Traits::assign(newPtr[oldSize], ch);
+                Traits::assign(newPtr[oldSize + 1], value_type());
+            }, ch);
+    }
+
+    void pop_back()
+    {
+        if (empty())
+            return;
+
+        auto& val = getVal();
+        --val.size;
+        Traits::assign(val.getPtr()[size()], value_type());
+    }
+
     void swap(basic_string& rhs) 
         noexcept(allocator_traits<Alloc>::propagate_on_container_swap::value ||
                  allocator_traits<Alloc>::is_always_equal::value)
@@ -1042,6 +1081,58 @@ public:
         if (this != tiny_stl::addressof(rhs)) {
             swapAux(rhs);
         }
+    }
+
+private:
+    size_type findHelper(const value_type* str, size_type pos, size_type count) const noexcept
+    {
+        // native find algorithm
+        size_type lhsSize = size();
+        if (count > lhsSize || pos > lhsSize - count)
+            return npos;
+        if (count == 0)
+            return pos;
+        auto& val = getVal();
+        for (size_type i = pos; i <= lhsSize - count; ++i)
+        {
+            if (!Traits::eq(val->getPtr()[i], str[0])) // mismatched the first character
+                continue;
+
+            size_type j = 1;
+            for (; j < count; ++j)
+            {
+                if (!Traits::eq(val->getPtr()[i + j], str[j]))
+                    break;
+            }
+            if (j == count)
+                return i;
+        }
+
+        return npos;
+    }
+
+public:
+    size_type find(const basic_string& str, size_type pos = 0) const noexcept
+    {
+        return findHelper(str.c_str(), pos, str.size());
+    }
+
+    size_type find(const value_type* str, size_type pos, size_type count) const
+    {
+        return findHelper(str, pos, count);
+    }
+
+    size_type find(const value_type* str, size_type pos = 0) const
+    {
+        return findHelper(str, pos, Traits::length(str));
+    }
+
+    size_type find(value_type ch, size_type pos = 0) const noexcept
+    {
+        const value_type* findAt = Traits::find(data() + pos,
+            size() - pos, ch);
+        return findAt == nullptr ? npos
+            : static_cast<size_type>(findAt - data());
     }
 
 private:
