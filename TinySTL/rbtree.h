@@ -275,11 +275,11 @@ public:
     using difference_type        = ptrdiff_t;
     
 private:
-    using AlTraits             = allocator_traits<Alloc>;
-    using Node                  = RBTNode<T>;
-    using NodePtr               = RBTNode<T>*;
-    using AlNode                = typename AlTraits::template rebind_alloc<Node>;
-    using AlNodeTraits         = allocator_traits<AlNode>;
+    using AlTraits               = allocator_traits<Alloc>;
+    using Node                   = RBTNode<T>;
+    using NodePtr                = RBTNode<T>*;
+    using AlNode                 = typename AlTraits::template rebind_alloc<Node>;
+    using AlNodeTraits           = allocator_traits<AlNode>;
     
 protected:
     NodePtr  header;

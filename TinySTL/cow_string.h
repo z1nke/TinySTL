@@ -1886,7 +1886,7 @@ namespace
 
 
 template <typename E, typename T>
-cow_basic_string<E> IntegerToCowString(T val) 
+inline cow_basic_string<E> IntegerToCowString(T val) 
 {
     static_assert(is_integral_v<T>, "T must be integral");
     static const char digits[] = "9876543210123456789";
@@ -1911,62 +1911,62 @@ cow_basic_string<E> IntegerToCowString(T val)
 
 } // namespace
 
-cow_string to_cow_string(int value)
+inline cow_string to_cow_string(int value)
 {
     return IntegerToCowString<char>(value);
 }
 
-cow_string to_cow_string(long value)
+inline cow_string to_cow_string(long value)
 {
     return IntegerToCowString<char>(value);
 }
 
-cow_string to_cow_string(unsigned value)
+inline cow_string to_cow_string(unsigned value)
 {
     return IntegerToCowString<char>(value);
 }
 
-cow_string to_cow_string(unsigned long value)
+inline cow_string to_cow_string(unsigned long value)
 {
     return IntegerToCowString<char>(value);
 }
 
-cow_string to_cow_string(long long value)
+inline cow_string to_cow_string(long long value)
 {
     return IntegerToCowString<char>(value);
 }
 
-cow_string to_cow_string(unsigned long long value)
+inline cow_string to_cow_string(unsigned long long value)
 {
     return IntegerToCowString<char>(value);
 }
 
-cow_wstring to_cow_wstring(int value)
+inline cow_wstring to_cow_wstring(int value)
 {
     return IntegerToCowString<wchar_t>(value);
 }
 
-cow_wstring to_cow_wstring(long value)
+inline cow_wstring to_cow_wstring(long value)
 {
     return IntegerToCowString<wchar_t>(value);
 }
 
-cow_wstring to_cow_wstring(unsigned value)
+inline cow_wstring to_cow_wstring(unsigned value)
 {
     return IntegerToCowString<wchar_t>(value);
 }
 
-cow_wstring to_cow_wstring(unsigned long value)
+inline cow_wstring to_cow_wstring(unsigned long value)
 {
     return IntegerToCowString<wchar_t>(value);
 }
 
-cow_wstring to_cow_wstring(long long value)
+inline cow_wstring to_cow_wstring(long long value)
 {
     return IntegerToCowString<wchar_t>(value);
 }
 
-cow_wstring to_cow_wstring(unsigned long long value)
+inline cow_wstring to_cow_wstring(unsigned long long value)
 {
     return IntegerToCowString<wchar_t>(value);
 }

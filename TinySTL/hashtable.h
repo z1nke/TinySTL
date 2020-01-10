@@ -159,6 +159,7 @@ struct HashIterator
     }
 };
 
+// FIXME: write a helper class for prime
 static const int stlPrimesSize = 28;
 static const size_t stlPrimesArray[stlPrimesSize] =
 {
