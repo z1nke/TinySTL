@@ -1043,13 +1043,14 @@ public:
     {
         const size_type oldCapacity = capacity();
         const size_type oldSize = size();
-        auto& val = getVal();
         if (oldSize < oldCapacity) // has enough space
         {
+            auto& val = getVal();
             ++val.size;
             pointer ptr = val.getPtr();
             Traits::assign(ptr[oldSize], ch);
             Traits::assign(ptr[oldSize + 1], value_type());
+            return;
         }
 
         // reallocate and assign
@@ -1058,8 +1059,8 @@ public:
                const size_type xOldSize, const value_type ch)
             {
                 Traits::move(newPtr, oldPtr, xOldSize);
-                Traits::assign(newPtr[oldSize], ch);
-                Traits::assign(newPtr[oldSize + 1], value_type());
+                Traits::assign(newPtr[xOldSize], ch);
+                Traits::assign(newPtr[xOldSize + 1], value_type());
             }, ch);
     }
 
@@ -1081,6 +1082,83 @@ public:
         if (this != tiny_stl::addressof(rhs)) {
             swapAux(rhs);
         }
+    }
+
+    basic_string& append(size_type count, value_type ch)
+    {
+        const size_type oldCapacity = capacity();
+        const size_type oldSize = size();
+        if (count <= oldCapacity && oldSize <= oldCapacity - count) // has enough space
+        {
+            auto& val = getVal();
+            val.size += count;
+            Traits::assign(val.getPtr() + oldSize, count, ch);
+            Traits::assign(val.getPtr()[oldSize + count], value_type());
+            return *this;
+        }
+
+        return reallocAndAssignGrowBy(count,
+            [](value_type* newPtr, const value_type* oldPtr, const size_type xOldSize,
+               const size_type xCount, const value_type xCh)
+            {
+                Traits::move(newPtr, oldPtr, xOldSize);
+                Traits::assign(newPtr + xOldSize, xCount, xCh);
+                Traits::assign(newPtr[xOldSize + xCount], value_type());
+            }, count, ch);
+    }
+
+    basic_string& append(const basic_string& str)
+    {
+        return append(str.getVal().getPtr(), str.size());
+    }
+
+    basic_string& append(const basic_string& str, size_type pos,
+        size_type count = npos)
+    {
+        str.checkOffset(pos);
+        count = tiny_stl::min(count, str.size() - pos);
+        return append(str.getVal().getPtr(), count);
+    }
+
+    basic_string& append(const value_type* str, size_type count)
+    {
+        const size_type oldCapacity = capacity();
+        const size_type oldSize = size();
+        if (count <= oldCapacity && oldSize <= oldCapacity - count)
+        {
+            auto& val = getVal();
+            val.size += count;
+            Traits::move(val.getPtr() + oldSize, str, count);
+            Traits::assign(val.getPtr()[oldSize + 1], value_type());
+
+            return *this;
+        }
+
+        return reallocAndAssignGrowBy(count,
+            [](value_type* newPtr, const value_type* oldPtr, const size_type xOldSize,
+               const value_type* xStr, const size_type xCount)
+            {
+                Traits::move(newPtr, oldPtr, xOldSize);
+                Traits::move(newPtr + xOldSize, xStr, xCount);
+                Traits::assign(newPtr[xOldSize + 1], value_type());
+            }, str, count);
+    }
+
+    basic_string& append(const value_type* str)
+    {
+        return append(str, Traits::length(str));
+    }
+
+    template <typename InIter, typename = enable_if_t<is_iterator<InIter>::value>>
+    basic_string& append(InIter first, InIter last)
+    {
+        basic_string str{ first, last };
+        return append(str);
+    }
+
+    basic_string& append(std::initializer_list<value_type> ilist)
+    {
+        return append(ilist.begin(), ilist.size());
     }
 
 private:
