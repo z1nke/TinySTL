@@ -17,10 +17,10 @@ struct StringConstIterator
     using difference_type   = ptrdiff_t;
     using Self              = StringConstIterator<T>;
 
-    T* ptr;
+    const T* ptr;
 
     StringConstIterator() = default;
-    StringConstIterator(T* p) : ptr(p) {}
+    StringConstIterator(const T* p) : ptr(p) {}
 
     reference operator*() const
     {
@@ -139,7 +139,7 @@ struct StringIterator : StringConstIterator<T>
 
     reference operator*() const
     {
-        return *this->ptr;
+        return const_cast<reference>(*this->ptr);
     }
 
     pointer operator->() const
@@ -898,8 +898,9 @@ public:
 
     const_iterator end() const noexcept
     {
-        return const_iterator(getVal().getPtr() +
-            static_cast<difference_type>(getVal().size));
+        const value_type* ptr = getVal().getPtr() +
+            static_cast<difference_type>(getVal().size);
+        return const_iterator{ ptr };
     }
 
     const_iterator cend() const noexcept
@@ -1039,6 +1040,36 @@ public:
         tidy();
     }
 
+    basic_string& erase(size_type pos = 0, size_type count = npos)
+    {
+        checkOffset(pos);
+        count = tiny_stl::min(count, size() - pos);
+        auto& val = getVal();
+        val.size -= count;
+        Traits::move(val.getPtr() + pos, val.getPtr() + pos + count, 
+            val.size - pos + 1); // + null character
+
+        return *this;
+    }
+
+    iterator erase(const_iterator pos)
+    {
+        const size_type offset = pos - cbegin();
+        checkOffset(offset);
+        const size_type count = cend() - pos;
+        erase(offset, 1);
+        return iterator(data() + static_cast<difference_type>(offset));
+    }
+
+    iterator erase(const_iterator first, const_iterator last)
+    {
+        const size_type offset = first - cbegin();
+        checkOffset(offset);
+        const size_type count = last - first;
+        erase(offset, count);
+        return iterator(data() + static_cast<difference_type>(offset));
+    }
+
     void push_back(value_type ch)
     {
         const size_type oldCapacity = capacity();
@@ -1129,7 +1160,7 @@ public:
             auto& val = getVal();
             val.size += count;
             Traits::move(val.getPtr() + oldSize, str, count);
-            Traits::assign(val.getPtr()[oldSize + 1], value_type());
+            Traits::assign(val.getPtr()[oldSize + count], value_type());
 
             return *this;
         }
