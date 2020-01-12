@@ -1161,6 +1161,27 @@ public:
         return append(ilist.begin(), ilist.size());
     }
 
+    basic_string& operator+=(const basic_string& str)
+    {
+        return append(str);
+    }
+
+    basic_string& operator+=(value_type ch)
+    {
+        push_back(ch);
+        return *this;
+    }
+
+    basic_string& operator+=(const value_type* str)
+    {
+        return append(str);
+    }
+
+    basic_string& operator+=(std::initializer_list<value_type> ilist)
+    {
+        return append(ilist.begin(), ilist.size());
+    }
+
 private:
     size_type findHelper(const value_type* str, size_type pos, size_type count) const noexcept
     {
