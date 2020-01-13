@@ -1040,6 +1040,108 @@ public:
         tidy();
     }
 
+    basic_string& insert(size_type pos, size_type count, value_type ch)
+    {
+        checkOffset(pos);
+        const size_type oldCapcity = capacity();
+        const size_type oldSize = size();
+        if (count <= oldCapcity && oldSize <= oldCapcity - count)
+        {
+            auto& val = getVal();
+            val.size += count;
+            Traits::move(val.getPtr() + pos + count, val.getPtr() + pos, oldSize - pos + 1);
+            Traits::assign(val.getPtr() + pos, count, ch);
+            Traits::assign(val.getPtr()[size()], value_type());
+            return *this;
+        }
+
+        return reallocAndAssignGrowBy(count,
+            [](value_type* newPtr, const value_type* oldPtr,
+               const size_type xOldSize, const size_type xPos,
+               const size_type xCount, const value_type xCh)
+            {
+                const size_type newSize = xOldSize + xCount;
+                Traits::move(newPtr, oldPtr, xPos);
+                Traits::assign(newPtr + xPos, xCount, xCh);
+                Traits::move(newPtr + xPos + xCount, oldPtr + xPos, xOldSize - xPos + 1);
+            }, pos, count, ch);
+    }
+
+    basic_string& insert(size_type pos, const value_type* str)
+    {
+        return insert(pos, str, Traits::length(str));
+    }
+
+    basic_string& insert(size_type pos, const value_type* str, size_type count)
+    {
+        checkOffset(pos);
+        const size_type oldCapacity = capacity();
+        const size_type oldSize = size();
+        if (count <= oldCapacity && oldSize <= oldCapacity - count)
+        {
+            auto& val = getVal();
+            val.size += count;
+            Traits::move(val.getPtr() + pos + count, val.getPtr() + pos, oldSize - pos + 1);
+            Traits::move(val.getPtr() + pos, str, count);
+            return *this;
+        }
+        
+        return reallocAndAssignGrowBy(count,
+            [](value_type* newPtr, const value_type* oldPtr,
+                const size_type xOldSize, const size_type xPos,
+                const value_type* xStr, const size_type xCount)
+            {
+                Traits::move(newPtr, oldPtr, xPos);
+                Traits::move(newPtr + xPos, xStr, xCount);
+                Traits::move(newPtr + xPos + xCount, oldPtr + xPos,
+                    xOldSize - xPos + 1);
+            }, pos, str, count);
+    }
+
+    basic_string& insert(size_type pos, const basic_string& str)
+    {
+        return insert(pos, str.c_str(), str.size());
+    }
+
+    basic_string& insert(size_type pos, const basic_string& str,
+        size_type strPos, size_type count = npos)
+    {
+        str.checkOffset(strPos);
+        auto& strVal = str.getVal();
+        count = tiny_stl::min(count, str.size() - strPos);
+        return insert(pos, str.getVal().getPtr() + strPos, count);
+    }
+
+    iterator insert(const_iterator pos, value_type ch)
+    {
+        const size_type offset = static_cast<size_type>(pos - cbegin());
+        insert(offset, 1, ch);
+        return begin() + static_cast<difference_type>(offset);
+    }
+
+    iterator insert(const_iterator pos, size_type count, value_type ch)
+    {
+        const size_type offset = static_cast<size_type>(pos - cbegin());
+        insert(offset, count, ch);
+        return begin() + static_cast<difference_type>(offset);
+    }
+
+    template <typename InIter, typename = enable_if_t<is_iterator_v<InIter>>>
+    iterator insert(const_iterator pos, InIter first, InIter last)
+    {
+        const size_type offset = static_cast<size_type>(pos - cbegin());
+        basic_string rhs{ first, last };
+        insert(offset, rhs);
+        return begin() + static_cast<difference_type>(offset);
+    }
+
+    iterator insert(const_iterator pos, std::initializer_list<value_type> ilist)
+    {
+        const size_type offset = static_cast<size_type>(pos - cbegin());
+        insert(offset, ilist.begin(), ilist.size());
+        return begin() + static_cast<difference_type>(offset);
+    }
+
     basic_string& erase(size_type pos = 0, size_type count = npos)
     {
         checkOffset(pos);
@@ -1211,6 +1313,11 @@ public:
     basic_string& operator+=(std::initializer_list<value_type> ilist)
     {
         return append(ilist.begin(), ilist.size());
+    }
+
+    basic_string substr(size_type pos = 0, size_type count = npos) const
+    {
+        return basic_string{ *this, pos, count };
     }
 
 private:
