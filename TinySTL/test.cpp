@@ -973,6 +973,53 @@ void testString()
     str8.push_back('a');
     UNIT_TEST(31, str8.size());
     UNIT_TEST('a', str8.back());
+
+    str3.append(3, 'x');
+    UNIT_TEST(11, str3.size());
+    UNIT_TEST('x', str3.back());
+
+    str8.append(32, '!');
+    UNIT_TEST(63, str8.size());
+    UNIT_TEST('!', str8.back());
+
+    str3.append("R0530");
+    UNIT_TEST(16, str3.size());
+    UNIT_TEST('0', str3.back());
+
+    str3.erase(8, 3);
+    UNIT_TEST(13, str3.size());
+    UNIT_TEST('R', str3[8]);
+
+    str3.erase(str3.begin());
+    UNIT_TEST(12, str3.size());
+    UNIT_TEST('b', str3.front());
+
+    auto iter3 = str3.begin();
+    iter3 += 7;
+    str3.erase(str3.begin(), iter3);
+    UNIT_TEST(5, str3.size());
+    UNIT_TEST('R', str3[0]);
+
+    tiny_stl::string str9 = "125";
+    str9.insert(2, 2, '3');
+    UNIT_TEST(5, str9.size());
+    UNIT_TEST('3', str9[2]);
+    UNIT_TEST('5', str9[4]);
+
+    str9 = "126";
+    str9.insert(2, "345");
+    UNIT_TEST(6, str9.size());
+    UNIT_TEST('3', str9[2]);
+    UNIT_TEST('6', str9.back());
+
+    tiny_stl::string str10 = "ceb";
+    str10.insert(1, 30, 'e');
+    UNIT_TEST(33, str10.size());
+
+    tiny_stl::string str11 = "abc";
+    str11.insert(1, "012345678901234567890123456789");
+    UNIT_TEST(33, str11.size());
+    UNIT_TEST('0', str11[1]);
 }
 
 
