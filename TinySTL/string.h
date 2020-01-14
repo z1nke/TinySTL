@@ -1315,6 +1315,112 @@ public:
         return append(ilist.begin(), ilist.size());
     }
 
+    int compare(const basic_string& rhs) const noexcept
+    {
+        const size_type lhsSize = size();
+        const size_type rhsSize = rhs.size();
+        int result = Traits::compare(data(), rhs.data(), tiny_stl::min(lhsSize, rhsSize));
+        if (result != 0)
+            return result;
+
+        // assert result == 0
+        if (lhsSize < rhsSize)
+            return -1;
+        if (lhsSize > rhsSize)
+            return 1;
+
+        // assert lhsSize == rhsSize
+        return 0;
+    }
+
+    int compare(size_type pos1, size_type count1, const basic_string& rhs) const
+    {
+        basic_string lhs = substr(pos1, count1);
+        return lhs.compare(rhs);
+    }
+
+    int compare(size_type pos1, size_type count1, const basic_string& rhs,
+        size_type pos2, size_type count2 = npos) const
+    {
+        basic_string lhs = substr(pos1, count1);
+        basic_string rhs = rhs.substr(pos2, count2);
+        return lhs.compare(rhs);
+    }
+
+    int compare(const value_type* str) const
+    {
+        basic_string rhs{str};
+        return compare(rhs);
+    }
+
+    int compare(size_type pos1, size_type count1, const value_type* str) const
+    {
+        basic_string lhs = substr(pos1, count1);
+        return lhs.compare(basic_string{str});
+    }
+
+    int compare(size_type pos1, size_type count1, const value_type* str,
+        size_type count2) const
+    {
+        basic_string lhs = substr(pos1, count1);
+        basic_string rhs{str, count2};
+        return lhs.compare(rhs);
+    }
+
+    bool starts_with(value_type ch) const noexcept
+    {
+        return size() >= 1 && this->front() == ch;
+    }
+
+    bool starts_with(const value_type* str) const
+    {
+        const size_type strLen = Traits::length(str);
+        return size() >= strLen && compare(0, strLen, str) == 0;
+    }
+
+    bool ends_with(value_type ch) const noexcept
+    {
+        return size() >= 1 && this->back() == ch;
+    }
+
+    bool ends_with(const value_type* str) const
+    {
+        const size_type lhsSize = size();
+        const size_type strLen = Traits::length(str);
+        return lhsSize >= strLen &&
+            compare(lhsSize - strLen, strLen, str) == 0;
+    }
+
+    size_type copy(value_type* dst, size_type count, size_type pos) const
+    {
+        checkOffset(pos);
+        count = tiny_stl::min(count, size() - pos);
+        Traits::move(dst, data() + pos, count);
+
+        return count;
+    }
+
+    void resize(size_type newSize)
+    {
+        return resize(count, value_type());
+    }
+
+    void resize(size_type newSize, value_type ch)
+    {
+        const size_type oldSize = size();
+        if (oldSize == newSize)
+            return;
+
+        if (oldSize < newSize) // inc
+        {
+            append(newSize - oldSize, ch);
+        }
+        else // oldSize > newSize // dec
+        {
+            erase(newSize);
+        }
+    }
+
     basic_string substr(size_type pos = 0, size_type count = npos) const
     {
         return basic_string{ *this, pos, count };
