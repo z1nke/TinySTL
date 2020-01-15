@@ -1035,6 +1035,15 @@ void testString()
 
     UNIT_TEST(true, str12.compare(str13) > 0);
     UNIT_TEST(true, str3.compare("R0530") == 0);
+
+    tiny_stl::string str14 = "abcdef";
+    str14.resize(7, 'g');
+    UNIT_TEST(7, str14.size());
+    UNIT_TEST('g', str14.back());
+
+    str14.resize(3);
+    UNIT_TEST(3, str14.size());
+    UNIT_TEST('c', str14.back());
 }
 
 

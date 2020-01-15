@@ -1402,7 +1402,7 @@ public:
 
     void resize(size_type newSize)
     {
-        return resize(count, value_type());
+        return resize(newSize, value_type());
     }
 
     void resize(size_type newSize, value_type ch)
