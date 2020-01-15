@@ -1020,6 +1020,21 @@ void testString()
     str11.insert(1, "012345678901234567890123456789");
     UNIT_TEST(33, str11.size());
     UNIT_TEST('0', str11[1]);
+
+    tiny_stl::string str12 = "abcgh";
+    str12.insert(3, "def");
+    UNIT_TEST(8, str12.size());
+    UNIT_TEST('d', str12[3]);
+    UNIT_TEST('e', str12[4]);
+    UNIT_TEST('f', str12[5]);
+
+    tiny_stl::string str13 = "116";
+    str13.insert(1, "23456789101112131415");
+    UNIT_TEST(23, str13.size());
+    UNIT_TEST('2', str13[1]);
+
+    UNIT_TEST(true, str12.compare(str13) > 0);
+    UNIT_TEST(true, str3.compare("R0530") == 0);
 }
 
 
