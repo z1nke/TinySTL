@@ -887,7 +887,7 @@ void testCowString()
     UNIT_TEST(static_cast<size_t>(-1), s12.find("42", 0, 2));
     UNIT_TEST(3, s12.find("42", 0, 1));
     s12 = "this is a string";
-    UNIT_TEST(5, s12.rfind("is"));
+    UNIT_TEST(5, s12.rfind("is", 5));
     UNIT_TEST(2, s12.rfind("is", 3));
     UNIT_TEST(10, s12.rfind('s'));
     UNIT_TEST(tiny_stl::cow_string::npos, s12.rfind("that"));
@@ -1044,6 +1044,14 @@ void testString()
     str14.resize(3);
     UNIT_TEST(3, str14.size());
     UNIT_TEST('c', str14.back());
+
+    tiny_stl::string str15 = "This is a string";
+    UNIT_TEST(2, str15.find("is"));
+    UNIT_TEST(5, str15.rfind("is"));
+    UNIT_TEST(3, str15.find('s'));
+    UNIT_TEST(6, str15.find('s', 4));
+    UNIT_TEST(13, str15.rfind('i'));
+    UNIT_TEST(5, str15.rfind("is", 5));
 }
 
 

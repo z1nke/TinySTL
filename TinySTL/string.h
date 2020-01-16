@@ -1435,16 +1435,16 @@ private:
             return npos;
         if (count == 0)
             return pos;
-        auto& val = getVal();
+
         for (size_type i = pos; i <= lhsSize - count; ++i)
         {
-            if (!Traits::eq(val->getPtr()[i], str[0])) // mismatched the first character
+            if (!Traits::eq(data()[i], str[0])) // mismatched the first character
                 continue;
 
             size_type j = 1;
             for (; j < count; ++j)
             {
-                if (!Traits::eq(val->getPtr()[i + j], str[j]))
+                if (!Traits::eq(data()[i + j], str[j]))
                     break;
             }
             if (j == count)
@@ -1454,6 +1454,36 @@ private:
         return npos;
     }
 
+    // [0, pos]
+    size_type rfindHelper(const value_type* str, size_type pos, size_type count) const noexcept
+    {
+        // native find algorithm
+        size_type lhsSize = size();
+        if (count > lhsSize || pos < count)
+            return npos;
+        if (lhsSize == 0)
+            return npos;
+        if (count == 0)
+            return pos;
+
+        pos = tiny_stl::min(pos, lhsSize - 1);
+        // pos >= count
+        for (difference_type i = static_cast<difference_type>(pos); i >= 0; --i)
+        {
+            if (!Traits::eq(data()[i], str[0])) // mismatched the first character
+                continue;
+
+            size_type j = 1;
+            for (; j < count; ++j)
+            {
+                if (!Traits::eq(data()[i + j], str[j]))
+                    break;
+            }
+            if (j == count)
+                return i;
+        }
+        return npos;
+    }
 
 public:
     size_type find(const basic_string& str, size_type pos = 0) const noexcept
@@ -1479,9 +1509,27 @@ public:
             : static_cast<size_type>(findAt - data());
     }
 
-    size_type(const basic_string& str, size_type pos = count) const
+    size_type rfind(const basic_string& str, size_type pos = npos) const noexcept
     {
+        return rfindHelper(str.data(), pos, str.size());
+    }
 
+    size_type rfind(const value_type* str, size_type pos, size_type count) const
+    {
+        return rfindHelper(str, pos, count);
+    }
+
+    size_type rfind(value_type ch, size_type pos = npos) const noexcept
+    {
+        pos = tiny_stl::min(pos, size() - 1);
+        difference_type i = pos;
+        for (; i >= 0; --i)
+        {
+            if (data()[i] == ch)
+                return static_cast<size_type>(i);
+        }
+
+        return npos;
     }
 
 private:
