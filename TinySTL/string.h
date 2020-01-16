@@ -1454,6 +1454,7 @@ private:
         return npos;
     }
 
+
 public:
     size_type find(const basic_string& str, size_type pos = 0) const noexcept
     {
@@ -1476,6 +1477,11 @@ public:
             size() - pos, ch);
         return findAt == nullptr ? npos
             : static_cast<size_type>(findAt - data());
+    }
+
+    size_type(const basic_string& str, size_type pos = count) const
+    {
+
     }
 
 private:
@@ -1524,6 +1530,66 @@ private:
         throw "invalid tiny_stl::basic_string<CharT> index";
     }
 };
+
+template <typename CharT, typename Traits, typename Alloc>
+basic_string<CharT, Traits, Alloc>
+operator+(const basic_string<CharT, Traits, Alloc>& lhs,
+          const basic_string<CharT, Traits, Alloc>& rhs)
+{
+    basic_string<CharT, Traits, Alloc> tmp;
+    tmp.reserve(lhs.size() + rhs.size());
+    tmp += lhs;
+    tmp += rhs;
+    return tmp;
+}
+
+template <typename CharT, typename Traits, typename Alloc>
+basic_string<CharT, Traits, Alloc>
+operator+(const basic_string<CharT, Traits, Alloc>& lhs,
+          const CharT* rhs)
+{
+    basic_string<CharT, Traits, Alloc> tmp;
+    tmp.reserve(lhs.size() + Traits::length(rhs));
+    tmp += lhs;
+    tmp += rhs;
+    return tmp;
+}
+
+template <typename CharT, typename Traits, typename Alloc>
+basic_string<CharT, Traits, Alloc>
+operator+(const basic_string<CharT, Traits, Alloc>& lhs,
+          CharT rhs)
+{
+    basic_string<CharT, Traits, Alloc> tmp;
+    tmp.reserve(lhs.size() + 1);
+    tmp += lhs;
+    tmp += rhs;
+    return tmp;
+}
+
+template <typename CharT, typename Traits, typename Alloc>
+basic_string<CharT, Traits, Alloc>
+operator+(const CharT* lhs,
+          const basic_string<CharT, Traits, Alloc>& rhs)
+{
+    basic_string<CharT, Traits, Alloc> tmp;
+    tmp.reserve(Traits::length(lhs) + rhs.size());
+    tmp += lhs;
+    tmp += rhs;
+    return tmp;
+}
+
+template <typename CharT, typename Traits, typename Alloc>
+basic_string<CharT, Traits, Alloc>
+operator+(CharT lhs,
+          const basic_string<CharT, Traits, Alloc>& rhs)
+{
+    basic_string<CharT, Traits, Alloc> tmp;
+    tmp.reserve(1 + rhs.size());
+    tmp += lhs;
+    tmp += rhs;
+    return tmp;
+}
 
 template <typename CharT, typename Traits, typename Alloc>
 inline bool operator==(const basic_string<CharT, Traits, Alloc>& lhs,
