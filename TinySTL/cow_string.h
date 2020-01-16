@@ -1439,30 +1439,33 @@ private:
         return npos;
     }
 
-    size_type rfindHelper(const CharT* s, size_type pos, size_type count) const
+    size_type rfindHelper(const CharT* str, size_type pos, size_type count) const
     {
-        size_type thisSize = size();
-
-        if (count > thisSize || pos < count)
+        // native find algorithm
+        size_type lhsSize = size();
+        if (count > lhsSize || pos < count)
             return npos;
+        if (lhsSize == 0)
+            return npos;
+        if (count == 0)
+            return pos;
 
-        pos = tiny_stl::min(pos, thisSize - 1);
-
-        for (size_type i = pos; i >= count; --i)
+        pos = tiny_stl::min(pos, lhsSize - 1);
+        // pos >= count
+        for (difference_type i = static_cast<difference_type>(pos); i >= 0; --i)
         {
-            if (traits_type::eq(value->data[i], s[count - 1]))  // matched last character
-            {
-                size_type j;
-                for (j = count - 1; j != -1; --j)
-                {
-                    if (!traits_type::eq(value->data[i + j - count + 1], s[j])) // mismatch
-                        break;
-                }
-                if (j == npos)
-                    return (i - count + 1);
-            }
-        }
+            if (!Traits::eq(value->data[i], str[0])) // mismatched the first character
+                continue;
 
+            size_type j = 1;
+            for (; j < count; ++j)
+            {
+                if (!Traits::eq(value->data[i + j], str[j]))
+                    break;
+            }
+            if (j == count)
+                return i;
+        }
         return npos;
     }
 
