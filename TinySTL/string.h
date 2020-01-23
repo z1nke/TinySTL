@@ -1463,9 +1463,9 @@ public:
             {
                 Traits::move(newPtr, oldPtr, offset);
                 Traits::move(newPtr + offset, xStr, xCount2);
-                Traits::move(newPtr + offset + xCount2, oldPtr + pos + count,
+                Traits::move(newPtr + offset + xCount2, oldPtr + offset + xCount1,
                              oldSize - offset - xCount1 + 1);
-            }, pos, count1, str, count2);
+            }, pos, count, str, count2);
     }
 
     basic_string& replace(const_iterator first, const_iterator last,
@@ -1516,9 +1516,9 @@ public:
                value_type ch)
             {
                 Traits::move(newPtr, oldPtr, offset);
-                Traits::assign(newPtr + offset, count2, ch);
-                Traits::move(newPtr + offset + count2, oldPtr + pos + count,
-                             oldSize - count - pos + 1);
+                Traits::assign(newPtr + offset, xCount2, ch);
+                Traits::move(newPtr + offset + xCount2, oldPtr + offset + xCount,
+                             oldSize - xCount - offset + 1);
             }, pos, count, count2, ch);
     }
 
