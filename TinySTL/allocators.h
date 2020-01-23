@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <cassert>
 #include <cstddef>
@@ -100,14 +100,14 @@ public:
         return reinterpret_cast<const_pointer>(&x);
     }
 
-    template <typename Obj, typename... Args>
-    void construct(Obj* p, Args&&... args)
+    template <typename T, typename... Args>
+    void construct(T* p, Args&&... args) 
     {
         constructHelper(p, tiny_stl::forward<Args>(args)...);
     }
 
-    template <typename Obj>
-    void destroy(Obj* ptr)
+    template <typename T>
+    void destroy(T* ptr) 
     {
         destroy_at(ptr);
     }

@@ -1194,7 +1194,7 @@ public:
                               const cow_basic_string& str, size_type pos2, 
                               size_type count2 = npos)
     {
-        return replace(pos, count, str.substr(pos, count));
+        return replace(pos, count, str.substr(pos2, count2));
     }
 
     template <typename InIter, 
