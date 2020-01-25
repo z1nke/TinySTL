@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include <intrin.h> // for _Interlockedxxx
+#include <atomic>
 #include <cstring>
 #include <new>
 #include <ostream>
@@ -1355,8 +1355,8 @@ private:
 private:
     // assure use count operation is threads safe
     // why not use atomic
-    AtomicCounterType mUses;
-    AtomicCounterType mWeaks;
+    std::atomic<AtomicCounterType>  mUses;
+    std::atomic<AtomicCounterType> mWeaks;
 
 protected:
     RefCountBase()
@@ -1377,32 +1377,27 @@ public:
         for (;;)
         {
             // loop until state is known
-            AtomicCounterType count = 
-                static_cast<volatile AtomicCounterType&>(mUses);
+            AtomicCounterType count = mUses.load();
             if (count == 0)
             {
                 return false;
             }
 
-            // _InterlockedCompareExchange is Microsoft Specific
-            // so the code is not able to cross platform
-            if (static_cast<AtomicCounterType>(_InterlockedCompareExchange(
-                    reinterpret_cast<volatile long*>(&mUses),
-                    count + 1, count)) == count)
+            if (mUses.compare_exchange_strong(count, count + 1))
             {
                 return true;
             }
         }
     }
 
-    long atomicIncrease(AtomicCounterType& c)
+    long atomicIncrease(std::atomic<AtomicCounterType>& c)
     {
-        return _InterlockedIncrement(reinterpret_cast<volatile long*>(&c));
+        return ++c;
     }
 
-    long atomicDecrease(AtomicCounterType& c)
+    long atomicDecrease(std::atomic<AtomicCounterType>& c)
     {
-        return _InterlockedDecrement(reinterpret_cast<volatile long*>(&c));
+        return --c;
     }
 
     void increaseRef()
