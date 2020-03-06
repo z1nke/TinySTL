@@ -6,6 +6,7 @@
 #include <chrono>
 #include <ctime>
 #include <iostream>
+#include <climits>
 
 #include "array.h"
 #include "cow_string.h"
@@ -796,7 +797,7 @@ void testStringView()
 
     using namespace tiny_stl::literals::string_view_literals;
     auto str7 = "xxx"_sv;
-    UNIT_TEST(true, (std::is_same_v<decltype(str7), tiny_stl::string_view>));
+    UNIT_TEST(true, (tiny_stl::is_same_v<tiny_stl::decltype(str7), tiny_stl::string_view>));
 }
 
 void testCowString()
