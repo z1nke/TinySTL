@@ -47,17 +47,6 @@ constexpr T&& forward(remove_reference_t<T>&& param) noexcept
 
 
 template <typename T>
-constexpr T* addressof(T& val) noexcept
-{
-    return reinterpret_cast<T*>(
-        &const_cast<char&>(
-            reinterpret_cast<const volatile char&>(val)));
-}
-
-template <typename T>
-const T* addressof(const T&&) = delete;
-
-template <typename T>
 inline void swap(T& lhs, T& rhs)
         noexcept(is_nothrow_move_constructible_v<T> &&
                  is_nothrow_move_assignable_v<T>)

@@ -4,6 +4,18 @@
 
 namespace tiny_stl
 {
+
+template <typename T>
+constexpr T* addressof(T& val) noexcept
+{
+    return reinterpret_cast<T*>(
+        &const_cast<char&>(
+            reinterpret_cast<const volatile char&>(val)));
+}
+
+template <typename T>
+const T* addressof(const T&&) = delete;
+
 // wraps a static constant of specified type.
 // as the base class for trait types.
 template <typename T, T val>
@@ -212,6 +224,12 @@ struct remove_reference<T&&>
 
 template <typename T>
 using remove_reference_t = typename remove_reference<T>::type;
+
+template <typename T>
+constexpr T&& forward(remove_reference_t<T>& param) noexcept;
+
+template <typename T>
+constexpr T&& forward(remove_reference_t<T>& param) noexcept;
 
 template <typename T>
 struct remove_pointer { };
@@ -651,7 +669,7 @@ constexpr bool is_pointer_v = is_pointer<T>::value;
 
 template <typename T>
 struct is_null_pointer : bool_constant<
-    is_same<remove_cv_t<T>, nullptr_t>::value> { };
+    is_same<remove_cv_t<T>, std::nullptr_t>::value> { };
 
 template <typename T>
 constexpr bool is_null_pointer_v = is_null_pointer<T>::value;
