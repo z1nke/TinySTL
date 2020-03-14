@@ -319,7 +319,7 @@ public:
         typename = enable_if_t<is_constructible<value_type, P&&>::value>>
     pair<iterator, bool> insert(P&& val)
     {
-        return this->insert_equal(tiny_stl::forward<P>(val)...);
+        return this->insert_equal(tiny_stl::forward<P>(val));
     }
 
     pair<iterator, bool> insert(value_type&& val)

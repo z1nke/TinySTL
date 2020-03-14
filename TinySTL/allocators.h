@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include <cassert>
 #include <cstddef>
@@ -100,14 +100,14 @@ public:
         return reinterpret_cast<const_pointer>(&x);
     }
 
-    template <typename T, typename... Args>
-    void construct(T* p, Args&&... args) 
+    template <typename Obj, typename... Args>
+    void construct(Obj* p, Args&&... args)
     {
         constructHelper(p, tiny_stl::forward<Args>(args)...);
     }
 
-    template <typename T>
-    void destroy(T* ptr) 
+    template <typename Obj>
+    void destroy(Obj* ptr)
     {
         destroy_at(ptr);
     }
@@ -172,6 +172,9 @@ inline void swapAllocHelper(Alloc& lhs, Alloc& rhs, false_type)
 {
     assert(lhs == rhs);
 }
+
+template <typename Alloc>
+struct allocator_traits;
 
 template <typename Alloc>
 inline void swapAlloc(Alloc& lhs, Alloc& rhs) noexcept 

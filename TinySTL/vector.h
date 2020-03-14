@@ -688,11 +688,8 @@ public:
         if (this->alloc != rhs.alloc) 
             tidy();    // this->alloc deallocate elements
 
-#pragma warning(push)   // if constexpr
-#pragma warning(disable : 4984)
-        if constexpr (allocator_traits<Alloc>::propagate_on_container_copy_assignment::value) 
+        if (allocator_traits<Alloc>::propagate_on_container_copy_assignment::value) 
             this->alloc = rhs.alloc;
-#pragma warning(pop)
        
         assign(rhs.first, rhs.last);
         return *this;
@@ -705,11 +702,8 @@ public:
     {
         assert(this != tiny_stl::addressof(rhs));
 
-#pragma warning(push)   // if constexpr
-#pragma warning(disable : 4984)
-        if constexpr (allocator_traits<Alloc>::propagate_on_container_move_assignment::value)
+        if (allocator_traits<Alloc>::propagate_on_container_move_assignment::value)
             this->alloc = rhs.alloc;
-#pragma warning(pop)
 
         assignMove(tiny_stl::move(rhs), disjunction<
             typename allocator_traits<Alloc>::propagate_on_container_move_assignment,

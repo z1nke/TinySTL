@@ -318,11 +318,8 @@ public:
     {
         assert(this != tiny_stl::addressof(rhs));
 
-#pragma warning(push)   // if constexpr
-#pragma warning(disable : 4984)
-        if constexpr (AlNodeTraits::propagate_on_container_copy_assignment::value) 
+        if (AlNodeTraits::propagate_on_container_copy_assignment::value) 
             this->getAlloc() = rhs.getAlloc();
-#pragma warning(pop)
 
         assign(rhs.begin(), rhs.end());
         return *this;
@@ -335,11 +332,8 @@ public:
 
         clear();
 
-#pragma warning(push)   // if constexpr
-#pragma warning(disable : 4984)
-        if constexpr (AlNodeTraits::propagate_on_container_move_assignment::value)
+        if (AlNodeTraits::propagate_on_container_move_assignment::value)
             this->getAlloc() = rhs.getAlloc();
-#pragma warning(pop)
 
         constructMove(tiny_stl::move(rhs),
             typename AlNodeTraits::propagate_on_container_move_assignment{});

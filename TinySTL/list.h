@@ -121,14 +121,14 @@ struct ListIterator : ListConstIterator<T>
 
     ListIterator& operator++(int) 
     { 
-        ListConstIterator tmp = *this;
+        ListIterator tmp = *this;
         Base::ptr = Base::ptr->next;
         return tmp;
     }
 
     ListIterator& operator--(int) 
     { 
-        ListConstIterator tmp = *this;
+        ListIterator tmp = *this;
         Base::ptr = Base::ptr->prev;
         return tmp;
     }
@@ -457,11 +457,8 @@ public:
         assert(this != tiny_stl::addressof(rhs));
         if (this->alloc != rhs.alloc) 
             clear();
-#pragma warning(push)
-#pragma warning(disable : 4984) // if constexpr
-        if constexpr (AlNodeTraits::propagate_on_container_copy_assignment::value) 
+        if (AlNodeTraits::propagate_on_container_copy_assignment::value) 
             this->alloc = rhs.alloc;
-#pragma warning(pop)
         assign(rhs.begin(), rhs.end());
         
         return *this;
@@ -470,11 +467,8 @@ public:
     list& operator=(list&& rhs) noexcept {
         assert(this != tiny_stl::addressof(rhs));
         clear();
-#pragma warning(push)
-#pragma warning(disable : 4984) // if constexpr
-        if constexpr (AlNodeTraits::propagate_on_container_move_assignment::value) 
+        if (AlNodeTraits::propagate_on_container_move_assignment::value) 
             this->alloc = rhs.alloc;
-#pragma warning(pop)
         
         constructMove(tiny_stl::move(rhs), 
             typename AlNodeTraits::propagate_on_container_move_assignment{});

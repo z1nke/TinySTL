@@ -4,6 +4,8 @@
 #include <cstring>
 #include <new>
 #include <ostream>
+#include <typeinfo>
+#include <memory>
 
 #include "allocators.h"
 #include "algorithm.h"
@@ -918,7 +920,7 @@ public:
 
     template <typename U, typename D,                           // (6)
         typename = enable_if_t<
-            is_convertible<unique_ptr<U, D>::pointer, pointer>::value
+            is_convertible<typename unique_ptr<U, D>::pointer, pointer>::value
             && !is_array<U>::value 
             && ((is_reference<Deleter>::value && is_same<Deleter, D>::value)
                 || (!is_reference<Deleter>::value && is_convertible<D, Deleter>::value))>>
@@ -938,8 +940,8 @@ public:
     }
 
     template <typename U, typename D,
-        typename = enable_if_t<is_convertible<unique_ptr<U, D>::pointer, pointer>::value
-            && is_assignable<Deleter&, D&&>>>
+        typename = enable_if_t<is_convertible<typename unique_ptr<U, D>::pointer, pointer>::value
+            && is_assignable_v<Deleter&, D&&>>>
     unique_ptr& operator=(unique_ptr<U, D>&& rhs) noexcept
     {
         reset(rhs.release());
@@ -1082,10 +1084,10 @@ public:
     template <typename U, typename D,                               // (6)
         typename = enable_if_t<is_array<U>::value
             && is_same<pointer, element_type*>::value
-            && is_same<unique_ptr<U, D>::pointer, unique_ptr<U, D>::element_type*>::value
-            && is_convertible<unique_ptr<U, D>::element_type(*)[], element_type(*)[]>::value
-            && (is_reference<Deleter>::value && is_same<D, Deleter>::value
-                || !is_reference<Deleter>::value && is_convertible<D, Deleter>::value)>>
+            && is_same<typename unique_ptr<U, D>::pointer, typename unique_ptr<U, D>::element_type*>::value
+            && is_convertible<typename unique_ptr<U, D>::element_type(*)[], element_type(*)[]>::value
+            && ((is_reference<Deleter>::value && is_same<D, Deleter>::value)
+                || (!is_reference<Deleter>::value && is_convertible<D, Deleter>::value))>>
     unique_ptr(unique_ptr<U, D>&& rhs) noexcept 
     : m_pair(tiny_stl::forward<D>(rhs.get_deleter()), rhs.release()) { }
 
@@ -1104,8 +1106,8 @@ public:
     template <typename U, typename D,
         typename = enable_if_t<is_array<U>::value
             && is_same<pointer, element_type*>::value
-            && is_same<unique_ptr<U, D>::pointer, unique_ptr<U, D>::element_type*>::value
-            && is_convertible<unique_ptr<U, D>::element_type(*)[], element_type(*)[]>::value
+            && is_same<typename unique_ptr<U, D>::pointer, typename unique_ptr<U, D>::element_type*>::value
+            && is_convertible<typename unique_ptr<U, D>::element_type(*)[], element_type(*)[]>::value
             && is_assignable<Deleter&, D&&>::value>>
     unique_ptr& operator=(unique_ptr<U, D>&& rhs) noexcept
     {
@@ -1433,7 +1435,7 @@ public:
         return static_cast<long>(mUses);
     }
 
-    virtual void* getDeleter(const type_info&) const noexcept
+    virtual void* getDeleter(const std::type_info&) const noexcept
     {
         return nullptr;
     }
@@ -1473,9 +1475,9 @@ public:
     {
     }
 
-    virtual void* getDeleter(const type_info& type) const noexcept override
+    virtual void* getDeleter(const std::type_info& type) const noexcept override
     {
-        if (type == typeid(D))
+        if (type.hash_code() == typeid(D).hash_code())
         {
             return const_cast<D*>(tiny_stl::addressof(mPair.get_first()));
         }
@@ -1512,7 +1514,7 @@ public:
     {
     }
 
-    virtual void* getDeleter(const type_info& type) const noexcept override
+    virtual void* getDeleter(const std::type_info& type) const noexcept override
     {
         if (type == typeid(D))
         {
