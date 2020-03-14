@@ -645,14 +645,11 @@ public:
         if (this->alloc != rhs.alloc) 
             tidy();
 
-#pragma warning(push)   // if constexpr
-#pragma warning(disable : 4984)
-        if constexpr (allocator_traits<Alloc>::propagate_on_container_copy_assignment::value) 
+        if (allocator_traits<Alloc>::propagate_on_container_copy_assignment::value) 
         {
             this->alloc = rhs.alloc;
             this->alloc_map = rhs.alloc_map;
         }
-#pragma warning(pop)
 
         try
         {

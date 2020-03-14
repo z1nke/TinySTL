@@ -174,6 +174,9 @@ inline void swapAllocHelper(Alloc& lhs, Alloc& rhs, false_type)
 }
 
 template <typename Alloc>
+struct allocator_traits;
+
+template <typename Alloc>
 inline void swapAlloc(Alloc& lhs, Alloc& rhs) noexcept 
 {
     typename allocator_traits<Alloc>::propagate_on_container_swap tag;

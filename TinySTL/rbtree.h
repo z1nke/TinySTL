@@ -1162,11 +1162,8 @@ public:
     {
         assert(this->alloc == rhs.alloc);
 
-#pragma warning(push)   // if constexpr
-#pragma warning(disable : 4984)
-        if constexpr (allocator_traits<Alloc>::propagate_on_container_swap::value)
+        if (allocator_traits<Alloc>::propagate_on_container_swap::value)
             tiny_stl::swapAlloc(this->alloc, rhs.alloc);
-#pragma warning(pop)
 
         tiny_stl::swapADL(this->header, rhs.header);
         tiny_stl::swapADL(this->compare, rhs.compare);

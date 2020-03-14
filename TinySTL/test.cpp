@@ -117,7 +117,7 @@ void testTypeTraits()
     UNIT_TEST(false, (is_same_v<int*, remove_const_t<const int*>>));
     UNIT_TEST(true, is_function_v<int(int)>);
     UNIT_TEST(false, is_function_v<int>);
-    UNIT_TEST(true, is_function_v<decltype(printf)>);
+    UNIT_TEST(true, (is_function_v<decltype(printf)>));
     UNIT_TEST(true, is_void_v<void>);
     UNIT_TEST(true, (is_same_v<add_lvalue_reference_t<int>, int&>));
     UNIT_TEST(true, (is_same_v<add_rvalue_reference_t<int>, int&&>));
@@ -795,9 +795,11 @@ void testStringView()
     UNIT_TEST(12, str5.rfind("xxx", 12));
     UNIT_TEST(0, str5.rfind("xxx", 11));
 
+#ifdef TINY_STL_CXX14
     using namespace tiny_stl::literals::string_view_literals;
     auto str7 = "xxx"_sv;
     UNIT_TEST(true, (tiny_stl::is_same_v<tiny_stl::decltype(str7), tiny_stl::string_view>));
+#endif // TINY_STL_CXX14
 }
 
 void testCowString()

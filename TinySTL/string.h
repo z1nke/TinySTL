@@ -298,6 +298,16 @@ private:
 
 private:
     extra::compress_pair<Alloc, StringValue> allocVal;
+private:
+    struct EqualAllocator {};
+    using PropagateAllocator   = true_type;
+    using NoPropagateAllocator = false_type;
+
+    template <typename AllocX>
+    using AllocMoveType = conditional_t<allocator_traits<AllocX>::is_always_equal::value,
+        EqualAllocator,
+        typename allocator_traits<AllocX>::propagate_on_container_move_assignment::type>;
+
 
 public:
     explicit basic_string(const Alloc& a)
@@ -416,7 +426,7 @@ public:
     }
 
     basic_string& operator=(basic_string&& rhs)
-        noexcept(noexcept(assignMove(rhs, AllocMoveType<Alty>)))
+        noexcept(noexcept(assignMove(rhs, AllocMoveType<Alty>{})))
     {
         if (this != tiny_stl::addressof(rhs))
         {
@@ -530,15 +540,6 @@ private:
         typename allocator_traits<AllocX>::propagate_on_container_move_assignment tag{};
         moveAllocAux(lhs, rhs, tag);
     }
-
-    struct EqualAllocator {};
-    using PropagateAllocator   = true_type;
-    using NoPropagateAllocator = false_type;
-
-    template <typename AllocX>
-    using AllocMoveType = conditional_t<allocator_traits<AllocX>::is_always_equal::value,
-        EqualAllocator,
-        typename allocator_traits<AllocX>::propagate_on_container_move_assignment::type>;
 
 
     void assignMove(basic_string& rhs, EqualAllocator) noexcept
@@ -705,7 +706,7 @@ private:
         const size_type count = static_cast<size_type>(
             tiny_stl::distance(first, last));
         reserve(count);
-        constructRange(first, last, input_iterator_tag);
+        constructRange(first, last, input_iterator_tag{});
     }
 
     void constructRange(const value_type* const first, const value_type* const last,
@@ -1343,8 +1344,8 @@ public:
         size_type pos2, size_type count2 = npos) const
     {
         basic_string lhs = substr(pos1, count1);
-        basic_string rhs = rhs.substr(pos2, count2);
-        return lhs.compare(rhs);
+        basic_string xrhs = rhs.substr(pos2, count2);
+        return lhs.compare(xrhs);
     }
 
     int compare(const value_type* str) const
@@ -2061,22 +2062,22 @@ inline wstring to_wstring(unsigned long long value)
 
 #pragma warning(push)
 #pragma warning(disable: 4455)
-inline string operator""s(const char* str, std::size_t len)
+inline string operator""_s(const char* str, std::size_t len)
 {
     return string{ str, len };
 }
 
-inline wstring operator""s(const wchar_t* str, std::size_t len)
+inline wstring operator""_s(const wchar_t* str, std::size_t len)
 {
     return wstring{ str, len };
 }
 
-inline u16string operator""s(const char16_t* str, std::size_t len)
+inline u16string operator""_s(const char16_t* str, std::size_t len)
 {
     return u16string{ str, len };
 }
 
-inline u32string operator""s(const char32_t* str, std::size_t len)
+inline u32string operator""_s(const char32_t* str, std::size_t len)
 {
     return u32string{ str, len };
 }

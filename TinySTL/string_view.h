@@ -626,7 +626,7 @@ public:
             return npos;
         }
 
-        for (size_type i = min(pos1, mSize - 1); i >= 0; --i)
+        for (int i = static_cast<int>(min(pos1, mSize - 1)); i >= 0; --i)
         {
             if (mData[i] == ch)
             {
