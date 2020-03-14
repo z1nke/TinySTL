@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include <type_traits>
 
@@ -893,42 +893,8 @@ struct result_of<F(Args...)>
     using type = decltype(declval<F>()(declval<Args>()...));
 };
 
-
 template <typename T>
-class reference_wrapper
-{
-private:
-    T* ptr;
-public:
-    using type = T;
-
-    reference_wrapper(T& r) noexcept
-        : ptr(tiny_stl::addressof(r)) {}
-
-    reference_wrapper(T&&) = delete;
-
-    reference_wrapper(const reference_wrapper&) noexcept = default;
-
-    reference_wrapper& operator=(const reference_wrapper&)
-        noexcept = default;
-
-    operator T&() const noexcept
-    {
-        return *ptr;
-    }
-
-    T& get() const noexcept
-    {
-        return *ptr;
-    }
-
-    template <typename... Args>
-    typename result_of<T&(Args&&...)>::type
-    operator()(Args&&... args) const
-    {
-        return std::invoke(get(), tiny_stl::forward<Args>(args)...);
-    }
-};
+using reference_wrapper = std::reference_wrapper<T>;
 
 
 template <typename T>
