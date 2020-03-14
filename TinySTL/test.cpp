@@ -798,7 +798,7 @@ void testStringView()
 #ifdef TINY_STL_CXX14
     using namespace tiny_stl::literals::string_view_literals;
     auto str7 = "xxx"_sv;
-    UNIT_TEST(true, (tiny_stl::is_same_v<tiny_stl::decltype(str7), tiny_stl::string_view>));
+    UNIT_TEST(true, (tiny_stl::is_same_v<decltype(str7), tiny_stl::string_view>));
 #endif // TINY_STL_CXX14
 }
 
