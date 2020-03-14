@@ -1391,6 +1391,149 @@ public:
             compare(lhsSize - strLen, strLen, str) == 0;
     }
 
+    basic_string& replace(size_type pos, size_type count,
+                          const basic_string& str)
+    {
+        return replace(pos, count, str.c_str(), str.size());
+    }
+
+    basic_string& replace(const_iterator first, const_iterator last,
+                          const basic_string& str)
+    {
+        return replace(first - begin(), last - first, str.c_str(), str.size());
+    }
+
+    basic_string& replace(size_type pos, size_type count, const basic_string& str,
+                          size_type pos2, size_type count2 = npos)
+    {
+        return replace(pos, count, str.substr(pos2, count2));
+    }
+
+    template <typename InIter,
+        typename = enable_if_t<is_iterator<InIter>::value>>
+    basic_string& replace(const_iterator first, const_iterator last,
+                          InIter first2, InIter last2)
+    {
+        return replace(first - begin(), last - first, basic_string{ first2, last2 });
+    }
+
+    basic_string& replace(size_type pos, size_type count,
+                          const value_type* str, size_type count2)
+    {
+        checkOffset(pos);
+        auto& val = getVal();
+        const size_type oldSize = size();
+        count = tiny_stl::min(count, oldSize - pos);
+        if (count == count2)
+        {
+            Traits::move(val.getPtr() + pos, str, count);
+            return *this;
+        }
+
+        const size_type suffixSize = oldSize - pos - count + 1;
+        if (count > count2)
+        {
+            val.size = oldSize - (count - count2);
+            value_type* oldPtr = val.getPtr();
+            value_type* replaceAt = oldPtr + pos;
+            Traits::move(replaceAt, str, count2);
+            Traits::move(replaceAt + count2, replaceAt + count, suffixSize);
+            return *this;
+        }
+
+        // count2 > count
+        const size_type growSize = count2 - count;
+        const size_type oldCapacity = capacity();
+        if (growSize < oldCapacity - oldSize)
+        {
+            val.size = oldSize + growSize;
+            value_type* replaceAt = val.getPtr() + pos;
+            value_type* oldSuffixAt = replaceAt + count;
+            value_type* newSuffixAt = oldSuffixAt + growSize;
+
+            Traits::move(newSuffixAt, oldSuffixAt, suffixSize);
+            Traits::move(replaceAt, str, count2);
+            return *this;
+        }
+
+        return reallocAndAssignGrowBy(growSize,
+            [](value_type* newPtr, const value_type* oldPtr, const size_type oldSize,
+               const size_type offset, const size_type xCount1, const value_type* xStr,
+               const size_type xCount2)
+            {
+                Traits::move(newPtr, oldPtr, offset);
+                Traits::move(newPtr + offset, xStr, xCount2);
+                Traits::move(newPtr + offset + xCount2, oldPtr + offset + xCount1,
+                             oldSize - offset - xCount1 + 1);
+            }, pos, count, str, count2);
+    }
+
+    basic_string& replace(const_iterator first, const_iterator last,
+                          const value_type* str, size_type count2)
+    {
+        return replace(first - begin(), last - first, str, count2);
+    }
+
+    basic_string& replace(size_type pos, size_type count,
+                          const value_type* str)
+    {
+        return replace(pos, count, str, Traits::length(str));
+    }
+
+    basic_string& replace(const_iterator first, const_iterator last,
+                          const value_type* str)
+    {
+        return replace(first - begin(), last - first, str);
+    }
+
+    basic_string& replace(size_type pos, size_type count,
+                          size_type count2, value_type ch)
+    {
+        checkOffset(pos);
+        auto& val = getVal();
+        const size_type oldSize = size();
+        count = tiny_stl::min(count, oldSize - pos);
+        if (count == count2)
+        {
+            Traits::assign(val.getPtr() + pos, count, ch);
+            return *this;
+        }
+
+        const size_type oldCapacity = capacity();
+        if (count2 < count || count2 - count < oldCapacity - oldSize)
+        {
+            val.size = oldSize + count2 - count;
+            value_type* oldPtr = val.getPtr();
+            value_type* replaceAt = oldPtr + pos;
+            Traits::move(replaceAt + count2, replaceAt + count, oldSize - pos - count + 1);
+            Traits::assign(replaceAt, count2, ch);
+            return *this;
+        }
+
+        return reallocAndAssignGrowBy(count2 - count,
+            [](value_type* newPtr, const value_type* oldPtr, const size_type oldSize,
+               const size_type offset, const size_type xCount, const size_type xCount2,
+               value_type ch)
+            {
+                Traits::move(newPtr, oldPtr, offset);
+                Traits::assign(newPtr + offset, xCount2, ch);
+                Traits::move(newPtr + offset + xCount2, oldPtr + offset + xCount,
+                             oldSize - xCount - offset + 1);
+            }, pos, count, count2, ch);
+    }
+
+    basic_string& replace(const_iterator first, const_iterator last,
+                          size_type count2, value_type ch)
+    {
+        return replace(first - begin(), last - first, count2, ch);
+    }
+
+    basic_string& replace(const_iterator first, const_iterator last,
+                          std::initializer_list<value_type> ilist)
+    {
+        return replace(first - begin(), last - first, ilist.begin(), ilist.size());
+    }
+
     size_type copy(value_type* dst, size_type count, size_type pos) const
     {
         checkOffset(pos);

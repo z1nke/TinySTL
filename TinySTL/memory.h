@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include <intrin.h> // for _Interlockedxxx
+#include <atomic>
 #include <cstring>
 #include <new>
 #include <ostream>
@@ -885,7 +885,7 @@ private:
     }
 
 public:
-    constexpr unique_ptr(nullptr_t p = nullptr) noexcept        // (1)
+    constexpr unique_ptr(std::nullptr_t p = nullptr) noexcept        // (1)
     : m_pair()
     {
         static_assert(is_default_constructible<Deleter>::value
@@ -947,7 +947,7 @@ public:
         return *this;
     }
 
-    unique_ptr& operator=(nullptr_t) noexcept 
+    unique_ptr& operator=(std::nullptr_t) noexcept 
     {
         reset();
         return *this;
@@ -1036,7 +1036,7 @@ private:
     }
 
     template <typename U,
-        typename Is_nullptr = is_same<U, nullptr_t>>
+        typename Is_nullptr = is_same<U, std::nullptr_t>>
     using EnableCtor = enable_if_t<
         is_same<U, pointer>::value
         || Is_nullptr::value
@@ -1046,7 +1046,7 @@ private:
 
 
 public:
-    constexpr unique_ptr(nullptr_t p = nullptr) noexcept            // (1)
+    constexpr unique_ptr(std::nullptr_t p = nullptr) noexcept            // (1)
     : m_pair() 
     { 
         static_assert(is_default_constructible<Deleter>::value
@@ -1114,7 +1114,7 @@ public:
         return *this;
     }
 
-    unique_ptr& operator=(nullptr_t) noexcept 
+    unique_ptr& operator=(std::nullptr_t) noexcept 
     {
         reset();
         return *this;
@@ -1152,7 +1152,7 @@ public:
             get_deleter()(old);
     }
 
-    void reset(nullptr_t) noexcept
+    void reset(std::nullptr_t) noexcept
     {
         reset(pointer());
     }
@@ -1256,73 +1256,73 @@ inline bool operator>=(const unique_ptr<T1, D1>& lhs,
 }
 
 template <typename T, typename D>
-inline bool operator==(const unique_ptr<T, D>& lhs, nullptr_t) noexcept 
+inline bool operator==(const unique_ptr<T, D>& lhs, std::nullptr_t) noexcept 
 {
     return !lhs;
 }
 
 template <typename T, typename D>
-inline bool operator==(nullptr_t, const unique_ptr<T, D>& rhs) noexcept 
+inline bool operator==(std::nullptr_t, const unique_ptr<T, D>& rhs) noexcept 
 {
     return !rhs;
 }
 
 template <typename T, typename D>
-inline bool operator!=(const unique_ptr<T, D>& lhs, nullptr_t) noexcept 
+inline bool operator!=(const unique_ptr<T, D>& lhs, std::nullptr_t) noexcept 
 {
     return (bool)lhs;
 }
 
 template <typename T, typename D>
-inline bool operator!=(nullptr_t, const unique_ptr<T, D>& rhs) noexcept
+inline bool operator!=(std::nullptr_t, const unique_ptr<T, D>& rhs) noexcept
 {
     return (bool)rhs;
 }
 
 template <typename T, typename D>
-inline bool operator<(const unique_ptr<T, D>& lhs, nullptr_t) 
+inline bool operator<(const unique_ptr<T, D>& lhs, std::nullptr_t) 
 {
     return less<typename unique_ptr<T, D>::pointer>()(lhs.get(), nullptr);
 }
 
 template <typename T, typename D>
-inline bool operator<(nullptr_t, const unique_ptr<T, D>& rhs) 
+inline bool operator<(std::nullptr_t, const unique_ptr<T, D>& rhs) 
 {
     return less<typename unique_ptr<T, D>::pointer>()(nullptr, rhs.get());
 }
 
 template <typename T, typename D>
-inline bool operator>(const unique_ptr<T, D>& lhs, nullptr_t) 
+inline bool operator>(const unique_ptr<T, D>& lhs, std::nullptr_t) 
 {
     return nullptr < lhs;
 }
 
 template <typename T, typename D>
-inline bool operator>(nullptr_t, const unique_ptr<T, D>& rhs) 
+inline bool operator>(std::nullptr_t, const unique_ptr<T, D>& rhs) 
 {
     return rhs < nullptr;
 }
 
 template <typename T, typename D>
-inline bool operator<=(const unique_ptr<T, D>& lhs, nullptr_t) 
+inline bool operator<=(const unique_ptr<T, D>& lhs, std::nullptr_t) 
 {
     return !(nullptr < lhs);
 }
 
 template <typename T, typename D>
-inline bool operator<=(nullptr_t, const unique_ptr<T, D>& rhs) 
+inline bool operator<=(std::nullptr_t, const unique_ptr<T, D>& rhs) 
 {
     return !(rhs < nullptr);
 }
 
 template <typename T, typename D>
-inline bool operator>=(const unique_ptr<T, D>& lhs, nullptr_t)
+inline bool operator>=(const unique_ptr<T, D>& lhs, std::nullptr_t)
 {
     return !(lhs < nullptr);
 }
 
 template <typename T, typename D>
-inline bool operator>=(nullptr_t, const unique_ptr<T, D>& rhs)
+inline bool operator>=(std::nullptr_t, const unique_ptr<T, D>& rhs)
 {
     return !(nullptr < rhs);
 }
@@ -1355,8 +1355,8 @@ private:
 private:
     // assure use count operation is threads safe
     // why not use atomic
-    AtomicCounterType mUses;
-    AtomicCounterType mWeaks;
+    std::atomic<AtomicCounterType>  mUses;
+    std::atomic<AtomicCounterType> mWeaks;
 
 protected:
     RefCountBase()
@@ -1377,32 +1377,27 @@ public:
         for (;;)
         {
             // loop until state is known
-            AtomicCounterType count = 
-                static_cast<volatile AtomicCounterType&>(mUses);
+            AtomicCounterType count = mUses.load();
             if (count == 0)
             {
                 return false;
             }
 
-            // _InterlockedCompareExchange is Microsoft Specific
-            // so the code is not able to cross platform
-            if (static_cast<AtomicCounterType>(_InterlockedCompareExchange(
-                    reinterpret_cast<volatile long*>(&mUses),
-                    count + 1, count)) == count)
+            if (mUses.compare_exchange_strong(count, count + 1))
             {
                 return true;
             }
         }
     }
 
-    long atomicIncrease(AtomicCounterType& c)
+    long atomicIncrease(std::atomic<AtomicCounterType>& c)
     {
-        return _InterlockedIncrement(reinterpret_cast<volatile long*>(&c));
+        return ++c;
     }
 
-    long atomicDecrease(AtomicCounterType& c)
+    long atomicDecrease(std::atomic<AtomicCounterType>& c)
     {
-        return _InterlockedDecrement(reinterpret_cast<volatile long*>(&c));
+        return --c;
     }
 
     void increaseRef()
@@ -1745,7 +1740,7 @@ public:
     {
     }
 
-    constexpr shared_ptr(nullptr_t) noexcept
+    constexpr shared_ptr(std::nullptr_t) noexcept
     {
     }
     
@@ -2007,7 +2002,7 @@ private:
         enableSharedFromThis(*this, ptr);
     }
 
-    void setPtrRepAndEnableShared(nullptr_t, RefCountBase* rep)
+    void setPtrRepAndEnableShared(std::nullptr_t, RefCountBase* rep)
     {
         this->setPtrRep(nullptr, rep);
     }
