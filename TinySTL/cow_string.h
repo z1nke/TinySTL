@@ -336,8 +336,8 @@ public:
     using traits_type            = Traits;
     using value_type             = CharT;
     using allocator_type         = Alloc;
-    using size_type              = typename Alloc::size_type;
-    using difference_type        = typename Alloc::difference_type;
+    using size_type              = size_t;
+    using difference_type        = ptrdiff_t;
     using reference              = CharT&;
     using const_reference        = const CharT&;
     using pointer                = CharT*;
@@ -853,7 +853,7 @@ public:
         checkLength(new_cap);
 
         size_type oldCapacity = capacity();
-        if (new_cap > oldCapacity)
+        if (new_cap > capacity())
             reallocteHelper(value->size);
         
         // else do nothing
@@ -902,7 +902,7 @@ public:
         {
             size_type newSize = value->size + 1;
             
-            reallocteHelper(newSize);
+            reallocteHelper(oldCapacity);
         }
             
         value->data[value->size++] = ch;

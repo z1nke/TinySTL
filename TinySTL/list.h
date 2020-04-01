@@ -217,8 +217,8 @@ class list : public ListBase<T, Alloc>
 public:
     using value_type             = T;
     using allocator_type         = Alloc;   // In fact, will be not be used
-    using size_type              = typename Alloc::size_type;
-    using difference_type        = typename Alloc::difference_type;
+    using size_type              = size_t;
+    using difference_type        = ptrdiff_t;
     using reference              = T&;
     using const_reference        = const T&;
     using pointer                = typename allocator_traits<Alloc>::pointer;
@@ -630,6 +630,8 @@ private:
 
     void insertN(const_iterator pos, size_type n, const T& val)
     {
+        size_type originN = n;
+
         for (; n > 0; --n)
             insertAux(pos, val);
     }

@@ -61,7 +61,7 @@ public:
     template <enable_if_t<                                              // (2)
         is_copy_constructible<Head>::value, int> = 0>
     explicit constexpr tuple(Head h, Tail... t) 
-    : Base(t...), m_head(h) { }
+    : m_head(h), Base(t...) { }
 
 
     template <typename H, typename... T, enable_if_t<                   // (3)
