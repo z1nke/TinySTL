@@ -1,6 +1,7 @@
 # TinySTL
 
-基于 `C++11/14 ` 的 TinySTL，使用了极少量的 `C++17` 特性。没有提供 C++ 11之前的版本兼容和平台移植性。编译环境：`vs2017`。
+基于 `C++14 ` 的 TinySTL。  
+编译通过 `clang++8, VS2017, VS2019`  
 
 删除了之前的库，进行了一下整合。
 
@@ -30,7 +31,8 @@
 
 - string：
 
-    - `basic_string(COW)`
+    - `basic_string`
+    - `basic_string_cow`
     - `basic_string_view`
 
 - adapter：
