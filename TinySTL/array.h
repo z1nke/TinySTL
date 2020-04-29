@@ -349,7 +349,7 @@ constexpr ArrayIterator<T, Size> operator+(ptrdiff_t offset,
 template <typename T, size_t Size>
 class array 
 {
-public:
+private:
     T elements[Size];
 public:
     using value_type             = T;
