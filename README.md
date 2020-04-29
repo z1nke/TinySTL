@@ -1,7 +1,7 @@
 # TinySTL
 
 基于 `C++14 ` 的 TinySTL。  
-编译通过 `clang++8, VS2017, VS2019`  
+编译通过 `clang++6 and above, VS2017, VS2019`  
 
 删除了之前的库，进行了一下整合。
 
