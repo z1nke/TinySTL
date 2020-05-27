@@ -82,7 +82,7 @@ void testUtility()
     UNIT_TEST(false, p0.second);
     tiny_stl::pair<std::int32_t, float> p1(42, 3.2f);
     UNIT_TEST(3.2f, p1.second);
-    tiny_stl::pair<std::int32_t, float> p2(tiny_stl::move(p1));
+    //tiny_stl::pair<std::int32_t, float> p2(tiny_stl::move(p1));
     
     auto p = tiny_stl::make_pair(1, "pair");
     UNIT_TEST(1, p.first);

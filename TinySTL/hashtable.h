@@ -188,8 +188,8 @@ public:
     using key_type              = typename AssociatedTypeHelper<T, isMap>::key_type;
     using mapped_type           = typename AssociatedTypeHelper<T, isMap>::mapped_type;
     using value_type            = T;
-    using size_type             = size_t;
-    using difference_type       = ptrdiff_t;
+    using size_type             = typename Alloc::size_type;
+    using difference_type       = typename Alloc::difference_type;
     using hasher                = Hash;
     using key_equal             = KeyEqual;
     using allocator_type        = Alloc;
@@ -293,8 +293,8 @@ public:
         const Alloc& al = Alloc(),
         const hasher& hf = hasher(), 
         const key_equal& equ = key_equal())
-    : hashfunc(hf), key_equ(equ),
-        buckets(static_cast<AlFlist>(al))
+    : buckets(static_cast<AlFlist>(al)),
+      hashfunc(hf), key_equ(equ)
     {
         init(n);
     }
@@ -302,17 +302,17 @@ public:
     HashTable(const HashTable&) = default;
 
     HashTable(const HashTable& rhs, const Alloc& alloc)
-    : hashfunc(rhs.hashfunc), key_equ(rhs.key_equ),
-        buckets(static_cast<AlFlist>(alloc)),
-        maxfactor(rhs.maxfactor), num_elements(rhs.num_elements)
+    : buckets(static_cast<AlFlist>(alloc)), num_elements(rhs.num_elements),
+      maxfactor(rhs.maxfactor), hashfunc(rhs.hashfunc),
+      key_equ(rhs.key_equ)
     {
-        copyAux(rhs); 
+        copyAux(rhs);
     }
 
     HashTable(HashTable&& rhs) noexcept
-    : hashfunc(rhs.hashfunc), key_equ(rhs.key_equ),
-        buckets(tiny_stl::move(rhs.buckets)),
-        maxfactor(rhs.maxfactor), num_elements(rhs.num_elements)
+    : buckets(tiny_stl::move(rhs.buckets)),
+      hashfunc(rhs.hashfunc), key_equ(rhs.key_equ),
+      maxfactor(rhs.maxfactor), num_elements(rhs.num_elements)
     {
         rhs.num_elements = 0;
     }
@@ -545,7 +545,9 @@ public:
         size_type idx = getNthBucket(*pos);
         auto prev  = buckets[idx].cbefore_begin();         // pos prev
         auto next = prev;
-        for (++next; next != pos.iter; ++next, ++prev); // find pos prev
+        for (++next; next != pos.iter; ++next, ++prev) // find pos prev
+        {
+        }
 
         auto iter = buckets[idx].erase_after(prev);        // erase pos
 

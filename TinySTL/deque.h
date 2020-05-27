@@ -469,8 +469,8 @@ public:
 public:
     using value_type             = T;
     using allocator_type         = Alloc;
-    using size_type              = size_t;
-    using difference_type        = ptrdiff_t;
+    using size_type              = typename Alloc::size_type;
+    using difference_type        = typename Alloc::difference_type;
     using pointer                = T*;
     using const_pointer          = const T*;
     using reference              = T&;
@@ -1183,7 +1183,10 @@ public:
         size_type offset = iter - begin();
         size_type oldSize = size();
 
-        if (last <= first);
+        if (last <= first)
+        {
+            // do nothing
+        }
         else if (offset <= oldSize / 2)      // front
         {  
             for (; first != last; ++first)
