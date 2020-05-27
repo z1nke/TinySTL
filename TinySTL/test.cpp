@@ -86,7 +86,7 @@ void testUtility()
     
     auto p = tiny_stl::make_pair(1, "pair");
     UNIT_TEST(1, p.first);
-    UNIT_TEST("pair", p.second);
+    UNIT_TEST(std::string{ "pair" }, p.second);
     UNIT_TEST(1, tiny_stl::get<0>(p));
     const auto cp = p;
     UNIT_TEST(1, tiny_stl::get<int>(cp));
