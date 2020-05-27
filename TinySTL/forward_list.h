@@ -226,8 +226,8 @@ public:
 public:
     using value_type        = T;
     using allocator_type    = Alloc;
-    using size_type         = size_t;
-    using difference_type   = ptrdiff_t;
+    using size_type         = typename Alloc::size_type;
+    using difference_type   = typename Alloc::difference_type;
     using reference         = T&;
     using const_reference   = const T&;
     using pointer           = typename allocator_traits<Alloc>::pointer;
@@ -461,14 +461,18 @@ private:
     size_type sizeAux() const 
     {
         size_type n = 0;
-        for (const_iterator p = begin(); p != end(); ++p, ++n);
+        for (const_iterator p = begin(); p != end(); ++p, ++n)
+        {
+        }
         return n;
     }
 
     const_iterator beforeEndAux() const 
     {
         const_iterator p = before_begin();
-        for (const_iterator nextNode = p; ++nextNode != end(); p = nextNode);
+        for (const_iterator nextNode = p; ++nextNode != end(); p = nextNode)
+        {
+        }
         return p;
     }
 

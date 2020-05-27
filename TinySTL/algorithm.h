@@ -699,7 +699,6 @@ inline void pop_heap(RanIter first, RanIter last)
 template <typename RanIter, typename Cmp> 
 inline void sort_heap(RanIter first, RanIter last, Cmp cmp) 
 {
-    RanIter origin = last;
     for (; last - first > 1; --last) 
         pop_heap(first, last);
 }

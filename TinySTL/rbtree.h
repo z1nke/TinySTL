@@ -271,8 +271,8 @@ class RBTreeBase
 public:
     using value_type             = T;
     using allocator_type         = Alloc;
-    using size_type              = size_t;
-    using difference_type        = ptrdiff_t;
+    using size_type              = typename Alloc::size_type;
+    using difference_type        = typename Alloc::difference_type;
     
 private:
     using AlTraits               = allocator_traits<Alloc>;

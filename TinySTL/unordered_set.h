@@ -14,8 +14,8 @@ class unordered_set : public HashTable<Key, Hash, KeyEqual, Alloc, false>
 public:
     using key_type              = Key;
     using value_type            = Key;
-    using size_type             = size_t;
-    using difference_type       = ptrdiff_t;
+    using size_type             = typename Alloc::size_type;
+    using difference_type       = typename Alloc::difference_type;
     using hasher                = Hash;
     using key_equal             = KeyEqual;
     using allocator_type        = Alloc;

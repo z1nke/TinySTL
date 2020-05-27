@@ -2027,7 +2027,7 @@ class RefCountObj : public RefCountBase
 public:
     template <typename... Args>
     explicit RefCountObj(Args&&... args) noexcept
-        : RefCountBase()
+        : RefCountBase(), mStroage()
     {
         ::new (static_cast<void*>(&mStroage)) 
             T(tiny_stl::forward<T>(args)...);

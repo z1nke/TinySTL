@@ -82,7 +82,7 @@ public:
     pointer allocate(size_type n) 
     {
         return allocateHelper(static_cast<difference_type>(n), 
-            reinterpret_cast<pointer>(0));
+            reinterpret_cast<pointer>(nullptr));
     }
 
     void deallocate(pointer p, size_t n) noexcept 
