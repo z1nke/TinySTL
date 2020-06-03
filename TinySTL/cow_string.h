@@ -1887,29 +1887,50 @@ using cow_u32string = cow_basic_string<char32_t>;
 namespace 
 {
 
-
-template <typename E, typename T>
-inline cow_basic_string<E> IntegerToCowString(T val) 
+template <typename CharT, typename T>
+inline cow_basic_string<CharT> IntegerToCowStringAux(T val, const CharT* zero)
 {
-    static_assert(is_integral_v<T>, "T must be integral");
+    bool isNegative = val < 0;
+    CharT buffer[21]; // -2^63 ~ 2^64-1
+    CharT* ptr = buffer;
+    do {
+      int lp = static_cast<int>(val % 10);
+      val /= 10;
+      *ptr++ = zero[lp];
+    } while (val);
+    
+    
+    if (isNegative) {
+      *ptr++ = cow_basic_string<CharT>::traits_type::to_char_type('-');
+    }
+    *ptr = cow_basic_string<CharT>::traits_type::to_char_type('\0');
+    reverse(buffer, ptr);
+    return cow_basic_string<CharT>{buffer};
+}
+
+template <typename CharT, typename T>
+inline cow_basic_string<CharT> IntegerToCowStringHelp(T val, true_type)
+{
     static const char digits[] = "9876543210123456789";
     static const char* zero = digits + 9;
-    bool isNegative = val < 0;
-    E buffer[21]; // -2^63 ~ 2^64-1
-    E* ptr = buffer;
-    do {
-        int lp = static_cast<int>(val % 10);
-        val /= 10;
-        *ptr++ = zero[lp];
-    } while (val);
+    return IntegerToCowStringAux(val, zero);
+}
 
+template <typename CharT, typename T>
+inline cow_basic_string<CharT> IntegerToCowStringHelp(T val, false_type)
+{
+    static const wchar_t digits[] = L"9876543210123456789";
+    static const wchar_t* zero = digits + 9;
+    return IntegerToCowStringAux(val, zero);
+}
 
-    if (isNegative) {
-        *ptr++ = '-';
-    }
-    *ptr = '\0';
-    reverse(buffer, ptr);
-    return cow_basic_string<E>{buffer};
+template <typename CharT, typename T, enable_if_t<
+  is_same_v<CharT, char> || is_same_v<CharT, wchar_t>, int> = 0>
+inline cow_basic_string<CharT> IntegerToCowString(T val) {
+    static_assert(is_integral_v<T>, "T must be integral");
+    static_assert(is_same_v<CharT, char> || is_same_v<CharT, wchar_t>,
+        "CharT must be char or wchar_t");
+    return IntegerToCowStringHelp<CharT>(val, is_same<CharT, char>());
 }
 
 } // namespace

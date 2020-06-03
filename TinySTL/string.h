@@ -1967,28 +1967,50 @@ struct hash<basic_string<CharT, Traits, Alloc>>
 namespace 
 {
 
-template <typename E, typename T>
-inline basic_string<E> IntegerToString(T val) 
+template <typename CharT, typename T>
+inline basic_string<CharT> IntegerToStringAux(T val, const CharT* zero)
 {
-    static_assert(is_integral_v<T>, "T must be integral");
+    bool isNegative = val < 0;
+    CharT buffer[21]; // -2^63 ~ 2^64-1
+    CharT* ptr = buffer;
+    do {
+      int lp = static_cast<int>(val % 10);
+      val /= 10;
+      *ptr++ = zero[lp];
+    } while (val);
+    
+    
+    if (isNegative) {
+      *ptr++ = basic_string<CharT>::traits_type::to_char_type('-');
+    }
+    *ptr = basic_string<CharT>::traits_type::to_char_type('\0');
+    reverse(buffer, ptr);
+    return basic_string<CharT>{buffer};
+}
+
+template <typename CharT, typename T>
+inline basic_string<CharT> IntegerToStringHelp(T val, true_type)
+{
     static const char digits[] = "9876543210123456789";
     static const char* zero = digits + 9;
-    bool isNegative = val < 0;
-    E buffer[21]; // -2^63 ~ 2^64-1
-    E* ptr = buffer;
-    do {
-        int lp = static_cast<int>(val % 10);
-        val /= 10;
-        *ptr++ = zero[lp];
-    } while (val);
+    return IntegerToStringAux(val, zero);
+}
 
+template <typename CharT, typename T>
+inline basic_string<CharT> IntegerToStringHelp(T val, false_type)
+{
+    static const wchar_t digits[] = L"9876543210123456789";
+    static const wchar_t* zero = digits + 9;
+    return IntegerToStringAux(val, zero);
+}
 
-    if (isNegative) {
-        *ptr++ = '-';
-    }
-    *ptr = '\0';
-    reverse(buffer, ptr);
-    return basic_string<E>{buffer};
+template <typename CharT, typename T, enable_if_t<
+  is_same_v<CharT, char> || is_same_v<CharT, wchar_t>, int> = 0>
+inline basic_string<CharT> IntegerToString(T val) {
+    static_assert(is_integral_v<T>, "T must be integral");
+    static_assert(is_same_v<CharT, char> || is_same_v<CharT, wchar_t>,
+        "CharT must be char or wchar_t");
+    return IntegerToStringHelp<CharT>(val, is_same<CharT, char>());
 }
 
 } // namespace
