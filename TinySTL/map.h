@@ -203,7 +203,7 @@ private:
 
 template <typename Key, typename T, typename Cmp, typename Alloc>
 inline void swap(map<Key, T, Cmp, Alloc>& lhs, map<Key, T, Cmp, Alloc>& rhs) 
-    noexcept(lhs.swap(rhs))
+    noexcept(noexcept(lhs.swap(rhs)))
 {
     lhs.swap(rhs);
 }
@@ -368,7 +368,7 @@ private:
 
 template <typename Key, typename T, typename Cmp, typename Alloc>
 inline void swap(multimap<Key, T, Cmp, Alloc>& lhs, multimap<Key, T, Cmp, Alloc>& rhs) 
-    noexcept(lhs.swap(rhs))
+    noexcept(noexcept(lhs.swap(rhs)))
 {
     lhs.swap(rhs);
 }

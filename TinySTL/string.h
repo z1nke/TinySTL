@@ -474,7 +474,9 @@ public:
     }
 
     basic_string& assing(basic_string&& rhs)
-        noexcept(noexcept(*this = tiny_stl::move(rhs)))
+        noexcept(noexcept(
+            AllocTraits::propagate_on_container_move_assignment::value||
+            AllocTraits::is_always_equal::value))
     {
         *this = tiny_stl::move(rhs);
         return *this;
