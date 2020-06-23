@@ -30,7 +30,7 @@ struct FListConstIterator
 
     Ptr ptr;
 
-    FListConstIterator() = default;
+    FListConstIterator() : ptr(nullptr) { }
     FListConstIterator(Ptr x) : ptr(x) { }
     FListConstIterator(const FListConstIterator& rhs) : ptr(rhs.ptr) { }
 

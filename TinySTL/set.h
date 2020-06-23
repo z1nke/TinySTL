@@ -140,7 +140,7 @@ public:
 template <typename Key, typename Compare, typename Alloc>
 inline void swap(set<Key, Compare, Alloc>& lhs, 
           set<Key, Compare, Alloc>& rhs)
-    noexcept(lhs.swap(rhs))
+    noexcept(noexcept(lhs.swap(rhs)))
 {
     lhs.swap(rhs);
 }
@@ -281,7 +281,7 @@ public:
 template <typename Key, typename Compare, typename Alloc>
 inline void swap(multiset<Key, Compare, Alloc>& lhs,
                  multiset<Key, Compare, Alloc>& rhs)
-    noexcept(lhs.swap(rhs))
+    noexcept(noexcept(lhs.swap(rhs)))
 {
     lhs.swap(rhs);
 }
