@@ -1,9 +1,7 @@
 # TinySTL
 
 基于 `C++14 ` 的 TinySTL。  
-编译通过 `clang++6 and above, VS2017, VS2019`  
-
-删除了之前的库，进行了一下整合。
+编译环境：VS2017, VS2019, 支持 C++14 的 clang++ 和 g++ 编译器
 
 实现的部分：
 
