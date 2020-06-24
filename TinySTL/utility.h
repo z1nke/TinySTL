@@ -3,11 +3,11 @@
 #include "type_traits.h"
 #include <type_traits>
 
-#if _MSVC_LANG >= 201402L
+#if _MSVC_LANG >= 201402L || __cplusplus >= 201402L
 #   define TINY_STL_CXX14
 #endif // _MSVC_LANG >= 201402L
 
-#if _MSVC_LANG >= 201703L
+#if _MSVC_LANG >= 201703L || __cplusplus >= 201703L
 #   define TINY_STL_CXX17
 #endif // _MSVC_LANG >= 201703L
 

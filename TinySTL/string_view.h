@@ -535,7 +535,7 @@ public:
         {
             if (mData[i] == rhs[0])     // matched the first element
             {
-                size_type j;
+                size_type j = 1;
                 for (j = 1; j < rhs.mSize; ++j)
                 {
                     if (mData[i + j] != rhs[j]) // mismatched
@@ -595,11 +595,12 @@ public:
             return npos;
         }
 
-        for (size_type i = min(pos1, mSize - rhs.mSize); i != -1; --i)
+        for (size_type i = min(pos1, mSize - rhs.mSize);
+             i != static_cast<size_type>(-1); --i)
         {
             if (mData[i] == rhs[0])     // matched the first element
             {
-                size_type j;
+                size_type j = 1;
                 for (j = 1; j < rhs.mSize; ++j)
                 {
                     if (mData[i + j] != rhs[j])
