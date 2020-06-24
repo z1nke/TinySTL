@@ -1063,7 +1063,7 @@ public:
                const size_type xOldSize, const size_type xPos,
                const size_type xCount, const value_type xCh)
             {
-                const size_type newSize = xOldSize + xCount;
+                //const size_type newSize = xOldSize + xCount;
                 Traits::move(newPtr, oldPtr, xPos);
                 Traits::assign(newPtr + xPos, xCount, xCh);
                 Traits::move(newPtr + xPos + xCount, oldPtr + xPos, xOldSize - xPos + 1);
@@ -1161,7 +1161,7 @@ public:
     {
         const size_type offset = pos - cbegin();
         checkOffset(offset);
-        const size_type count = cend() - pos;
+        //const size_type count = cend() - pos;
         erase(offset, 1);
         return iterator(data() + static_cast<difference_type>(offset));
     }
@@ -2083,9 +2083,14 @@ inline wstring to_wstring(unsigned long long value)
     return IntegerToString<wchar_t>(value);
 }
 
+#ifdef TINY_STL_CXX14
 
-#pragma warning(push)
-#pragma warning(disable: 4455)
+namespace literals
+{
+
+namespace string_literals
+{
+
 inline string operator""_s(const char* str, std::size_t len)
 {
     return string{ str, len };
@@ -2105,6 +2110,10 @@ inline u32string operator""_s(const char32_t* str, std::size_t len)
 {
     return u32string{ str, len };
 }
-#pragma warning(pop)
+
+} // namespace string_literals
+} // namespace literals
+
+#endif // TINY_STL_CXX14
 
 } // namespace tiny_stl

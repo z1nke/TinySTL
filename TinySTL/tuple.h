@@ -55,7 +55,7 @@ protected:
 public:
     template <enable_if_t<                                              // (1)
         is_default_constructible<Head>::value, int> = 0>
-    explicit tuple() : m_head(), Base() { }
+    explicit tuple() : Base(), m_head() { }
 
 
     template <enable_if_t<                                              // (2)

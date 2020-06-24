@@ -47,12 +47,12 @@ inline RBTNode<T>* rbTreeMaxValue(RBTNode<T>* ptr)
 }
 
 // 
-//        |                                  |
-//        x                                  y
-//      /   \          left-rotate         /   \
+//        |                                   |
+//        x                                   y
+//      ↙  ↘          left-rotate         ↙ ↘
 //     a     y      ---------------->     x     c
-//         /   \                        /   \
-//        b     c                      a     b
+//         ↙  ↘                       ↙ ↘
+//         b    c                      a    b
 // 
 template <typename T>
 inline void rbTreeLeftRotate(RBTNode<T>*& root, RBTNode<T>* x)
@@ -79,10 +79,10 @@ inline void rbTreeLeftRotate(RBTNode<T>*& root, RBTNode<T>* x)
 
 //        |                                 |
 //        y                                 x
-//      /   \         right-rotate        /   \
-//     x     c      ---------------->    a     y
-//   /   \                                   /   \
-//  a     b                                 b     c
+//      ↙ ↘         right-rotate        ↙ ↘
+//     x     c      ---------------->    a    y
+//   ↙ ↘                                   ↙ ↘
+//  a    b                                  b    c
 //
 template <typename T>
 inline void rbTreeRightRotate(RBTNode<T>*& root, RBTNode<T>* y)

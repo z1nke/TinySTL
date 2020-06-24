@@ -1,5 +1,4 @@
-# g++ compile error
-CXX=clang++
+# CXX=clang++
 SRC=./TinySTL/test.cpp
 
 test: ${SRC}

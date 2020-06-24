@@ -311,8 +311,10 @@ public:
 
     HashTable(HashTable&& rhs) noexcept
     : buckets(tiny_stl::move(rhs.buckets)),
-      hashfunc(rhs.hashfunc), key_equ(rhs.key_equ),
-      maxfactor(rhs.maxfactor), num_elements(rhs.num_elements)
+      num_elements(rhs.num_elements),
+      maxfactor(rhs.maxfactor),
+      hashfunc(rhs.hashfunc),
+      key_equ(rhs.key_equ)
     {
         rhs.num_elements = 0;
     }
