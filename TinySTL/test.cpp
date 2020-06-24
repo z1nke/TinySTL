@@ -231,7 +231,8 @@ void testAlgorithm()
     tiny_stl::vector<int> v = { 3,4,2,3,5,5,3,5,2 };
     UNIT_TEST(3, tiny_stl::count(v.begin(), v.end(), 5));
 
-    auto p = tiny_stl::minmax(4, 2);
+    int a = 4, b = 2;
+    auto p = tiny_stl::minmax(a, b);
     UNIT_TEST(2, p.first);
     UNIT_TEST(4, p.second);
 
