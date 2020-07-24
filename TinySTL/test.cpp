@@ -831,6 +831,7 @@ void testCowString()
     s4.resize(5);
     UNIT_TEST(5, s4.size());
     s4.resize(10, 'a');
+    UNIT_TEST('1', s4.front());
     UNIT_TEST(10, s4.size());
     UNIT_TEST('a', s4.back());
 

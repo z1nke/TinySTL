@@ -812,9 +812,13 @@ private:
         {
             if (count > value->capa)    // count > old capacity
             {
+                // reallocate
+                CharT *newPtr = value->alloc.allocate(count + 1);
+                Traits::move(newPtr, value->data, value->size);
                 value->alloc.deallocate(value->data, value->capa);
+
                 value->capa = count + 1;
-                value->init(value->data);  // reallocate
+                value->data = newPtr;
             }
             
             lambda();
