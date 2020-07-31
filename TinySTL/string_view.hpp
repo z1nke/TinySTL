@@ -5,7 +5,7 @@
 #include <cstring>
 #include <stdexcept>
 
-#include "string.h"
+#include "string.hpp"
 
 namespace tiny_stl
 {

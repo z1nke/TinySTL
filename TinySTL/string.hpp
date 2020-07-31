@@ -1,7 +1,7 @@
 #pragma once
 
-#include "string_view.h"
-#include "memory.h"
+#include "string_view.hpp"
+#include "memory.hpp"
 #include <initializer_list>
 
 namespace tiny_stl

@@ -7,9 +7,9 @@
 #include <typeinfo>
 #include <memory>
 
-#include "allocators.h"
-#include "algorithm.h"
-#include "iterator.h"
+#include "allocators.hpp"
+#include "algorithm.hpp"
+#include "iterator.hpp"
 
 namespace tiny_stl 
 {

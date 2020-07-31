@@ -6,8 +6,8 @@
 #include <initializer_list>
 #include <random>
 
-#include "functional.h"
-#include "iterator.h"
+#include "functional.hpp"
+#include "iterator.hpp"
 
 namespace tiny_stl 
 {

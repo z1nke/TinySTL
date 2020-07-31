@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "iterator.h"
-#include "algorithm.h"
-#include "memory.h"
+#include "iterator.hpp"
+#include "algorithm.hpp"
+#include "memory.hpp"
 
 namespace tiny_stl 
 {
