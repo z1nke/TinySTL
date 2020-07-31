@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "type_traits.h"
+#include "type_traits.hpp"
 #include <type_traits>
 
 #if _MSVC_LANG >= 201402L || __cplusplus >= 201402L

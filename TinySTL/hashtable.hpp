@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "forward_list.h"
-#include "vector.h"
+#include "forward_list.hpp"
+#include "vector.hpp"
 
 namespace tiny_stl
 {

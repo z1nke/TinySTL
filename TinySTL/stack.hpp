@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "deque.h"
+#include "deque.hpp"
 
 namespace tiny_stl 
 {

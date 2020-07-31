@@ -1,19 +1,20 @@
 ﻿#pragma once
 
-#include "hashtable.h"
+#include "hashtable.hpp"
 
 namespace tiny_stl
 {
 
-template <typename Key, 
-    typename Hash = hash<Key>, 
-    typename KeyEqual = equal_to<Key>, 
-    typename Alloc = allocator<Key>>
-class unordered_set : public HashTable<Key, Hash, KeyEqual, Alloc, false>
+template <typename Key, typename T,
+    typename Hash = hash<Key>,
+    typename KeyEqual = equal_to<Key>,
+    typename Alloc = allocator<pair<Key, T>>>
+class unordered_map : public HashTable<pair<Key, T>, Hash, KeyEqual, Alloc, true>
 {
 public:
     using key_type              = Key;
-    using value_type            = Key;
+    using mapped_type           = T;
+    using value_type            = pair<const Key, T>;
     using size_type             = typename Alloc::size_type;
     using difference_type       = typename Alloc::difference_type;
     using hasher                = Hash;
@@ -24,32 +25,33 @@ public:
     using AlTraits              = allocator_traits<allocator_type>;
     using pointer               = typename AlTraits::pointer;
     using const_pointer         = typename AlTraits::const_pointer;
-    using Base                  = HashTable<Key, Hash, KeyEqual, Alloc, false>;
+    using Base                  = HashTable<pair<Key, T>, Hash, KeyEqual, Alloc, true>;
     using iterator              = typename Base::iterator;
     using const_iterator        = typename Base::const_iterator;
     using local_iterator        = typename Base::local_iterator;
     using const_local_iterator  = typename Base::const_local_iterator;
 
+    
 public:
-    unordered_set() : unordered_set(0) { }                          // (1)
-    explicit unordered_set(size_type num_bucket,
+    unordered_map() : unordered_map(0) { }                          // (1)
+    explicit unordered_map(size_type num_bucket,
                            const Hash& hashfunc = Hash(),
                            const KeyEqual& eq = KeyEqual(),
                            const Alloc& alloc = Alloc()) 
     : Base(num_bucket, alloc, hashfunc, eq) { }
 
-    unordered_set(size_type num_bucket, const Alloc& alloc)         // (1)
-    : unordered_set(num_bucket, Hash(), KeyEqual(), alloc) { }
+    unordered_map(size_type num_bucket, const Alloc& alloc)         // (1)
+    : unordered_map(num_bucket, Hash(), KeyEqual(), alloc) { }
 
-    unordered_set(size_type num_bucket,                             // (1)
+    unordered_map(size_type num_bucket,                             // (1)
                   const Hash& hashfunc, const Alloc& alloc)
-    : unordered_set(num_bucket, hashfunc, KeyEqual(), alloc) { }
+    : unordered_map(num_bucket, hashfunc, KeyEqual(), alloc) { }
 
-    explicit unordered_set(const Alloc& alloc)                      // (1)
+    explicit unordered_map(const Alloc& alloc)                      // (1)
     : Base(0, alloc) { }
 
     template <typename InIter>                                      // (2)
-    unordered_set(InIter first, InIter last,
+    unordered_map(InIter first, InIter last,
                   size_type num_bucket = 0,
                   const Hash& hashfunc = Hash(),
                   const KeyEqual& eq = KeyEqual(),
@@ -60,67 +62,105 @@ public:
     }
 
     template <typename InIter>                                      // (2)
-    unordered_set(InIter first, InIter last,
+    unordered_map(InIter first, InIter last,
                   size_type num_bucket,
                   const Alloc& alloc)
-    : unordered_set(first, last, num_bucket, 
+    : unordered_map(first, last, num_bucket, 
                     Hash(), KeyEqual(), alloc) { }
 
     template <typename InIter>                                      // (2)
-    unordered_set(InIter first, InIter last,
+    unordered_map(InIter first, InIter last,
                   size_type num_bucket,
                   const Hash& hashfunc,
                   const Alloc& alloc)
-    : unordered_set(first, last, num_bucket, 
-        hashfunc, KeyEqual(), alloc) { }
+    : unordered_map(first, last, num_bucket, 
+                    hashfunc, KeyEqual(), alloc) { }
 
 
-    unordered_set(const unordered_set& rhs)                         // (3)
+    unordered_map(const unordered_map& rhs)                         // (3)
     : Base(rhs) { }
 
-    unordered_set(const unordered_set& rhs,                         // (3)
-                  const Alloc& alloc) : Base(rhs, alloc) { }
+    unordered_map(const unordered_map& rhs,                         // (3)
+        const Alloc& alloc) : Base(rhs, alloc) { }
 
-    unordered_set(unordered_set&& rhs) noexcept                     // (4)
+    unordered_map(unordered_map&& rhs) noexcept                     // (4)
     : Base(tiny_stl::move(rhs)) { }
 
-    unordered_set(std::initializer_list<value_type> ilist,          // (5)
+    unordered_map(std::initializer_list<value_type> ilist,          // (5)
                   size_type num_bucket = 0,
                   const Hash& hashfunc = Hash(),
                   const KeyEqual& eq = KeyEqual(),
                   const Alloc& alloc = Alloc())
-    : unordered_set(ilist.begin(), ilist.end(), 
+    : unordered_map(ilist.begin(), ilist.end(), 
                     num_bucket, hashfunc, eq, alloc) { }
 
-    unordered_set(std::initializer_list<value_type> ilist,          // (5)
+    unordered_map(std::initializer_list<value_type> ilist,          // (5)
                   size_type num_bucket, const Alloc& alloc)
-    : unordered_set(ilist, num_bucket,
+    : unordered_map(ilist, num_bucket,
                     Hash(), KeyEqual(), alloc) { }
 
-    unordered_set(std::initializer_list<value_type> ilist,          // (5)
+    unordered_map(std::initializer_list<value_type> ilist,          // (5)
                   size_type num_bucket, const Hash& hashfunc,
                   const Alloc& alloc)
-    : unordered_set(ilist, num_bucket,
+    : unordered_map(ilist, num_bucket,
                     hashfunc, KeyEqual(), alloc) { }
 
-    unordered_set& operator=(const unordered_set& rhs)
+    unordered_map& operator=(const unordered_map& rhs)
     {
         Base::operator=(rhs);
         return *this;
     }
 
-    unordered_set& operator=(unordered_set&& rhs)
+    unordered_map& operator=(unordered_map&& rhs)
     {
         Base::operator=(tiny_stl::move(rhs));
         return *this;
     }
 
-    unordered_set& operator=(std::initializer_list<value_type> ilist)
+    unordered_map& operator=(std::initializer_list<value_type> ilist)
     {
         this->clear();
         this->insert(ilist);
         return *this;
     }
+
+    mapped_type& at(const key_type& key)
+    {
+        iterator pos = this->find(key);
+        if (pos == this->end())
+            throw "unordered_map: out of range";
+
+        return pos->second;
+    }
+
+    const mapped_type& at(const key_type& key) const
+    {
+        const_iterator pos = this->find(key);
+        if (pos == this->end())
+            throw "unordered_map: out of range";
+
+        return pos->second;
+    }
+
+    T& operator[](const key_type& key)
+    {
+        iterator pos = this->find(key);
+        if (pos == this->end())
+            return this->insert(make_pair(key, T{})).first->second;
+
+        return pos->second;
+    }
+
+
+    T& operator[](key_type&& key)
+    {
+        iterator pos = this->find(key);
+        if (pos == this->end())
+            return this->insert(make_pair(tiny_stl::move(key), T{})).first->second;
+
+        return pos->second;
+    }
+
 
     size_type count(const key_type& key) const
     {
@@ -154,29 +194,32 @@ public:
         this->emplace_unique(tiny_stl::forward<Args>(args)...);
     }
 
-    void swap(unordered_set& rhs)
+    void swap(unordered_map& rhs)
     {
         Base::swap(rhs);
     }
-};  // unordered_set
+};  // unordered_map
 
-template <typename Key, typename Hash, typename KeyEqual, typename Alloc>
-void swap(unordered_set<Key, Hash, KeyEqual, Alloc>& lhs,
-          unordered_set<Key, Hash, KeyEqual, Alloc>& rhs)
+template <typename Key, typename T, typename Hash, 
+          typename KeyEqual, typename Alloc>
+void swap(unordered_map<Key, T, Hash, KeyEqual, Alloc>& lhs,
+          unordered_map<Key, T, Hash, KeyEqual, Alloc>& rhs)
 {
     lhs.swap(rhs);
 }
 
 
-template <typename Key, 
-    typename Hash = hash<Key>, 
-    typename KeyEqual = equal_to<Key>, 
-    typename Alloc = allocator<Key>>
-class unordered_multiset : public HashTable<Key, Hash, KeyEqual, Alloc, false>
+template <typename Key, typename T,
+    typename Hash = hash<Key>,
+    typename KeyEqual = equal_to<Key>,
+    typename Alloc = allocator<pair<Key, T>>>
+class unordered_multimap 
+    : public HashTable<pair<Key, T>, Hash, KeyEqual, Alloc, true>
 {
 public:
     using key_type              = Key;
-    using value_type            = Key;
+    using mapped_type           = T;
+    using value_type            = pair<const Key, T>;
     using size_type             = size_t;
     using difference_type       = ptrdiff_t;
     using hasher                = Hash;
@@ -187,32 +230,33 @@ public:
     using AlTraits              = allocator_traits<allocator_type>;
     using pointer               = typename AlTraits::pointer;
     using const_pointer         = typename AlTraits::const_pointer;
-    using Base                  = HashTable<Key, Hash, KeyEqual, Alloc, false>;
+    using Base                  = HashTable<pair<Key, T>, Hash, KeyEqual, Alloc, true>;
     using iterator              = typename Base::iterator;
     using const_iterator        = typename Base::const_iterator;
     using local_iterator        = typename Base::local_iterator;
     using const_local_iterator  = typename Base::const_local_iterator;
 
+    
 public:
-    unordered_multiset() : unordered_multiset(0) { }                    // (1)
-    explicit unordered_multiset(size_type num_bucket,
+    unordered_multimap() : unordered_multimap(0) { }                    // (1)
+    explicit unordered_multimap(size_type num_bucket,
                                 const Hash& hashfunc = Hash(),
                                 const KeyEqual& eq = KeyEqual(),
                                 const Alloc& alloc = Alloc()) 
     : Base(num_bucket, alloc, hashfunc, eq) { }
 
-    unordered_multiset(size_type num_bucket, const Alloc& alloc)        // (1)
-    : unordered_multiset(num_bucket, Hash(), KeyEqual(), alloc) { }
+    unordered_multimap(size_type num_bucket, const Alloc& alloc)        // (1)
+    : unordered_multimap(num_bucket, Hash(), KeyEqual(), alloc) { }
 
-    unordered_multiset(size_type num_bucket,                            // (1)
+    unordered_multimap(size_type num_bucket,                            // (1)
                        const Hash& hashfunc, const Alloc& alloc)
-    : unordered_multiset(num_bucket, hashfunc, KeyEqual(), alloc) { }
+    : unordered_multimap(num_bucket, hashfunc, KeyEqual(), alloc) { }
 
-    explicit unordered_multiset(const Alloc& alloc)                     // (1)
+    explicit unordered_multimap(const Alloc& alloc)                     // (1)
     : Base(0, alloc) { }
 
     template <typename InIter>                                          // (2)
-    unordered_multiset(InIter first, InIter last,
+    unordered_multimap(InIter first, InIter last,
                        size_type num_bucket = 0,
                        const Hash& hashfunc = Hash(),
                        const KeyEqual& eq = KeyEqual(),
@@ -223,62 +267,62 @@ public:
     }
 
     template <typename InIter>                                          // (2)
-    unordered_multiset(InIter first, InIter last,
+    unordered_multimap(InIter first, InIter last,
                        size_type num_bucket,
                        const Alloc& alloc)
-    : unordered_multiset(first, last, num_bucket, 
+    : unordered_multimap(first, last, num_bucket, 
                          Hash(), KeyEqual(), alloc) { }
 
     template <typename InIter>                                          // (2)
-    unordered_multiset(InIter first, InIter last,
+    unordered_multimap(InIter first, InIter last,
                        size_type num_bucket,
                        const Hash& hashfunc,
                        const Alloc& alloc)
-    : unordered_multiset(first, last, num_bucket, 
+    : unordered_multimap(first, last, num_bucket, 
                          hashfunc, KeyEqual(), alloc) { }
 
 
-    unordered_multiset(const unordered_multiset& rhs)                   // (3)
+    unordered_multimap(const unordered_multimap& rhs)                   // (3)
     : Base(rhs) { }
 
-    unordered_multiset(const unordered_multiset& rhs,                   // (3)
+    unordered_multimap(const unordered_multimap& rhs,                   // (3)
         const Alloc& alloc) : Base(rhs, alloc) { }
 
-    unordered_multiset(unordered_multiset&& rhs)                        // (4)
+    unordered_multimap(unordered_multimap&& rhs)                        // (4)
     : Base(tiny_stl::move(rhs)) { }
 
-    unordered_multiset(std::initializer_list<value_type> ilist,         // (5)
+    unordered_multimap(std::initializer_list<value_type> ilist,         // (5)
                        size_type num_bucket = 0,
                        const Hash& hashfunc = Hash(),
                        const KeyEqual& eq = KeyEqual(),
                        const Alloc& alloc = Alloc())
-    : unordered_multiset(ilist.begin(), ilist.end(), 
+    : unordered_multimap(ilist.begin(), ilist.end(), 
                          num_bucket, hashfunc, eq, alloc) { }
 
-    unordered_multiset(std::initializer_list<value_type> ilist,         // (5)
+    unordered_multimap(std::initializer_list<value_type> ilist,         // (5)
                        size_type num_bucket, const Alloc& alloc)
-    : unordered_multiset(ilist, num_bucket,
+    : unordered_multimap(ilist, num_bucket,
                          Hash(), KeyEqual(), alloc) { }
 
-    unordered_multiset(std::initializer_list<value_type> ilist,         // (5)
+    unordered_multimap(std::initializer_list<value_type> ilist,         // (5)
                        size_type num_bucket, const Hash& hashfunc,
                        const Alloc& alloc)
-    : unordered_multiset(ilist, num_bucket,
+    : unordered_multimap(ilist, num_bucket,
                          hashfunc, KeyEqual(), alloc) { }
 
-    unordered_multiset& operator=(const unordered_multiset& rhs)
+    unordered_multimap& operator=(const unordered_multimap& rhs)
     {
         Base::operator=(rhs);
         return *this;
     }
 
-    unordered_multiset& operator=(unordered_multiset&& rhs)
+    unordered_multimap& operator=(unordered_multimap&& rhs)
     {
         Base::operator=(tiny_stl::move(rhs));
         return *this;
     }
 
-    unordered_multiset& operator=(std::initializer_list<value_type> ilist)
+    unordered_multimap& operator=(std::initializer_list<value_type> ilist)
     {
         this->clear();
         this->insert(ilist);
@@ -290,12 +334,12 @@ public:
         return this->count_equal(key);
     }
 
-    iterator insert(const value_type& val)
+    pair<iterator, bool> insert(const value_type& val)
     {
         return this->insert_equal(val);
     }
 
-    iterator insert(value_type&& val)
+    pair<iterator, bool> insert(value_type&& val)
     {
         return this->insert_equal(tiny_stl::move(val));
     }
@@ -312,22 +356,25 @@ public:
     }
 
     template <typename... Args>
-    iterator emplace(Args&&... args)
+    pair<iterator, bool> emplace(Args&&... args)
     {
         this->emplace_equal(tiny_stl::forward<Args>(args)...);
     }
 
-    void swap(unordered_multiset& rhs)
+    void swap(unordered_multimap& rhs)
     {
         Base::swap(rhs);
     }
-};  // unordered_multiset
+};  // unordered_multimap
 
-template <typename Key, typename Hash, typename KeyEqual, typename Alloc>
-void swap(unordered_multiset<Key, Hash, KeyEqual, Alloc>& lhs,
-          unordered_multiset<Key, Hash, KeyEqual, Alloc>& rhs)
+template <typename Key, typename T, typename Hash, typename KeyEqual, typename Alloc>
+void swap(unordered_multimap<Key, T, Hash, KeyEqual, Alloc>& lhs,
+          unordered_multimap<Key, T, Hash, KeyEqual, Alloc>& rhs)
 {
     lhs.swap(rhs);
 }
 
+
+
 }   // namespace tiny_stl
+

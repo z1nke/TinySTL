@@ -148,30 +148,30 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="algorithm.h" />
-    <ClInclude Include="allocators.h" />
-    <ClInclude Include="array.h" />
-    <ClInclude Include="deque.h" />
-    <ClInclude Include="forward_list.h" />
-    <ClInclude Include="functional.h" />
-    <ClInclude Include="hashtable.h" />
-    <ClInclude Include="iterator.h" />
-    <ClInclude Include="list.h" />
-    <ClInclude Include="map.h" />
-    <ClInclude Include="memory.h" />
-    <ClInclude Include="queue.h" />
-    <ClInclude Include="rbtree.h" />
-    <ClInclude Include="set.h" />
-    <ClInclude Include="stack.h" />
-    <ClInclude Include="cow_string.h" />
-    <ClInclude Include="string.h" />
-    <ClInclude Include="string_view.h" />
-    <ClInclude Include="tuple.h" />
-    <ClInclude Include="type_traits.h" />
-    <ClInclude Include="unordered_map.h" />
-    <ClInclude Include="unordered_set.h" />
-    <ClInclude Include="utility.h" />
-    <ClInclude Include="vector.h" />
+    <ClInclude Include="algorithm.hpp" />
+    <ClInclude Include="allocators.hpp" />
+    <ClInclude Include="array.hpp" />
+    <ClInclude Include="deque.hpp" />
+    <ClInclude Include="forward_list.hpp" />
+    <ClInclude Include="functional.hpp" />
+    <ClInclude Include="hashtable.hpp" />
+    <ClInclude Include="iterator.hpp" />
+    <ClInclude Include="list.hpp" />
+    <ClInclude Include="map.hpp" />
+    <ClInclude Include="memory.hpp" />
+    <ClInclude Include="queue.hpp" />
+    <ClInclude Include="rbtree.hpp" />
+    <ClInclude Include="set.hpp" />
+    <ClInclude Include="stack.hpp" />
+    <ClInclude Include="cow_string.hpp" />
+    <ClInclude Include="string.hpp" />
+    <ClInclude Include="string_view.hpp" />
+    <ClInclude Include="tuple.hpp" />
+    <ClInclude Include="type_traits.hpp" />
+    <ClInclude Include="unordered_map.hpp" />
+    <ClInclude Include="unordered_set.hpp" />
+    <ClInclude Include="utility.hpp" />
+    <ClInclude Include="vector.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp" />

@@ -3,7 +3,7 @@
 #include <initializer_list>
 #include <string>
 
-#include "memory.h"
+#include "memory.hpp"
 
 namespace tiny_stl 
 {

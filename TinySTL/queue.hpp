@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "deque.h"
-#include "vector.h"
+#include "deque.hpp"
+#include "vector.hpp"
 
 namespace tiny_stl
 {
