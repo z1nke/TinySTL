@@ -1,65 +1,52 @@
 ﻿#pragma once
 
-#include <initializer_list> 
+#include <initializer_list>
 
 #include "memory.hpp"
 
-namespace tiny_stl
-{
+namespace tiny_stl {
 
-namespace 
-{
+namespace {
 
-enum class Color : uint16_t
-{
-    RED,
-    BLACK
-};
+enum class Color : uint16_t { RED, BLACK };
 
-template <typename T>
-struct RBTNode
-{
+template <typename T> struct RBTNode {
     using IsNil = uint16_t;
     Color color;
-    IsNil isNil;            // 1 is nil, 0 is not nil
+    IsNil isNil; // 1 is nil, 0 is not nil
     RBTNode* parent;
     RBTNode* left;
     RBTNode* right;
     T value;
 };
 
-template <typename T>
-inline RBTNode<T>* rbTreeMinValue(RBTNode<T>* ptr)
-{
+template <typename T> inline RBTNode<T>* rbTreeMinValue(RBTNode<T>* ptr) {
     while (!ptr->left->isNil)
         ptr = ptr->left;
 
     return ptr;
 }
 
-template <typename T>
-inline RBTNode<T>* rbTreeMaxValue(RBTNode<T>* ptr)
-{
+template <typename T> inline RBTNode<T>* rbTreeMaxValue(RBTNode<T>* ptr) {
     while (!ptr->right->isNil)
         ptr = ptr->right;
 
     return ptr;
 }
 
-// 
+//
 //        |                                   |
 //        x                                   y
 //      ↙  ↘          left-rotate         ↙ ↘
 //     a     y      ---------------->     x     c
 //         ↙  ↘                       ↙ ↘
 //         b    c                      a    b
-// 
+//
 template <typename T>
-inline void rbTreeLeftRotate(RBTNode<T>*& root, RBTNode<T>* x)
-{
-    RBTNode<T>* y = x->right;      
+inline void rbTreeLeftRotate(RBTNode<T>*& root, RBTNode<T>* x) {
+    RBTNode<T>* y = x->right;
 
-    x->right = y->left;                
+    x->right = y->left;
     if (!y->left->isNil)
         y->left->parent = x;
 
@@ -67,7 +54,7 @@ inline void rbTreeLeftRotate(RBTNode<T>*& root, RBTNode<T>* x)
 
     if (x->parent->isNil)
         root = y;
-    else if (x == x->parent->left)  // x is the left child of x.p
+    else if (x == x->parent->left) // x is the left child of x.p
         x->parent->left = y;
     else
         x->parent->right = y;
@@ -75,7 +62,6 @@ inline void rbTreeLeftRotate(RBTNode<T>*& root, RBTNode<T>* x)
     x->parent = y;
     y->left = x;
 }
-
 
 //        |                                 |
 //        y                                 x
@@ -85,8 +71,7 @@ inline void rbTreeLeftRotate(RBTNode<T>*& root, RBTNode<T>* x)
 //  a    b                                  b    c
 //
 template <typename T>
-inline void rbTreeRightRotate(RBTNode<T>*& root, RBTNode<T>* y)
-{
+inline void rbTreeRightRotate(RBTNode<T>*& root, RBTNode<T>* y) {
     RBTNode<T>* x = y->left;
 
     y->left = x->right;
@@ -106,50 +91,41 @@ inline void rbTreeRightRotate(RBTNode<T>*& root, RBTNode<T>* y)
     y->parent = x;
 }
 
-
-
 } // namespace
 
-
-template <typename T>
-struct RBTreeConstIterator
-{
+template <typename T> struct RBTreeConstIterator {
     using iterator_category = bidirectional_iterator_tag;
-    using value_type        = T;
-    using difference_type   = ptrdiff_t;
-    using pointer           = const T*;
-    using reference         = const T&;
+    using value_type = T;
+    using difference_type = ptrdiff_t;
+    using pointer = const T*;
+    using reference = const T&;
 
-    using Ptr               = RBTNode<T>*;
+    using Ptr = RBTNode<T>*;
 
     Ptr ptr;
 
-    RBTreeConstIterator() : ptr() { }
-    RBTreeConstIterator(Ptr x) : ptr(x) { }
-    RBTreeConstIterator(const RBTreeConstIterator& rhs) : ptr(rhs.ptr) { }
+    RBTreeConstIterator() : ptr() {
+    }
+    RBTreeConstIterator(Ptr x) : ptr(x) {
+    }
+    RBTreeConstIterator(const RBTreeConstIterator& rhs) : ptr(rhs.ptr) {
+    }
 
-    reference operator*() const
-    {
+    reference operator*() const {
         return ptr->value;
     }
 
-    pointer operator->() const
-    {
+    pointer operator->() const {
         return pointer_traits<pointer>::pointer_to(**this);
     }
 
-    RBTreeConstIterator& operator++()            
-    {
-        if (!ptr->right->isNil)
-        {
+    RBTreeConstIterator& operator++() {
+        if (!ptr->right->isNil) {
             ptr = ptr->right;
             ptr = rbTreeMinValue(ptr);
-        }
-        else                                
-        {
+        } else {
             Ptr x = ptr->parent;
-            while (!x->isNil && ptr == x->right)
-            {
+            while (!x->isNil && ptr == x->right) {
                 ptr = x;
                 x = x->parent;
             }
@@ -159,28 +135,22 @@ struct RBTreeConstIterator
         return *this;
     }
 
-    RBTreeConstIterator operator++(int)
-    {
+    RBTreeConstIterator operator++(int) {
         RBTreeConstIterator tmp = *this;
         ++*this;
 
         return tmp;
     }
 
-    RBTreeConstIterator& operator--()
-    {
+    RBTreeConstIterator& operator--() {
         if (ptr->isNil)
             ptr = ptr->right;
-        else if (!ptr->left->isNil)
-        {
+        else if (!ptr->left->isNil) {
             ptr = ptr->left;
             ptr = rbTreeMaxValue(ptr);
-        }
-        else
-        {
+        } else {
             Ptr x = ptr->parent;
-            while (!x->isNil && ptr == x->left)
-            {
+            while (!x->isNil && ptr == x->left) {
                 ptr = x;
                 x = x->parent;
             }
@@ -190,174 +160,154 @@ struct RBTreeConstIterator
         return *this;
     }
 
-    RBTreeConstIterator operator--(int)
-    {
+    RBTreeConstIterator operator--(int) {
         RBTreeConstIterator tmp = *this;
         --*this;
 
         return tmp;
     }
 
-    bool operator==(const RBTreeConstIterator& rhs) const
-    {
+    bool operator==(const RBTreeConstIterator& rhs) const {
         return ptr == rhs.ptr;
     }
 
-    bool operator!=(const RBTreeConstIterator& rhs) const
-    {
+    bool operator!=(const RBTreeConstIterator& rhs) const {
         return !(ptr == rhs.ptr);
     }
-    
-};  // RBTreeConstIterator
 
+}; // RBTreeConstIterator
 
-template <typename T>
-struct RBTreeIterator : RBTreeConstIterator<T>
-{
+template <typename T> struct RBTreeIterator : RBTreeConstIterator<T> {
     using iterator_category = bidirectional_iterator_tag;
-    using value_type        = T;
-    using difference_type   = ptrdiff_t;
-    using pointer           = T*;
-    using reference         = T&;
+    using value_type = T;
+    using difference_type = ptrdiff_t;
+    using pointer = T*;
+    using reference = T&;
 
-    using Ptr               = RBTNode<T>*;
-    using Base              = RBTreeConstIterator<T>;
+    using Ptr = RBTNode<T>*;
+    using Base = RBTreeConstIterator<T>;
 
-    RBTreeIterator() : Base() { }
-    RBTreeIterator(Ptr x) : Base(x) { }
-    RBTreeIterator(const RBTreeIterator& rhs) : Base(rhs.ptr) { }
+    RBTreeIterator() : Base() {
+    }
+    RBTreeIterator(Ptr x) : Base(x) {
+    }
+    RBTreeIterator(const RBTreeIterator& rhs) : Base(rhs.ptr) {
+    }
 
-    reference operator*() const
-    {
+    reference operator*() const {
         return const_cast<reference>(Base::operator*());
     }
 
-    pointer operator->() const
-    {
+    pointer operator->() const {
         return pointer_traits<pointer>::pointer_to(**this);
     }
 
-    RBTreeIterator& operator++()
-    {
+    RBTreeIterator& operator++() {
         ++*static_cast<Base*>(this);
         return *this;
     }
 
-    RBTreeIterator operator++(int)
-    {
+    RBTreeIterator operator++(int) {
         RBTreeIterator tmp = *this;
         ++*this;
         return tmp;
     }
 
-    RBTreeIterator& operator--()
-    {
+    RBTreeIterator& operator--() {
         --*static_cast<Base*>(this);
         return *this;
     }
 
-    RBTreeIterator operator--(int)
-    {
+    RBTreeIterator operator--(int) {
         RBTreeIterator tmp = *this;
         --*this;
         return tmp;
     }
-};  // RBTreeIterator
+}; // RBTreeIterator
 
-
-template <typename T, typename Compare, typename Alloc>
-class RBTreeBase
-{
+template <typename T, typename Compare, typename Alloc> class RBTreeBase {
 public:
-    using value_type             = T;
-    using allocator_type         = Alloc;
-    using size_type              = typename Alloc::size_type;
-    using difference_type        = typename Alloc::difference_type;
-    
+    using value_type = T;
+    using allocator_type = Alloc;
+    using size_type = typename Alloc::size_type;
+    using difference_type = typename Alloc::difference_type;
+
 private:
-    using AlTraits               = allocator_traits<Alloc>;
-    using Node                   = RBTNode<T>;
-    using NodePtr                = RBTNode<T>*;
-    using AlNode                 = typename AlTraits::template rebind_alloc<Node>;
-    using AlNodeTraits           = allocator_traits<AlNode>;
-    
+    using AlTraits = allocator_traits<Alloc>;
+    using Node = RBTNode<T>;
+    using NodePtr = RBTNode<T>*;
+    using AlNode = typename AlTraits::template rebind_alloc<Node>;
+    using AlNodeTraits = allocator_traits<AlNode>;
+
 protected:
-    NodePtr  header;
+    NodePtr header;
     size_type m_count;
-    AlNode   alloc;
-    Compare   compare;
+    AlNode alloc;
+    Compare compare;
 
 public:
-    RBTreeBase() : m_count(0), alloc(), compare()
-    {
+    RBTreeBase() : m_count(0), alloc(), compare() {
         createHeaderNode();
     }
 
-    template <typename Any_alloc,
+    template <
+        typename Any_alloc,
         typename = enable_if_t<!is_same<decay_t<Any_alloc>, RBTreeBase>::value>>
-    RBTreeBase(const Compare& cmp, Any_alloc&& anyAlloc) 
-    : m_count(0), alloc(tiny_stl::forward<Any_alloc>(anyAlloc)), compare(cmp)
-    {
+    RBTreeBase(const Compare& cmp, Any_alloc&& anyAlloc)
+        : m_count(0), alloc(tiny_stl::forward<Any_alloc>(anyAlloc)),
+          compare(cmp) {
         createHeaderNode();
     }
 
-    ~RBTreeBase()
-    {
+    ~RBTreeBase() {
         alloc.deallocate(header, 1);
     }
 
 private:
-    void createHeaderNode()
-    {
-        try
-        {
+    void createHeaderNode() {
+        try {
             header = alloc.allocate(1);
             header->left = header;
             header->right = header;
             header->parent = header;
             header->isNil = 1;
             header->color = Color::BLACK;
-        }
-        catch (...)
-        {
+        } catch (...) {
             alloc.deallocate(header, 1);
             throw;
         }
     }
-};  // RBTreeBase
-
+}; // RBTreeBase
 
 template <typename T, typename Compare, typename Alloc, bool isMap>
-class RBTree : public RBTreeBase<T, Compare, Alloc>
-{
+class RBTree : public RBTreeBase<T, Compare, Alloc> {
 public:
-    using key_type               = typename AssociatedTypeHelper<T, isMap>::key_type;
-    using mapped_type            = typename AssociatedTypeHelper<T, isMap>::mapped_type;
-    using value_type             = T;
-    using key_compare            = Compare;         // if it is map, compare pair
-    using allocator_type         = Alloc;
-    using size_type              = size_t;
-    using difference_type        = ptrdiff_t;
-    using reference              = value_type&;
-    using const_reference        = const value_type&;
-    using pointer                = value_type*;
-    using const_pointer          = const value_type*;
-    
-    using AlTraits             = allocator_traits<Alloc>;
-    using Node                  = RBTNode<value_type>;
-    using NodePtr               = RBTNode<value_type>*;
-    using AlNode                = typename AlTraits::template rebind_alloc<Node>;
-    using AlNodeTraits         = allocator_traits<AlNode>;
-    using Base                  = RBTreeBase<value_type, Compare, Alloc>;
+    using key_type = typename AssociatedTypeHelper<T, isMap>::key_type;
+    using mapped_type = typename AssociatedTypeHelper<T, isMap>::mapped_type;
+    using value_type = T;
+    using key_compare = Compare; // if it is map, compare pair
+    using allocator_type = Alloc;
+    using size_type = size_t;
+    using difference_type = ptrdiff_t;
+    using reference = value_type&;
+    using const_reference = const value_type&;
+    using pointer = value_type*;
+    using const_pointer = const value_type*;
 
-    using iterator               = RBTreeIterator<value_type>;
-    using const_iterator         = RBTreeConstIterator<value_type>;
-    using reverse_iterator       = tiny_stl::reverse_iterator<iterator>;
+    using AlTraits = allocator_traits<Alloc>;
+    using Node = RBTNode<value_type>;
+    using NodePtr = RBTNode<value_type>*;
+    using AlNode = typename AlTraits::template rebind_alloc<Node>;
+    using AlNodeTraits = allocator_traits<AlNode>;
+    using Base = RBTreeBase<value_type, Compare, Alloc>;
+
+    using iterator = RBTreeIterator<value_type>;
+    using const_iterator = RBTreeConstIterator<value_type>;
+    using reverse_iterator = tiny_stl::reverse_iterator<iterator>;
     using const_reverse_iterator = tiny_stl::reverse_iterator<const_iterator>;
+
 private:
-    template <typename... Args>
-    NodePtr allocAndConstruct(Args&&... args)
-    {
+    template <typename... Args> NodePtr allocAndConstruct(Args&&... args) {
         NodePtr p = this->alloc.allocate(1);
 
         p->color = Color::RED;
@@ -366,13 +316,10 @@ private:
         p->left = this->header;
         p->right = this->header;
 
-        try
-        {
+        try {
             this->alloc.construct(tiny_stl::addressof(p->value),
-                tiny_stl::forward<Args>(args)...);
-        }
-        catch (...)
-        {
+                                  tiny_stl::forward<Args>(args)...);
+        } catch (...) {
             this->alloc.deallocate(p, 1);
             throw;
         }
@@ -380,65 +327,53 @@ private:
         return p;
     }
 
-    void destroyAndFree(NodePtr p)
-    {
-        if (p != nullptr)
-        {
+    void destroyAndFree(NodePtr p) {
+        if (p != nullptr) {
             this->alloc.destroy(tiny_stl::addressof(p->value));
             this->alloc.deallocate(p, 1);
         }
     }
 
-    NodePtr& getRoot() const noexcept
-    {
+    NodePtr& getRoot() const noexcept {
         return this->header->parent;
     }
 
-    const key_type& getKeyNode(NodePtr ptr, true_type) const    // map
-    {
+    // map
+    const key_type& getKeyNode(NodePtr ptr, true_type) const {
         return ptr->value.first;
     }
 
-    const key_type& getKeyNode(NodePtr ptr, false_type) const   // set
-    {
+    // set
+    const key_type& getKeyNode(NodePtr ptr, false_type) const {
         return ptr->value;
     }
 
-    const key_type& get_key(NodePtr ptr) const
-    {
+    const key_type& get_key(NodePtr ptr) const {
         return getKeyNode(ptr, tiny_stl::bool_constant<isMap>{});
     }
 
-    const key_type& getKeyValue(const T& val, true_type) const   // map
-    {
+    // map
+    const key_type& getKeyValue(const T& val, true_type) const {
         return val.first;
     }
 
-    const key_type& getKeyValue(const T& val, false_type) const   // set
-    {
+    // set
+    const key_type& getKeyValue(const T& val, false_type) const {
         return val;
     }
 
-    const key_type& getKeyFromValue(const T& val) const
-    {
+    const key_type& getKeyFromValue(const T& val) const {
         return getKeyValue(val, tiny_stl::bool_constant<isMap>{});
     }
 
-
-    template <typename K>
-    NodePtr lowBoundAux(const K& val) const
-    {
+    template <typename K> NodePtr lowBoundAux(const K& val) const {
         NodePtr pos = this->header;
         NodePtr p = pos->parent;
 
-        while (!p->isNil)
-        {
-            if (this->compare(get_key(p), val))
-            {
+        while (!p->isNil) {
+            if (this->compare(get_key(p), val)) {
                 p = p->right;
-            }
-            else
-            {
+            } else {
                 pos = p;
                 p = p->left;
             }
@@ -447,20 +382,14 @@ private:
         return pos;
     }
 
-    template <typename K>
-    NodePtr uppBoundAux(const K& val) const
-    {
+    template <typename K> NodePtr uppBoundAux(const K& val) const {
         NodePtr pos = this->header;
         NodePtr p = pos->parent;
 
-        while (!p->isNil)
-        {
-            if (!this->compare(val, get_key(p)))
-            {
+        while (!p->isNil) {
+            if (!this->compare(val, get_key(p))) {
                 p = p->right;
-            }
-            else
-            {
+            } else {
                 pos = p;
                 p = p->left;
             }
@@ -468,23 +397,18 @@ private:
 
         return pos;
     }
-    
-    NodePtr copyNodes(NodePtr rhsRoot, NodePtr thisPos)
-    {
+
+    NodePtr copyNodes(NodePtr rhsRoot, NodePtr thisPos) {
         NodePtr newheader = this->header;
 
-        if (!rhsRoot->isNil)
-        {
+        if (!rhsRoot->isNil) {
             NodePtr p = this->alloc.allocate(1);
             p->color = rhsRoot->color;
             p->isNil = 0;
             p->parent = thisPos;
-            try
-            {
+            try {
                 p->value = rhsRoot->value;
-            }
-            catch (...)
-            {
+            } catch (...) {
                 this->alloc.deallocate(p, 1);
                 throw;
             }
@@ -499,77 +423,63 @@ private:
         return newheader;
     }
 
-    void copyAux(const RBTree& rhs)
-    {
+    void copyAux(const RBTree& rhs) {
         getRoot() = copyNodes(rhs.getRoot(), this->header);
         this->m_count = rhs.m_count;
 
-        if (!getRoot()->isNil)
-        {
+        if (!getRoot()->isNil) {
             this->header->left = rbTreeMinValue(getRoot());
             this->header->right = rbTreeMaxValue(getRoot());
-        }
-        else
-        {
+        } else {
             this->header->left = this->header;
             this->header->right = this->header;
         }
     }
 
-    void moveAux(RBTree&& rhs)
-    {
+    void moveAux(RBTree&& rhs) {
         tiny_stl::swapADL(this->compare, rhs.compare);
         tiny_stl::swapADL(this->header, rhs.header);
         tiny_stl::swapADL(this->m_count, rhs.m_count);
     }
 
+    void rbTreeFixupForInsert(NodePtr& root, NodePtr z) {
+        while (z->parent->color == Color::RED) { // parent is red
+            // if parent is grandfather's left child
+            if (z->parent == z->parent->parent->left) {
+                NodePtr y = z->parent->parent->right; // y is z's uncle
 
-    void rbTreeFixupForInsert(NodePtr& root, NodePtr z)
-    {
-        while (z->parent->color == Color::RED)                  // parent is red
-        {
-            if (z->parent == z->parent->parent->left)           // parent is grandfather's left child
-            {
-                NodePtr y = z->parent->parent->right;           // y is z's uncle
-
-                if (y->color == Color::RED)                     // case 1, z's uncle is red
-                {
+                if (y->color == Color::RED) { // case 1, z's uncle is red
                     z->parent->color = Color::BLACK;
                     y->color = Color::BLACK;
                     z->parent->parent->color = Color::RED;
                     z = z->parent->parent;
-                }
-                else
-                {
-                    if (z == z->parent->right)                  // case 2, z is parent's right child
-                    {
+                } else {
+                    if (z == z->parent->right) {
+                        // case 2, z is parent's right child
                         z = z->parent;
                         rbTreeLeftRotate(root, z);
                     }
-                    z->parent->color = Color::BLACK;            // case 3, z is parent's left child
+                    z->parent->color =
+                        Color::BLACK; // case 3, z is parent's left child
                     z->parent->parent->color = Color::RED;
                     rbTreeRightRotate(root, z->parent->parent);
                 }
-            }
-            else                                                // parent is grandfather's right
-            {
-                NodePtr y = z->parent->parent->left;            // y is z's uncle
-    
-                if (y->color == Color::RED)                     // case 1, z's uncle is red
-                {
+            } else { // parent is grandfather's right
+                NodePtr y = z->parent->parent->left; // y is z's uncle
+
+                if (y->color == Color::RED) { // case 1, z's uncle is red
                     z->parent->color = Color::BLACK;
                     y->color = Color::BLACK;
                     z->parent->parent->color = Color::RED;
                     z = z->parent->parent;
-                }
-                else
-                {
-                    if (z == z->parent->left)                   // case 2, z is parent's left child
-                    {
+                } else {
+                    if (z == z->parent->left) {
+                        // case 2, z is parent's left child
                         z = z->parent;
                         rbTreeRightRotate(root, z);
                     }
-                    z->parent->color = Color::BLACK;            // case 3, z is parent's left child
+                    // case 3, z is parent's left child
+                    z->parent->color = Color::BLACK;
                     z->parent->parent->color = Color::RED;
                     rbTreeLeftRotate(root, z->parent->parent);
                 }
@@ -579,30 +489,23 @@ private:
         root->color = Color::BLACK;
     }
 
-    void rbTreeFixupForErase(NodePtr& root, NodePtr x)
-    {
-        while (x != root && x->color == Color::BLACK)
-        {
-            if (x == x->parent->left)
-            {
+    void rbTreeFixupForErase(NodePtr& root, NodePtr x) {
+        while (x != root && x->color == Color::BLACK) {
+            if (x == x->parent->left) {
                 NodePtr w = x->parent->right;
-                if (w->color == Color::RED)                     // case 1, x's brother w is red
-                {
+                if (w->color == Color::RED) { // case 1, x's brother w is red
                     w->color = Color::BLACK;
                     x->parent->color = Color::RED;
                     rbTreeLeftRotate(root, x->parent);
                     w = x->parent->right;
                 }
-                if (w->left->color == Color::BLACK              // case 2, w's left and 
-                    && w->right->color == Color::BLACK)         // right child is black
-                {
+                if (w->left->color == Color::BLACK &&
+                    w->right->color == Color::BLACK) {
+                    // case 2, w's left and right child is black
                     w->color = Color::RED;
                     x = x->parent;
-                }
-                else                                            // case 3, w's right child is black
-                {
-                    if (w->right->color == Color::BLACK)       
-                    {
+                } else { // case 3, w's right child is black
+                    if (w->right->color == Color::BLACK) {
                         w->left->color = Color::BLACK;
                         w->color = Color::RED;
                         rbTreeRightRotate(root, w);
@@ -614,33 +517,27 @@ private:
                     rbTreeLeftRotate(root, x->parent);
                     x = root;
                 }
-            }
-            else
-            {
+            } else {
                 NodePtr w = x->parent->left;
-                if (w->color == Color::RED)                     // case 1
-                {
+                if (w->color == Color::RED) { // case 1
                     w->color = Color::BLACK;
                     x->parent->color = Color::RED;
                     rbTreeRightRotate(root, x->parent);
                     w = x->parent->left;
                 }
-                if (w->left->color == Color::BLACK              // case 2
-                    && w->right->color == Color::BLACK)
-                {
+                if (w->left->color == Color::BLACK &&
+                    w->right->color == Color::BLACK) { // case 2
                     w->color = Color::RED;
                     x = x->parent;
-                }
-                else
-                {
-                    if (w->left->color == Color::BLACK)         // case 3
-                    {
+                } else {
+                    if (w->left->color == Color::BLACK) { // case 3
                         w->right->color = Color::BLACK;
                         w->color = Color::RED;
                         rbTreeLeftRotate(root, w);
                         w = x->parent->left;
                     }
-                    w->color = x->parent->color;                // case 4
+                    // case 4
+                    w->color = x->parent->color;
                     x->parent->color = Color::BLACK;
                     w->left->color = Color::BLACK;
                     rbTreeRightRotate(root, x->parent);
@@ -654,32 +551,30 @@ private:
     }
 
 public:
-    RBTree() : Base() {}
+    RBTree() : Base() {
+    }
 
-    RBTree(const Compare& cmp) : Base(cmp) {}
+    RBTree(const Compare& cmp) : Base(cmp) {
+    }
 
-    RBTree(const Compare& cmp, const allocator_type& alloc)
-    : Base(cmp, alloc) { }
+    RBTree(const Compare& cmp, const allocator_type& alloc) : Base(cmp, alloc) {
+    }
 
     template <typename Any_alloc>
-    RBTree(const RBTree& rhs, Any_alloc&& alloc) 
-    : Base(rhs.compare, tiny_stl::forward<Any_alloc>(alloc))
-    {
+    RBTree(const RBTree& rhs, Any_alloc&& alloc)
+        : Base(rhs.compare, tiny_stl::forward<Any_alloc>(alloc)) {
         copyAux(rhs);
     }
-    
-    RBTree(RBTree&& rhs) noexcept : Base(rhs.compare, rhs.alloc)
-    {
+
+    RBTree(RBTree&& rhs) noexcept : Base(rhs.compare, rhs.alloc) {
         moveAux(tiny_stl::move(rhs));
     }
 
-    RBTree(RBTree&& rhs, const Alloc& alloc) : Base(rhs.compare, alloc)
-    {
+    RBTree(RBTree&& rhs, const Alloc& alloc) : Base(rhs.compare, alloc) {
         moveAux(tiny_stl::move(rhs));
     }
 
-    RBTree& operator=(const RBTree& rhs)
-    {
+    RBTree& operator=(const RBTree& rhs) {
         // Non-standard, user allocator may be wrong
         clear();
         copyAux(rhs);
@@ -687,8 +582,7 @@ public:
         return *this;
     }
 
-    RBTree& operator=(RBTree&& rhs) 
-    {
+    RBTree& operator=(RBTree&& rhs) {
         // Non-standard, user allocator may be wrong
         clear();
         moveAux(tiny_stl::move(rhs));
@@ -696,160 +590,127 @@ public:
         return *this;
     }
 
-    ~RBTree()
-    {
+    ~RBTree() {
         clear();
     }
 
-    allocator_type get_allocator() const noexcept
-    {
+    allocator_type get_allocator() const noexcept {
         return this->alloc;
     }
 
-    size_type size() const noexcept
-    {
+    size_type size() const noexcept {
         return this->m_count;
     }
 
-    bool empty() const noexcept
-    {
+    bool empty() const noexcept {
         return size() == 0;
     }
 
-    size_type max_size() const noexcept
-    {
+    size_type max_size() const noexcept {
         return AlNodeTraits::max_size(this->alloc);
     }
 
-    iterator lower_bound(const key_type& val)
-    {
+    iterator lower_bound(const key_type& val) {
         return iterator(lowBoundAux(val));
     }
 
-    const_iterator lower_bound(const key_type& val) const
-    {
+    const_iterator lower_bound(const key_type& val) const {
         return const_iterator(lowBoundAux(val));
     }
 
-    template <typename K, 
-        typename Cmp = Compare,
-        typename = typename Cmp::is_transparent>
-    iterator lower_bound(const K& val)
-    {
+    template <typename K, typename Cmp = Compare,
+              typename = typename Cmp::is_transparent>
+    iterator lower_bound(const K& val) {
         return iterator(lowBoundAux(val));
     }
 
-    template <typename K,
-        typename Cmp = Compare,
-        typename = typename Cmp::is_transparent>
-    const_iterator lower_bound(const K& val) const
-    {
+    template <typename K, typename Cmp = Compare,
+              typename = typename Cmp::is_transparent>
+    const_iterator lower_bound(const K& val) const {
         return iterator(lowBoundAux(val));
     }
 
-    iterator upper_bound(const key_type& val)
-    {
+    iterator upper_bound(const key_type& val) {
         return iterator(uppBoundAux(val));
     }
 
-    const_iterator upper_bound(const key_type& val) const
-    {
+    const_iterator upper_bound(const key_type& val) const {
         return const_iterator(uppBoundAux(val));
     }
 
-    template <typename K,
-        typename Cmp = Compare,
-        typename = typename Cmp::is_transparent>
-    iterator upper_bound(const K& val)
-    {
+    template <typename K, typename Cmp = Compare,
+              typename = typename Cmp::is_transparent>
+    iterator upper_bound(const K& val) {
         return iterator(uppBoundAux(val));
     }
 
-    template <typename K,
-        typename Cmp = Compare,
-        typename = typename Cmp::is_transparent>
-    const_iterator upper_bound(const K& val) const
-    {
+    template <typename K, typename Cmp = Compare,
+              typename = typename Cmp::is_transparent>
+    const_iterator upper_bound(const K& val) const {
         return const_iterator(uppBoundAux(val));
     }
 
-    pair<iterator, iterator> equal_range(const key_type& key)
-    {
-        return { lower_bound(key), upper_bound(key) };
+    pair<iterator, iterator> equal_range(const key_type& key) {
+        return {lower_bound(key), upper_bound(key)};
     }
 
-    pair<const_iterator, const_iterator> equal_range(const key_type& key) const
-    {
-        return { lower_bound(key), upper_bound(key) };
+    pair<const_iterator, const_iterator>
+    equal_range(const key_type& key) const {
+        return {lower_bound(key), upper_bound(key)};
     }
 
-    template <typename K,
-        typename Cmp = Compare,
-        typename = typename Cmp::is_transparent>
-    pair<iterator, iterator> equal_range(const K& key)
-    {
-        return { lower_bound(key), upper_bound(key) };
+    template <typename K, typename Cmp = Compare,
+              typename = typename Cmp::is_transparent>
+    pair<iterator, iterator> equal_range(const K& key) {
+        return {lower_bound(key), upper_bound(key)};
     }
 
-    template <typename K,
-        typename Cmp = Compare,
-        typename = typename Cmp::is_transparent>
-    pair<const_iterator, const_iterator> equal_range(const K& key) const
-    {
-        return { lower_bound(key), upper_bound(key) };
+    template <typename K, typename Cmp = Compare,
+              typename = typename Cmp::is_transparent>
+    pair<const_iterator, const_iterator> equal_range(const K& key) const {
+        return {lower_bound(key), upper_bound(key)};
     }
 
-    size_type count(const key_type& key) const
-    {
+    size_type count(const key_type& key) const {
         pair<const_iterator, const_iterator> range = equal_range(key);
         return tiny_stl::distance(range.first, range.second);
     }
 
-    template <typename K>
-    size_type count(const K& key) const
-    {
+    template <typename K> size_type count(const K& key) const {
         pair<const_iterator, const_iterator> range = equal_range(key);
         return tiny_stl::distance(range.first, range.second);
     }
 
-    iterator find(const key_type& val)
-    {
+    iterator find(const key_type& val) {
         iterator pos = lower_bound(val);
-        return (pos == end() || this->compare(val, get_key(pos.ptr)))
-            ? end() : pos;
+        return (pos == end() || this->compare(val, get_key(pos.ptr))) ? end()
+                                                                      : pos;
     }
 
-    const_iterator find(const key_type& val) const
-    {
+    const_iterator find(const key_type& val) const {
         const_iterator pos = lower_bound(val);
-        return (pos == end() || this->compare(val, get_key(pos.ptr)))
-            ? end() : pos;
+        return (pos == end() || this->compare(val, get_key(pos.ptr))) ? end()
+                                                                      : pos;
     }
 
-    template <typename K,
-        typename Cmp = Compare,
-        typename = typename Cmp::is_transparent>
-    iterator find(const K& val)
-    {
+    template <typename K, typename Cmp = Compare,
+              typename = typename Cmp::is_transparent>
+    iterator find(const K& val) {
         iterator pos = lower_bound(val);
-        return (pos == end() || this->compare(val, get_key(pos.ptr)))
-            ? end() : pos;
+        return (pos == end() || this->compare(val, get_key(pos.ptr))) ? end()
+                                                                      : pos;
     }
 
-    template <typename K,
-        typename Cmp = Compare,
-        typename = typename Cmp::is_transparent>
-    const_iterator find(const K& val) const 
-    {
+    template <typename K, typename Cmp = Compare,
+              typename = typename Cmp::is_transparent>
+    const_iterator find(const K& val) const {
         iterator pos = lower_bound(val);
-        return (pos == end() || this->compare(val, get_key(pos.ptr)))
-            ? end() : pos;
+        return (pos == end() || this->compare(val, get_key(pos.ptr))) ? end()
+                                                                      : pos;
     }
-
 
 private:
-    iterator insertAux(NodePtr z)
-    {
+    iterator insertAux(NodePtr z) {
         NodePtr x = getRoot();
         NodePtr y = this->header;
 
@@ -859,8 +720,7 @@ private:
         if (y->right->isNil || !this->compare(get_key(z), get_key(y->right)))
             y->right = z;
 
-        while (!x->isNil)
-        {
+        while (!x->isNil) {
             y = x;
             if (this->compare(get_key(z), get_key(x)))
                 x = x->left;
@@ -870,25 +730,18 @@ private:
 
         z->parent = y;
 
-        if (y->isNil)
-        {
+        if (y->isNil) {
             getRoot() = z;
             this->header->left = z;
             this->header->right = z;
-        }
-        else if (this->compare(get_key(z), get_key(y)))
-        {
+        } else if (this->compare(get_key(z), get_key(y))) {
             y->left = z;
-            if (this->compare(get_key(z), 
-                            get_key(this->header->left)))   // z.key < min_value
-                this->header->left = z;
-        }
-        else
-        {
+            if (this->compare(get_key(z), get_key(this->header->left)))
+                this->header->left = z; // z.key < min_value
+        } else {
             y->right = z;
-            if (!this->compare(get_key(z), 
-                            get_key(this->header->right)))   // z.key >= max_value
-                this->header->right = z;
+            if (!this->compare(get_key(z), get_key(this->header->right)))
+                this->header->right = z; // z.key >= max_value
         }
 
         rbTreeFixupForInsert(getRoot(), z);
@@ -898,96 +751,78 @@ private:
         return iterator(z);
     }
 
-    template <typename Value>
-    iterator insertEqualAux(Value&& val)
-    {
+    template <typename Value> iterator insertEqualAux(Value&& val) {
         NodePtr z = allocAndConstruct(tiny_stl::forward<Value>(val));
         return insertAux(z);
     }
 
     template <typename Value>
-    pair<iterator, bool> insertUniqueAux(Value&& val)
-    {
+    pair<iterator, bool> insertUniqueAux(Value&& val) {
         T value(tiny_stl::forward<Value>(val));
         iterator pos = find(getKeyFromValue(val));
 
-        if (pos != end())
-        {
+        if (pos != end()) {
             return make_pair(pos, false);
         }
-            
+
         NodePtr z = allocAndConstruct(tiny_stl::move(value));
         return make_pair(insertAux(z), true);
     }
 
 protected:
-    iterator insert_equal(const value_type& val)
-    {
+    iterator insert_equal(const value_type& val) {
         return insertEqualAux(val);
     }
 
-    iterator insert_equal(value_type&& val)
-    {
+    iterator insert_equal(value_type&& val) {
         return insertEqualAux(tiny_stl::move(val));
     }
 
-    template <typename InIter>
-    void insert_equal(InIter first, InIter last)
-    {
-        for (;first != last; ++first)
+    template <typename InIter> void insert_equal(InIter first, InIter last) {
+        for (; first != last; ++first)
             insertEqualAux(*first);
     }
 
-    pair<iterator, bool> insert_unique(const value_type& val)
-    {
+    pair<iterator, bool> insert_unique(const value_type& val) {
         return insertUniqueAux(val);
     }
 
-    pair<iterator, bool> insert_unique(value_type&& val)
-    {
+    pair<iterator, bool> insert_unique(value_type&& val) {
         return insertUniqueAux(tiny_stl::move(val));
     }
 
-    template <typename InIter>
-    void insert_unique(InIter first, InIter last)
-    {
+    template <typename InIter> void insert_unique(InIter first, InIter last) {
         for (; first != last; ++first)
             insertUniqueAux(*first);
     }
 
-    template <typename... Args>
-    iterator emplace_equal(Args&&... args)
-    {
+    template <typename... Args> iterator emplace_equal(Args&&... args) {
         return insertEqualAux(tiny_stl::forward<Args>(args)...);
     }
 
     template <typename... Args>
-    pair<iterator, bool> emplace_unique(Args&&... args)
-    {
+    pair<iterator, bool> emplace_unique(Args&&... args) {
         return insertUniqueAux(tiny_stl::forward<Args>(args)...);
     }
 
 private:
     // transplant v to the location of u
-    inline void transplantForErase(NodePtr& root, NodePtr u, NodePtr v)
-    {
-        if (u->parent->isNil)                   // u is root
+    inline void transplantForErase(NodePtr& root, NodePtr u, NodePtr v) {
+        if (u->parent->isNil) // u is root
             root = v;
-        else if (u == u->parent->left)          // u is left child
+        else if (u == u->parent->left) // u is left child
             u->parent->left = v;
-        else                                    // u is right child
+        else // u is right child
             u->parent->right = v;
-       
+
         v->parent = u->parent;
     }
 
     // erase node z
-    void eraseAux(NodePtr root, NodePtr z)
-    {
+    void eraseAux(NodePtr root, NodePtr z) {
         NodePtr y = z;
         NodePtr x = nullptr;
-       
-        
+
         Color yOriginColor = y->color;
 
         if (z == this->header->left)
@@ -996,33 +831,25 @@ private:
         if (z == this->header->right)
             this->header->right = (--iterator(z)).ptr;
 
-        if (z->left->isNil)                     // z has not left child
-        {
+        if (z->left->isNil) { // z has not left child
             x = z->right;
             transplantForErase(getRoot(), z, z->right);
-        }
-        else if (z->right->isNil)               // z has not right child
-        {
+        } else if (z->right->isNil) { // z has not right child
             x = z->left;
             transplantForErase(getRoot(), z, z->left);
-        }
-        else                                    // z has left and right child
-        {
+        } else { // z has left and right child
             y = rbTreeMinValue(z->right);
             yOriginColor = y->color;
             x = y->right;
 
-            if (y->parent == z)
-            {
+            if (y->parent == z) {
                 x->parent = y;
-            }
-            else
-            {
+            } else {
                 transplantForErase(getRoot(), y, y->right);
                 y->right = z->right;
                 y->right->parent = y;
             }
-            
+
             transplantForErase(getRoot(), z, y);
             y->left = z->left;
             y->left->parent = y;
@@ -1040,8 +867,7 @@ private:
     }
 
 public:
-    iterator erase(const_iterator pos)
-    {
+    iterator erase(const_iterator pos) {
         NodePtr z = pos.ptr;
 
         ++pos;
@@ -1049,22 +875,19 @@ public:
         return iterator(pos.ptr);
     }
 
-    iterator erase(const_iterator first, const_iterator last)
-    {
-        if (first == begin() && last == end())
-        {
+    iterator erase(const_iterator first, const_iterator last) {
+        if (first == begin() && last == end()) {
             clear();
             return end();
         }
-            
+
         while (first != last)
             erase(first++);
 
         return iterator(first.ptr);
     }
 
-    size_type erase(const key_type& key)
-    {
+    size_type erase(const key_type& key) {
         auto ppos = equal_range(key);
         size_type num = tiny_stl::distance(ppos.first, ppos.second);
 
@@ -1074,81 +897,67 @@ public:
     }
 
 public:
-    iterator begin() noexcept
-    {
+    iterator begin() noexcept {
         return iterator(this->header->left);
     }
 
-    const_iterator begin() const noexcept
-    {
+    const_iterator begin() const noexcept {
         return const_iterator(this->header->left);
     }
 
-    const_iterator cbegin() const noexcept
-    {
+    const_iterator cbegin() const noexcept {
         return begin();
     }
 
-    iterator end() noexcept
-    {
+    iterator end() noexcept {
         return iterator(this->header);
     }
 
-    const_iterator end() const noexcept
-    {
+    const_iterator end() const noexcept {
         return const_iterator(this->header);
     }
 
-    const_iterator cend() const noexcept
-    {
+    const_iterator cend() const noexcept {
         return end();
     }
 
-    reverse_iterator rbegin() noexcept
-    {
+    reverse_iterator rbegin() noexcept {
         return reverse_iterator(end());
     }
 
-    const_reverse_iterator rbegin() const noexcept
-    {
+    const_reverse_iterator rbegin() const noexcept {
         return const_reverse_iterator(end());
     }
 
-    const_reverse_iterator crbegin() const noexcept
-    {
+    const_reverse_iterator crbegin() const noexcept {
         return rbegin();
     }
 
-    reverse_iterator rend() noexcept
-    {
+    reverse_iterator rend() noexcept {
         return reverse_iterator(begin());
     }
 
-    const_reverse_iterator rend() const noexcept
-    {
+    const_reverse_iterator rend() const noexcept {
         return const_reverse_iterator(begin());
     }
 
-    const_reverse_iterator crend() const noexcept
-    {
+    const_reverse_iterator crend() const noexcept {
         return rend();
     }
 
 private:
-    void clearAux(NodePtr root)
-    {
-        for (NodePtr p = root; !p->isNil; root = p)
-        {
+    void clearAux(NodePtr root) {
+        for (NodePtr p = root; !p->isNil; root = p) {
             clearAux(p->right);
             p = p->left;
-            AlNodeTraits::destroy(this->alloc, tiny_stl::addressof(root->value));
+            AlNodeTraits::destroy(this->alloc,
+                                  tiny_stl::addressof(root->value));
             this->alloc.deallocate(root, 1);
         }
     }
 
 public:
-    void clear()
-    {
+    void clear() {
         clearAux(getRoot());
         this->header->left = this->header;
         this->header->right = this->header;
@@ -1156,10 +965,8 @@ public:
         this->m_count = 0;
     }
 
-    void swap(RBTree& rhs) 
-        noexcept(AlTraits::is_always_equal::value 
-            && is_nothrow_swappable<Compare>::value)
-    {
+    void swap(RBTree& rhs) noexcept(AlTraits::is_always_equal::value &&
+                                        is_nothrow_swappable<Compare>::value) {
         assert(this->alloc == rhs.alloc);
 
         if (allocator_traits<Alloc>::propagate_on_container_swap::value)
@@ -1170,52 +977,44 @@ public:
         tiny_stl::swapADL(this->m_count, rhs.m_count);
     }
 
-    
-};  // RBTree
+}; // RBTree
 
 template <typename T, typename Compare, typename Alloc, bool isMap>
 bool operator==(const RBTree<T, Compare, Alloc, isMap>& lhs,
-                const RBTree<T, Compare, Alloc, isMap>& rhs)
-{
+                const RBTree<T, Compare, Alloc, isMap>& rhs) {
     return lhs.size() == rhs.size() &&
-        tiny_stl::equal(lhs.begin(), lhs.end(), rhs.begin());
+           tiny_stl::equal(lhs.begin(), lhs.end(), rhs.begin());
 }
 
 template <typename T, typename Compare, typename Alloc, bool isMap>
 bool operator!=(const RBTree<T, Compare, Alloc, isMap>& lhs,
-                const RBTree<T, Compare, Alloc, isMap>& rhs)
-{
+                const RBTree<T, Compare, Alloc, isMap>& rhs) {
     return !(lhs == rhs);
 }
 
-
 template <typename T, typename Compare, typename Alloc, bool isMap>
 bool operator<(const RBTree<T, Compare, Alloc, isMap>& lhs,
-               const RBTree<T, Compare, Alloc, isMap>& rhs)
-{
+               const RBTree<T, Compare, Alloc, isMap>& rhs) {
     return tiny_stl::lexicographical_compare(lhs.begin(), lhs.end(),
                                              rhs.begin(), rhs.end());
 }
 
 template <typename T, typename Compare, typename Alloc, bool isMap>
 bool operator>(const RBTree<T, Compare, Alloc, isMap>& lhs,
-               const RBTree<T, Compare, Alloc, isMap>& rhs)
-{
+               const RBTree<T, Compare, Alloc, isMap>& rhs) {
     return rhs < lhs;
 }
 
 template <typename T, typename Compare, typename Alloc, bool isMap>
 bool operator<=(const RBTree<T, Compare, Alloc, isMap>& lhs,
-                const RBTree<T, Compare, Alloc, isMap>& rhs)
-{
+                const RBTree<T, Compare, Alloc, isMap>& rhs) {
     return !(rhs < lhs);
 }
 
 template <typename T, typename Compare, typename Alloc, bool isMap>
 bool operator>=(const RBTree<T, Compare, Alloc, isMap>& lhs,
-                const RBTree<T, Compare, Alloc, isMap>& rhs)
-{
+                const RBTree<T, Compare, Alloc, isMap>& rhs) {
     return !(lhs < rhs);
 }
 
-}   // namespace tiny_stl
+} // namespace tiny_stl
