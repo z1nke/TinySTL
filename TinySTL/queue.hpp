@@ -24,38 +24,45 @@ private:
     container_type cont;
 
 public:
-    explicit queue(const container_type& c)                     // (1)
+    // (1)
+    explicit queue(const container_type& c)                     
     : cont(c) { }
 
-    explicit queue(container_type&& c = container_type())       // (2)
+    // (2)
+    explicit queue(container_type&& c = container_type())       
     : cont(tiny_stl::move(c)) { }
 
-    queue(const queue& rhs) : cont(rhs.cont) { }                // (3)
+    // (3)
+    queue(const queue& rhs) : cont(rhs.cont) { }                
 
-    queue(queue&& rhs) : cont(tiny_stl::move(rhs.cont)) { }     // (4)
+    // (4)
+    queue(queue&& rhs) : cont(tiny_stl::move(rhs.cont)) { }     
 
-    template <typename Alloc, typename =                        // (5)
+    // (5)
+    template <typename Alloc, typename =                        
         enable_if_t<uses_allocator<container_type, Alloc>::value>>
     explicit queue(const Alloc& alloc) : cont(alloc) { }
 
-    template <typename Alloc, typename =                        // (6)
+    // (6)
+    template <typename Alloc, typename =                        
         enable_if_t<uses_allocator<container_type, Alloc>::value>>
     queue(const container_type& c, const Alloc& alloc) 
     : cont(c, alloc) { }
 
-    template <typename Alloc, typename =                        // (7)
+    // (7)
+    template <typename Alloc, typename =                        
         enable_if_t<uses_allocator<container_type, Alloc>::value>>
     queue(container_type&& c, const Alloc& alloc) 
     : cont(tiny_stl::move(c), alloc) { }
 
-    // copy construct 
-    template <typename Alloc, typename =                        // (8)
+    // (8)
+    template <typename Alloc, typename =                        
         enable_if_t<uses_allocator<container_type, Alloc>::value>>
     queue(const queue& rhs, const Alloc& alloc) 
     : cont(rhs.cont, alloc) { }
 
-    // move construct
-    template <typename Alloc, typename =                        // (9)
+    // (9)
+    template <typename Alloc, typename =                        
         enable_if_t<uses_allocator<container_type, Alloc>::value>>
     queue(queue&& rhs, const Alloc& alloc) 
     : cont(tiny_stl::move(rhs.cont), alloc) { }
@@ -202,36 +209,43 @@ private:
     container_type cont;
 
 public:
-    priority_queue(const value_compare& cmp, const container_type& c)   // (1)
+    // (1)
+    priority_queue(const value_compare& cmp, const container_type& c)   
     : comp(cmp), cont(c) 
     { 
         tiny_stl::make_heap(cont.begin(), cont.end(), comp);
     }
 
-    explicit priority_queue(const value_compare& cmp = value_compare{}, // (2)
+    // (2)
+    explicit priority_queue(const value_compare& cmp = value_compare{}, 
         container_type&& c = container_type{}) 
     : comp(cmp), cont(tiny_stl::move(c))
     { 
         tiny_stl::make_heap(cont.begin(), cont.end(), comp);
     }
 
-    priority_queue(const priority_queue& rhs)                           // (3)
+    // (3)
+    priority_queue(const priority_queue& rhs)                           
     : comp(rhs.comp), cont(rhs.cont) { }
 
-    priority_queue(priority_queue&& rhs)                                // (4)
+    // (4)
+    priority_queue(priority_queue&& rhs)                                
     : comp(tiny_stl::move(rhs.comp)), cont(tiny_stl::move(rhs.cont)) { }
 
-    template <typename Alloc, typename =                                // (5)
+    // (5)
+    template <typename Alloc, typename =                                
         enable_if_t<uses_allocator<container_type, Alloc>::value>>
     explicit priority_queue(const Alloc& alloc) 
     : comp(), cont(alloc) { }
 
-    template <typename Alloc, typename =                                // (6)
+    // (6)
+    template <typename Alloc, typename =                                
         enable_if_t<uses_allocator<container_type, Alloc>::value>>
     priority_queue(const value_compare& cmp, const Alloc& alloc) 
     : comp(cmp), cont(alloc) { }
 
-    template <typename Alloc, typename =                                // (7)
+    // (7)
+    template <typename Alloc, typename =                                
         enable_if_t<uses_allocator<container_type, Alloc>::value>>
     priority_queue(const value_compare& cmp, 
         const container_type& c, const Alloc& alloc) 
@@ -240,7 +254,8 @@ public:
         tiny_stl::make_heap(cont.begin(), cont.end(), comp);
     }
 
-    template <typename Alloc, typename =                                // (8)
+    // (8)
+    template <typename Alloc, typename =                                
         enable_if_t<uses_allocator<container_type, Alloc>::value>>
     priority_queue(const value_compare& cmp, 
         container_type&& c, const Alloc& alloc) 
@@ -249,18 +264,21 @@ public:
         tiny_stl::make_heap(cont.begin(), cont.end(), comp);
     }
 
-    template <typename Alloc, typename =                                // (9)
+    // (9)
+    template <typename Alloc, typename =                                
         enable_if_t<uses_allocator<container_type, Alloc>::value>>
     priority_queue(const priority_queue& rhs, const Alloc& alloc) 
     : comp(rhs.comp), cont(rhs.cont, alloc) { }
 
-    template <typename Alloc, typename =                                // (10)
+    // (10)
+    template <typename Alloc, typename =                                
         enable_if_t<uses_allocator<container_type, Alloc>::value>>
     priority_queue(priority_queue&& rhs, const Alloc& alloc) 
     : comp(tiny_stl::move(rhs.comp)), 
         cont(tiny_stl::move(rhs.cont), alloc) { }
 
-    template <typename InIter>                                          // (11)
+    // (11)
+    template <typename InIter>                                          
     priority_queue(InIter first, InIter last, 
                 const value_compare& cmp, const container_type& c) 
     : comp(cmp), cont(c)
@@ -269,7 +287,8 @@ public:
         tiny_stl::make_heap(cont.begin(), cont.end(), comp);
     }
 
-    template <typename InIter>                                          // (12)
+    // (12)
+    template <typename InIter>                                          
     priority_queue(InIter first, InIter last,
         const value_compare& cmp = value_compare{},
         container_type&& c = container_type{}) 
