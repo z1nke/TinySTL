@@ -171,7 +171,8 @@ public:
         return this->insert_unique(tiny_stl::move(val));
     }
 
-    template <typename InIter> void insert(InIter first, InIter last) {
+    template <typename InIter>
+    void insert(InIter first, InIter last) {
         this->insert_unique(first, last);
     }
 
@@ -179,7 +180,8 @@ public:
         this->insert_unique(ilist.begin(), ilist.end());
     }
 
-    template <typename... Args> pair<iterator, bool> emplace(Args&&... args) {
+    template <typename... Args>
+    pair<iterator, bool> emplace(Args&&... args) {
         this->emplace_unique(tiny_stl::forward<Args>(args)...);
     }
 
@@ -335,7 +337,8 @@ public:
         return this->insert_equal(tiny_stl::move(val));
     }
 
-    template <typename InIter> void insert(InIter first, InIter last) {
+    template <typename InIter>
+    void insert(InIter first, InIter last) {
         this->insert_equal(first, last);
     }
 
@@ -343,7 +346,8 @@ public:
         this->insert_equal(ilist.begin(), ilist.end());
     }
 
-    template <typename... Args> pair<iterator, bool> emplace(Args&&... args) {
+    template <typename... Args>
+    pair<iterator, bool> emplace(Args&&... args) {
         this->emplace_equal(tiny_stl::forward<Args>(args)...);
     }
 

@@ -4,7 +4,8 @@
 
 namespace tiny_stl {
 
-template <typename UnaryPred> class unary_negate {
+template <typename UnaryPred>
+class unary_negate {
 private:
     UnaryPred functor;
 
@@ -20,7 +21,8 @@ public:
     }
 };
 
-template <typename BinPred> class binary_negate {
+template <typename BinPred>
+class binary_negate {
 private:
     BinPred functor;
 
@@ -39,7 +41,8 @@ public:
 };
 
 // operator&
-template <typename T = void> struct bit_and {
+template <typename T = void>
+struct bit_and {
     using first_argument_type = T;
     using second_argument_type = T;
     using result_type = T;
@@ -49,7 +52,8 @@ template <typename T = void> struct bit_and {
     }
 };
 
-template <> struct bit_and<void> {
+template <>
+struct bit_and<void> {
     using is_transparent = int;
 
     // C++ 11
@@ -70,7 +74,8 @@ template <> struct bit_and<void> {
 };
 
 // operator|
-template <typename T = void> struct bit_or {
+template <typename T = void>
+struct bit_or {
     using first_argument_type = T;
     using second_argument_type = T;
     using result_type = T;
@@ -80,7 +85,8 @@ template <typename T = void> struct bit_or {
     }
 };
 
-template <> struct bit_or<void> {
+template <>
+struct bit_or<void> {
     using is_transparent = int;
 
     template <typename T1, typename T2>
@@ -91,7 +97,8 @@ template <> struct bit_or<void> {
 };
 
 // operator^
-template <typename T = void> struct bit_xor {
+template <typename T = void>
+struct bit_xor {
     using first_argument_type = T;
     using second_argument_type = T;
     using result_type = T;
@@ -101,7 +108,8 @@ template <typename T = void> struct bit_xor {
     }
 };
 
-template <> struct bit_xor<void> {
+template <>
+struct bit_xor<void> {
     using is_transparent = int;
 
     template <typename T1, typename T2>
@@ -112,7 +120,8 @@ template <> struct bit_xor<void> {
 };
 
 // operator&&
-template <typename T = void> struct logical_and {
+template <typename T = void>
+struct logical_and {
     using first_argument_type = T;
     using second_argument_type = T;
     using result_type = bool;
@@ -122,7 +131,8 @@ template <typename T = void> struct logical_and {
     }
 };
 
-template <> struct logical_and<void> {
+template <>
+struct logical_and<void> {
     using is_transparent = int;
 
     template <typename T1, typename T2>
@@ -133,7 +143,8 @@ template <> struct logical_and<void> {
 };
 
 // operator||
-template <typename T = void> struct logical_or {
+template <typename T = void>
+struct logical_or {
     using first_argument_type = T;
     using second_argument_type = T;
     using result_type = bool;
@@ -143,7 +154,8 @@ template <typename T = void> struct logical_or {
     }
 };
 
-template <> struct logical_or<void> {
+template <>
+struct logical_or<void> {
     using is_transparent = int;
 
     template <typename T1, typename T2>
@@ -154,7 +166,8 @@ template <> struct logical_or<void> {
 };
 
 // operator!
-template <typename T = void> struct logical_not {
+template <typename T = void>
+struct logical_not {
     using argument_type = T;
     using result_type = bool;
 
@@ -163,7 +176,8 @@ template <typename T = void> struct logical_not {
     }
 };
 
-template <> struct logical_not<void> {
+template <>
+struct logical_not<void> {
     using is_transparent = int;
 
     template <typename T>
@@ -174,7 +188,8 @@ template <> struct logical_not<void> {
 };
 
 // operator+
-template <typename T = void> struct plus {
+template <typename T = void>
+struct plus {
     using first_argument_type = T;
     using second_argument_type = T;
     using result_type = T;
@@ -184,7 +199,8 @@ template <typename T = void> struct plus {
     }
 };
 
-template <> struct plus<void> {
+template <>
+struct plus<void> {
     using is_transparent = int;
 
     template <typename T1, typename T2>
@@ -195,7 +211,8 @@ template <> struct plus<void> {
 };
 
 // binary operator-
-template <typename T = void> struct minus {
+template <typename T = void>
+struct minus {
     using first_argument_type = T;
     using second_argument_type = T;
     using result_type = T;
@@ -205,7 +222,8 @@ template <typename T = void> struct minus {
     }
 };
 
-template <> struct minus<void> {
+template <>
+struct minus<void> {
     using is_transparent = int;
 
     template <typename T1, typename T2>
@@ -216,7 +234,8 @@ template <> struct minus<void> {
 };
 
 // operator*
-template <typename T = void> struct multiplies {
+template <typename T = void>
+struct multiplies {
     using first_argument_type = T;
     using second_argument_type = T;
     using result_type = T;
@@ -226,7 +245,8 @@ template <typename T = void> struct multiplies {
     }
 };
 
-template <> struct multiplies<void> {
+template <>
+struct multiplies<void> {
     using is_transparent = int;
 
     template <typename T1, typename T2>
@@ -237,7 +257,8 @@ template <> struct multiplies<void> {
 };
 
 // operator/
-template <typename T = void> struct divides {
+template <typename T = void>
+struct divides {
     using first_argument_type = T;
     using second_argument_type = T;
     using result_type = T;
@@ -247,7 +268,8 @@ template <typename T = void> struct divides {
     }
 };
 
-template <> struct divides<void> {
+template <>
+struct divides<void> {
     using is_transparent = int;
 
     template <typename T1, typename T2>
@@ -258,7 +280,8 @@ template <> struct divides<void> {
 };
 
 // operator%
-template <typename T = void> struct modulus {
+template <typename T = void>
+struct modulus {
     using first_argument_type = T;
     using second_argument_type = T;
     using result_type = T;
@@ -268,7 +291,8 @@ template <typename T = void> struct modulus {
     }
 };
 
-template <> struct modulus<void> {
+template <>
+struct modulus<void> {
     using is_transparent = int;
 
     template <typename T1, typename T2>
@@ -279,7 +303,8 @@ template <> struct modulus<void> {
 };
 
 // unary operator-
-template <typename T = void> struct negate {
+template <typename T = void>
+struct negate {
     using argument_type = T;
     using result_type = T;
 
@@ -288,7 +313,8 @@ template <typename T = void> struct negate {
     }
 };
 
-template <> struct negate<void> {
+template <>
+struct negate<void> {
     using is_transparent = int;
 
     template <typename T>
@@ -299,7 +325,8 @@ template <> struct negate<void> {
 };
 
 // operator==
-template <typename T = void> struct equal_to {
+template <typename T = void>
+struct equal_to {
     using first_argument_type = T;
     using second_argument_type = T;
     using result_type = bool;
@@ -309,7 +336,8 @@ template <typename T = void> struct equal_to {
     }
 };
 
-template <> struct equal_to<void> {
+template <>
+struct equal_to<void> {
     using is_transparent = int;
 
     template <typename T1, typename T2>
@@ -320,7 +348,8 @@ template <> struct equal_to<void> {
 };
 
 // operator!=
-template <typename T = void> struct not_equal_to {
+template <typename T = void>
+struct not_equal_to {
     using first_argument_type = T;
     using second_argument_type = T;
     using result_type = bool;
@@ -330,7 +359,8 @@ template <typename T = void> struct not_equal_to {
     }
 };
 
-template <> struct not_equal_to<void> {
+template <>
+struct not_equal_to<void> {
     using is_transparent = int;
 
     template <typename T1, typename T2>
@@ -341,7 +371,8 @@ template <> struct not_equal_to<void> {
 };
 
 // operator<
-template <typename T = void> struct less {
+template <typename T = void>
+struct less {
     using first_argument_type = T;
     using second_argument_type = T;
     using result_type = bool;
@@ -351,7 +382,8 @@ template <typename T = void> struct less {
     }
 };
 
-template <> struct less<void> {
+template <>
+struct less<void> {
     using is_transparent = int;
 
     template <typename T1, typename T2>
@@ -362,7 +394,8 @@ template <> struct less<void> {
 };
 
 // operator<=
-template <typename T = void> struct less_equal {
+template <typename T = void>
+struct less_equal {
     using first_argument_type = T;
     using second_argument_type = T;
     using result_type = bool;
@@ -372,7 +405,8 @@ template <typename T = void> struct less_equal {
     }
 };
 
-template <> struct less_equal<void> {
+template <>
+struct less_equal<void> {
     using is_transparent = int;
 
     template <typename T1, typename T2>
@@ -383,7 +417,8 @@ template <> struct less_equal<void> {
 };
 
 // operator>
-template <typename T = void> struct greater {
+template <typename T = void>
+struct greater {
     using first_argument_type = T;
     using second_argument_type = T;
     using result_type = bool;
@@ -393,7 +428,8 @@ template <typename T = void> struct greater {
     }
 };
 
-template <> struct greater<void> {
+template <>
+struct greater<void> {
     using is_transparent = int;
 
     template <typename T1, typename T2>
@@ -404,7 +440,8 @@ template <> struct greater<void> {
 };
 
 // operator>=
-template <typename T = void> struct greater_equal {
+template <typename T = void>
+struct greater_equal {
     using first_argument_type = T;
     using second_argument_type = T;
     using result_type = bool;
@@ -414,7 +451,8 @@ template <typename T = void> struct greater_equal {
     }
 };
 
-template <> struct greater_equal<void> {
+template <>
+struct greater_equal<void> {
     using is_transparent = int;
 
     template <typename T1, typename T2>
@@ -424,7 +462,8 @@ template <> struct greater_equal<void> {
     }
 };
 
-template <typename T> inline size_t hashFNV(const T* p, size_t count) noexcept {
+template <typename T>
+inline size_t hashFNV(const T* p, size_t count) noexcept {
     static_assert(is_arithmetic_v<T>, "T must be arithmetic type");
     size_t ret = 2166136261U;
     for (size_t i = 0u; i < count; ++i) {
@@ -435,7 +474,8 @@ template <typename T> inline size_t hashFNV(const T* p, size_t count) noexcept {
     return ret;
 }
 
-template <typename Key> struct hash {
+template <typename Key>
+struct hash {
     using argument_type = Key;
     using result_type = size_t;
 

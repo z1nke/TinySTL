@@ -48,7 +48,8 @@ static int test_pass = 0;
 #define UNIT_TEST(expect, actual)                                              \
     UNIT_TEST_BASE((expect) == (actual), (expect), (actual))
 
-template <typename Con> void print_elements(const Con& c) {
+template <typename Con>
+void print_elements(const Con& c) {
     for (const auto& x : c)
         std::cout << x << " ";
     std::cout << "\n";
@@ -122,7 +123,8 @@ void testTypeTraits() {
                                tiny_stl::add_pointer_t<int(int)>>));
 }
 
-template <typename T> bool is_equal(const T& lhs, const T& rhs) {
+template <typename T>
+bool is_equal(const T& lhs, const T& rhs) {
     return lhs == rhs;
 }
 

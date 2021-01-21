@@ -21,7 +21,8 @@ inline void constructInPlace(T& dst, Args&&... args) noexcept(
     ::new (static_cast<void*>(&dst)) T(tiny_stl::forward<Args>(args)...);
 }
 
-template <typename T> inline void destroyInPlace(T& obj) noexcept {
+template <typename T>
+inline void destroyInPlace(T& obj) noexcept {
     obj.~T();
 }
 
@@ -221,7 +222,8 @@ inline void destroyRange(FwdIter first, FwdIter last) {
                     is_trivially_destructible<IteratorValueType<FwdIter>>{});
 }
 
-template <typename FwdIter> inline void destroy(FwdIter first, FwdIter last) {
+template <typename FwdIter>
+inline void destroy(FwdIter first, FwdIter last) {
     destroyRange(first, last);
 }
 
@@ -338,7 +340,8 @@ inline FwdIter uninitializedAllocMove(InIter first, InIter last,
     return newFirst;
 }
 
-template <typename T> struct GetFirstParameter;
+template <typename T>
+struct GetFirstParameter;
 
 template <template <typename, typename...> class T, typename First,
           typename... Rest>
@@ -346,7 +349,8 @@ struct GetFirstParameter<T<First, Rest...>> {
     using type = First;
 };
 
-template <typename T, typename = void> struct GetElementType {
+template <typename T, typename = void>
+struct GetElementType {
     using type = typename GetFirstParameter<T>::type;
 };
 
@@ -355,7 +359,8 @@ struct GetElementType<T, void_t<typename T::element_type>> {
     using type = typename T::element_type;
 };
 
-template <typename T, typename = void> struct GetPtrDifferenceType {
+template <typename T, typename = void>
+struct GetPtrDifferenceType {
     using type = ptrdiff_t;
 };
 
@@ -364,7 +369,8 @@ struct GetPtrDifferenceType<T, void_t<typename T::difference_type>> {
     using type = typename T::difference_type;
 };
 
-template <typename NewFirst, typename T> struct ReplaceFirstParameter;
+template <typename NewFirst, typename T>
+struct ReplaceFirstParameter;
 
 template <typename NewFirst, template <typename, typename...> class T,
           typename First, typename... Rest>
@@ -372,7 +378,8 @@ struct ReplaceFirstParameter<NewFirst, T<First, Rest...>> {
     using type = T<NewFirst, Rest...>;
 };
 
-template <typename T, typename Other, typename = void> struct GetRebindType {
+template <typename T, typename Other, typename = void>
+struct GetRebindType {
     using type = typename ReplaceFirstParameter<Other, T>::type;
 };
 
@@ -382,7 +389,8 @@ struct GetRebindType<T, Other, void_t<typename T::template rebind<Other>>> {
 };
 
 // deal with type of like pointer
-template <typename Ptr> struct pointer_traits {
+template <typename Ptr>
+struct pointer_traits {
     using pointer = Ptr;
     using element_type = typename GetElementType<Ptr>::type;
     using difference_type = typename GetPtrDifferenceType<Ptr>::type;
@@ -398,12 +406,14 @@ template <typename Ptr> struct pointer_traits {
     }
 };
 
-template <typename T> struct pointer_traits<T*> {
+template <typename T>
+struct pointer_traits<T*> {
     using element_type = T;
     using pointer = T*;
     using difference_type = ptrdiff_t;
 
-    template <typename Other> using rebind = Other*;
+    template <typename Other>
+    using rebind = Other*;
 
     using RefType =
         conditional_t<is_void<T>::value, char&, add_lvalue_reference_t<T>>;
@@ -414,7 +424,8 @@ template <typename T> struct pointer_traits<T*> {
 };
 
 // allocator_traits type helper
-template <typename Alloc, typename = void> struct GetPointer {
+template <typename Alloc, typename = void>
+struct GetPointer {
     using type = typename Alloc::value_type*;
 };
 
@@ -423,7 +434,8 @@ struct GetPointer<Alloc, void_t<typename Alloc::pointer>> {
     using type = typename Alloc::pointer;
 };
 
-template <typename Alloc, typename = void> struct GetConstPointer {
+template <typename Alloc, typename = void>
+struct GetConstPointer {
     using Ptr = typename GetPointer<Alloc>::type;
     using Val = typename Alloc::value_type;
     using type = typename pointer_traits<Ptr>::template rebind<const Val>;
@@ -434,7 +446,8 @@ struct GetConstPointer<Alloc, void_t<typename Alloc::const_pointer>> {
     using type = typename Alloc::const_pointer;
 };
 
-template <typename Alloc, typename = void> struct GetVoidPointer {
+template <typename Alloc, typename = void>
+struct GetVoidPointer {
     using Ptr = typename GetPointer<Alloc>::type;
     using type = typename pointer_traits<Ptr>::template rebind<void>;
 };
@@ -444,7 +457,8 @@ struct GetVoidPointer<Alloc, void_t<typename Alloc::void_pointer>> {
     using type = typename Alloc::void_pointer;
 };
 
-template <typename Alloc, typename = void> struct GetConstVoidPointer {
+template <typename Alloc, typename = void>
+struct GetConstVoidPointer {
     using Ptr = typename GetPointer<Alloc>::type;
     using type = typename pointer_traits<Ptr>::template rebind<const void>;
 };
@@ -454,7 +468,8 @@ struct GetConstVoidPointer<Alloc, void_t<typename Alloc::const_void_pointer>> {
     using type = typename Alloc::const_void_pointer;
 };
 
-template <typename Alloc, typename = void> struct GetDifferenceType {
+template <typename Alloc, typename = void>
+struct GetDifferenceType {
     using Ptr = typename GetPointer<Alloc>::type;
     using type = typename pointer_traits<Ptr>::difference_type;
 };
@@ -464,7 +479,8 @@ struct GetDifferenceType<Alloc, void_t<typename Alloc::difference_type>> {
     using type = typename Alloc::difference_type;
 };
 
-template <typename Alloc, typename = void> struct GetSizeType {
+template <typename Alloc, typename = void>
+struct GetSizeType {
     using Diff = typename GetDifferenceType<Alloc>::type;
     using type = make_unsigned_t<Diff>;
 };
@@ -474,7 +490,8 @@ struct GetSizeType<Alloc, void_t<typename Alloc::size_type>> {
     using type = typename Alloc::size_type;
 };
 
-template <typename Alloc, typename = void> struct GetPropagateOnContainerCopy {
+template <typename Alloc, typename = void>
+struct GetPropagateOnContainerCopy {
     using type = false_type;
 };
 
@@ -484,7 +501,8 @@ struct GetPropagateOnContainerCopy<
     using type = typename Alloc::propagate_on_container_copy_assignment;
 };
 
-template <typename Alloc, typename = void> struct GetPropagateOnContainerMove {
+template <typename Alloc, typename = void>
+struct GetPropagateOnContainerMove {
     using type = false_type;
 };
 
@@ -494,7 +512,8 @@ struct GetPropagateOnContainerMove<
     using type = typename Alloc::propagate_on_container_move_assignment;
 };
 
-template <class Alloc, typename = void> struct GetPropagateOnContainerSwap {
+template <class Alloc, typename = void>
+struct GetPropagateOnContainerSwap {
     using type = false_type;
 };
 
@@ -504,7 +523,8 @@ struct GetPropagateOnContainerSwap<
     using type = typename Alloc::propagate_on_container_swap;
 };
 
-template <class Alloc, typename = void> struct GetIsAlwaysEqual {
+template <class Alloc, typename = void>
+struct GetIsAlwaysEqual {
     using type = typename is_empty<Alloc>::type;
 };
 
@@ -535,7 +555,8 @@ struct HasAllocateHint<Alloc, Size_type, Const_void_pointer,
                            tiny_stl::declval<const Const_void_pointer&>()))>>
     : true_type {};
 
-template <typename Alloc, typename = void> struct HasMaxSize : false_type {};
+template <typename Alloc, typename = void>
+struct HasMaxSize : false_type {};
 
 template <typename Alloc>
 struct HasMaxSize<
@@ -551,7 +572,8 @@ struct HasSelectOnContainerCopyConstruction<
                                .select_on_container_copy_construction())>>
     : true_type {};
 
-template <typename Alloc> struct allocator_traits {
+template <typename Alloc>
+struct allocator_traits {
     using allocator_type = Alloc;
     using value_type = typename Alloc::value_type;
     using pointer = typename GetPointer<Alloc>::type;
@@ -616,15 +638,18 @@ template <typename Alloc> struct allocator_traits {
                         tiny_stl::forward<Args>(args)...);
     }
 
-    template <typename T> static void destroyAux(Alloc& a, T* ptr, true_type) {
+    template <typename T>
+    static void destroyAux(Alloc& a, T* ptr, true_type) {
         ptr->~T();
     }
 
-    template <typename T> static void destroyAux(Alloc& a, T* ptr, false_type) {
+    template <typename T>
+    static void destroyAux(Alloc& a, T* ptr, false_type) {
         a.destroy(ptr);
     }
 
-    template <typename T> static void destroy(Alloc& a, T* ptr) {
+    template <typename T>
+    static void destroy(Alloc& a, T* ptr) {
         destroyAux(a, ptr, UseDefaultDestroy<Alloc, T*>{});
     }
 
@@ -673,7 +698,8 @@ struct uses_allocator : HasAllocatorType<Con, Alloc>::type {};
 template <typename Con, typename Alloc>
 constexpr bool uses_allocator_value = uses_allocator<Con, Alloc>::value;
 
-template <typename T> struct default_delete {
+template <typename T>
+struct default_delete {
     constexpr default_delete() noexcept = default;
 
     template <typename U, typename = enable_if_t<is_convertible<U*, T*>::value>>
@@ -686,7 +712,8 @@ template <typename T> struct default_delete {
     }
 };
 
-template <typename T> class default_delete<T[]> {
+template <typename T>
+class default_delete<T[]> {
 public:
     constexpr default_delete() noexcept = default;
 
@@ -703,9 +730,11 @@ public:
     }
 };
 
-template <typename T, typename D = default_delete<T>> class unique_ptr;
+template <typename T, typename D = default_delete<T>>
+class unique_ptr;
 
-template <typename T, typename Deleter> class unique_ptr {
+template <typename T, typename Deleter>
+class unique_ptr {
 public:
     using pointer = T*;
     using element_type = T;
@@ -846,7 +875,8 @@ public:
     }
 }; // unique_ptr<T, Deleter>
 
-template <typename T, typename Deleter> class unique_ptr<T[], Deleter> {
+template <typename T, typename Deleter>
+class unique_ptr<T[], Deleter> {
 public:
     using pointer = T*;
     using element_type = T;
@@ -1019,7 +1049,8 @@ template <typename T, typename... Args,
           typename = enable_if_t<std::extent<T>::value != 0>>
 void make_unique(Args&&...) = delete;
 
-template <typename T, typename D> struct hash<unique_ptr<T, D>> {
+template <typename T, typename D>
+struct hash<unique_ptr<T, D>> {
     using argument_type = unique_ptr<T, D>;
     using result_type = size_t;
 
@@ -1133,9 +1164,11 @@ inline void swap(unique_ptr<T, D>& lhs, unique_ptr<T, D>& rhs) noexcept {
     lhs.swap(rhs);
 }
 
-template <typename T> class shared_ptr;
+template <typename T>
+class shared_ptr;
 
-template <typename T> class weak_ptr;
+template <typename T>
+class weak_ptr;
 
 // reference MSVC implement
 
@@ -1217,7 +1250,8 @@ public:
     }
 };
 
-template <typename T> class RefCount : public RefCountBase {
+template <typename T>
+class RefCount : public RefCountBase {
 public:
     explicit RefCount(T* p) : RefCountBase(), mPtr(p) {
     }
@@ -1236,7 +1270,8 @@ private:
 };
 
 // handle reference counting for object with deleter
-template <typename T, typename D> class RefCountResource : public RefCountBase {
+template <typename T, typename D>
+class RefCountResource : public RefCountBase {
 public:
     RefCountResource(T p, D d) : RefCountBase(), mPair(tiny_stl::move(d), p) {
     }
@@ -1300,7 +1335,8 @@ private:
 
 namespace {
 
-template <typename T, typename = void> struct CanEnableShared : false_type {};
+template <typename T, typename = void>
+struct CanEnableShared : false_type {};
 
 template <typename F, typename Arg, typename = void>
 struct IsFunctionObject : false_type {};
@@ -1335,7 +1371,8 @@ void enableSharedFromThis(const shared_ptr<Other>& sp, U* ptr) {
 }
 
 // base class for shared_ptr and weak_ptr
-template <typename T> class PtrBase {
+template <typename T>
+class PtrBase {
 public:
 #ifdef TINY_STL_CXX17
     using element_type = remove_extent_t<T>;
@@ -1365,7 +1402,8 @@ protected:
     constexpr PtrBase() noexcept = default;
     ~PtrBase() = default;
 
-    template <typename U> void constructMove(PtrBase<U>&& rhs) {
+    template <typename U>
+    void constructMove(PtrBase<U>&& rhs) {
         // implement shared_ptr's move ctor and weak_ptr's move ctor
         mPtr = rhs.mPtr;
         mRep = rhs.mRep;
@@ -1374,7 +1412,8 @@ protected:
         rhs.mRep = nullptr;
     }
 
-    template <typename U> void constructCopy(const shared_ptr<U>& rhs) {
+    template <typename U>
+    void constructCopy(const shared_ptr<U>& rhs) {
         // implement shared_ptr's copy ctor
         if (rhs.mRep) {
             rhs.mRep->increaseRef();
@@ -1395,9 +1434,11 @@ protected:
         mRep = rhs.mRep;
     }
 
-    template <typename U> friend class weak_ptr;
+    template <typename U>
+    friend class weak_ptr;
 
-    template <typename U> bool constructFromWeak(const weak_ptr<U>& rhs) {
+    template <typename U>
+    bool constructFromWeak(const weak_ptr<U>& rhs) {
         if (rhs.mRep && rhs.mRep->increaseRefNotZero()) {
             mPtr = rhs.mPtr;
             mRep = rhs.mRep;
@@ -1429,7 +1470,8 @@ protected:
         mRep = rep;
     }
 
-    template <typename U> void weaklyConstructFrom(const PtrBase<U>& rhs) {
+    template <typename U>
+    void weaklyConstructFrom(const PtrBase<U>& rhs) {
         // implement weak_ptr's ctor
         if (rhs.mRep) {
             rhs.mRep->increaseWRef();
@@ -1439,7 +1481,8 @@ protected:
         mRep = rhs.mRep;
     }
 
-    template <typename U> friend class PtrBase;
+    template <typename U>
+    friend class PtrBase;
 
 private:
     element_type* mPtr{nullptr};
@@ -1449,7 +1492,8 @@ private:
     friend D* get_deleter(const shared_ptr<U>& sp) noexcept;
 };
 
-template <typename T> class shared_ptr : public PtrBase<T> {
+template <typename T>
+class shared_ptr : public PtrBase<T> {
 public:
 #ifdef TINY_STL_CXX17
     using weak_type = weak_ptr<T>;
@@ -1572,7 +1616,8 @@ public:
         return *this;
     }
 
-    template <typename U> shared_ptr& operator=(shared_ptr<U>&& rhs) noexcept {
+    template <typename U>
+    shared_ptr& operator=(shared_ptr<U>&& rhs) noexcept {
         shared_ptr{tiny_stl::move(rhs)}.swap(*this);
         return *this;
     }
@@ -1591,11 +1636,13 @@ public:
         shared_ptr{}.swap(*this);
     }
 
-    template <typename U> void reset(U* ptr) {
+    template <typename U>
+    void reset(U* ptr) {
         shared_ptr{ptr}.swap(*this);
     }
 
-    template <typename U, typename D> void reset(U* ptr, D d) {
+    template <typename U, typename D>
+    void reset(U* ptr, D d) {
         // d must be copy constructible
         shared_ptr{ptr, d}.swap(*this);
     }
@@ -1627,7 +1674,8 @@ public:
 
 private:
     // TODO, support shared_ptr<T[]>
-    template <typename U> void setPtr(U* ptr) {
+    template <typename U>
+    void setPtr(U* ptr) {
         // strong exception guarantee
         try {
             setPtrRepAndEnableShared(ptr, new RefCount<U>(ptr));
@@ -1693,7 +1741,8 @@ private:
 
 namespace {
 
-template <typename T> class RefCountObj : public RefCountBase {
+template <typename T>
+class RefCountObj : public RefCountBase {
 public:
     template <typename... Args>
     explicit RefCountObj(Args&&... args) noexcept : RefCountBase(), mStroage() {
@@ -1932,7 +1981,8 @@ void swap(shared_ptr<T>& lhs, shared_ptr<T>& rhs) noexcept {
     lhs.swap(rhs);
 }
 
-template <typename T> class weak_ptr : public PtrBase<T> {
+template <typename T>
+class weak_ptr : public PtrBase<T> {
 public:
     constexpr weak_ptr() noexcept {
     }
@@ -1971,7 +2021,8 @@ public:
         return *this;
     }
 
-    template <typename U> weak_ptr& operator=(const weak_ptr<U>& rhs) noexcept {
+    template <typename U>
+    weak_ptr& operator=(const weak_ptr<U>& rhs) noexcept {
         weak_ptr(rhs).swap(*this);
         return *this;
     }
@@ -1987,7 +2038,8 @@ public:
         return *this;
     }
 
-    template <typename U> weak_ptr& operator=(weak_ptr<U>&& rhs) noexcept {
+    template <typename U>
+    weak_ptr& operator=(weak_ptr<U>&& rhs) noexcept {
         weak_ptr(tiny_stl::move(rhs)).swap(*this);
         return *this;
     }
@@ -2012,11 +2064,13 @@ public:
     }
 };
 
-template <typename T> void swap(weak_ptr<T>& lhs, weak_ptr<T>& rhs) noexcept {
+template <typename T>
+void swap(weak_ptr<T>& lhs, weak_ptr<T>& rhs) noexcept {
     lhs.swap(rhs);
 }
 
-template <typename T> class enable_shared_from_this {
+template <typename T>
+class enable_shared_from_this {
 public:
     shared_ptr<T> shared_from_this() {
         return shared_ptr<T>(mWptr);

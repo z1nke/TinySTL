@@ -12,7 +12,8 @@ struct forward_iterator_tag : public input_iterator_tag {};
 struct bidirectional_iterator_tag : public forward_iterator_tag {};
 struct random_access_iterator_tag : public bidirectional_iterator_tag {};
 
-template <typename T, typename Distance> struct input_iterator {
+template <typename T, typename Distance>
+struct input_iterator {
     using iterator_category = input_iterator_tag;
     using value_type = T;
     using difference_type = Distance;
@@ -28,7 +29,8 @@ struct output_iterator {
     using reference = void;
 };
 
-template <typename T, typename Distance> struct forward_iterator {
+template <typename T, typename Distance>
+struct forward_iterator {
     using iterator_category = forward_iterator_tag;
     using value_type = T;
     using difference_type = Distance;
@@ -36,7 +38,8 @@ template <typename T, typename Distance> struct forward_iterator {
     using reference = T&;
 };
 
-template <typename T, typename Distance> struct bidirectional_iterator {
+template <typename T, typename Distance>
+struct bidirectional_iterator {
     using iterator_category = bidirectional_iterator_tag;
     using value_type = T;
     using difference_type = Distance;
@@ -44,7 +47,8 @@ template <typename T, typename Distance> struct bidirectional_iterator {
     using reference = T&;
 };
 
-template <typename T, typename Distance> struct random_access_iterator {
+template <typename T, typename Distance>
+struct random_access_iterator {
     using iterator_category = random_access_iterator_tag;
     using value_type = T;
     using difference_type = Distance;
@@ -62,7 +66,8 @@ struct iterator {
     using reference = Reference;
 };
 
-template <typename, typename = void> struct IteratorTraitsBase {};
+template <typename, typename = void>
+struct IteratorTraitsBase {};
 
 template <typename Iter>
 struct IteratorTraitsBase<
@@ -86,18 +91,21 @@ struct IteratorTraitsPointerBase {
     using reference = T&;
 };
 
-template <typename Iter> struct iterator_traits : IteratorTraitsBase<Iter> {};
+template <typename Iter>
+struct iterator_traits : IteratorTraitsBase<Iter> {};
 
 template <typename T>
 struct iterator_traits<T*> : IteratorTraitsPointerBase<T> {};
 
-template <typename T, typename = void> struct is_iterator : false_type {};
+template <typename T, typename = void>
+struct is_iterator : false_type {};
 
 template <typename T>
 struct is_iterator<T, void_t<typename iterator_traits<T>::iterator_category>>
     : true_type {};
 
-template <typename T> constexpr bool is_iterator_v = is_iterator<T>::value;
+template <typename T>
+constexpr bool is_iterator_v = is_iterator<T>::value;
 
 template <typename Iter>
 inline typename iterator_traits<Iter>::category iterator_category(const Iter&) {
@@ -142,7 +150,8 @@ constexpr decltype(auto) operator_arrow(Iter&& target,
 //    |                                |
 //  begin                             end
 
-template <typename Iter> class reverse_iterator {
+template <typename Iter>
+class reverse_iterator {
 protected:
     Iter current;
 
@@ -289,7 +298,8 @@ constexpr reverse_iterator<Iter> make_reverse_iterator(Iter iter) {
     return reverse_iterator<Iter>(iter);
 }
 
-template <typename Iter> class move_iterator {
+template <typename Iter>
+class move_iterator {
 protected:
     Iter current;
 

@@ -6,7 +6,8 @@
 
 namespace tiny_stl {
 
-template <typename T, size_t Size> class ArrayConstIterator {
+template <typename T, size_t Size>
+class ArrayConstIterator {
 public:
     using iterator_category = random_access_iterator_tag;
     using value_type = T;
@@ -293,7 +294,8 @@ constexpr ArrayIterator<T, Size> operator+(ptrdiff_t offset,
     return rhs += offset;
 }
 
-template <typename T, size_t Size> class array {
+template <typename T, size_t Size>
+class array {
 public:
     T elements[Size];
 
@@ -436,7 +438,8 @@ public:
 
 #define ARRAY0_OUT_OF_RANGE false
 
-template <typename T> class array<T, 0> {
+template <typename T>
+class array<T, 0> {
 public:
     T element[1];
 

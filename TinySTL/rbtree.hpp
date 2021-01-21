@@ -10,7 +10,8 @@ namespace {
 
 enum class Color : uint16_t { RED, BLACK };
 
-template <typename T> struct RBTNode {
+template <typename T>
+struct RBTNode {
     using IsNil = uint16_t;
     Color color;
     IsNil isNil; // 1 is nil, 0 is not nil
@@ -20,14 +21,16 @@ template <typename T> struct RBTNode {
     T value;
 };
 
-template <typename T> inline RBTNode<T>* rbTreeMinValue(RBTNode<T>* ptr) {
+template <typename T>
+inline RBTNode<T>* rbTreeMinValue(RBTNode<T>* ptr) {
     while (!ptr->left->isNil)
         ptr = ptr->left;
 
     return ptr;
 }
 
-template <typename T> inline RBTNode<T>* rbTreeMaxValue(RBTNode<T>* ptr) {
+template <typename T>
+inline RBTNode<T>* rbTreeMaxValue(RBTNode<T>* ptr) {
     while (!ptr->right->isNil)
         ptr = ptr->right;
 
@@ -93,7 +96,8 @@ inline void rbTreeRightRotate(RBTNode<T>*& root, RBTNode<T>* y) {
 
 } // namespace
 
-template <typename T> struct RBTreeConstIterator {
+template <typename T>
+struct RBTreeConstIterator {
     using iterator_category = bidirectional_iterator_tag;
     using value_type = T;
     using difference_type = ptrdiff_t;
@@ -177,7 +181,8 @@ template <typename T> struct RBTreeConstIterator {
 
 }; // RBTreeConstIterator
 
-template <typename T> struct RBTreeIterator : RBTreeConstIterator<T> {
+template <typename T>
+struct RBTreeIterator : RBTreeConstIterator<T> {
     using iterator_category = bidirectional_iterator_tag;
     using value_type = T;
     using difference_type = ptrdiff_t;
@@ -225,7 +230,8 @@ template <typename T> struct RBTreeIterator : RBTreeConstIterator<T> {
     }
 }; // RBTreeIterator
 
-template <typename T, typename Compare, typename Alloc> class RBTreeBase {
+template <typename T, typename Compare, typename Alloc>
+class RBTreeBase {
 public:
     using value_type = T;
     using allocator_type = Alloc;
@@ -307,7 +313,8 @@ public:
     using const_reverse_iterator = tiny_stl::reverse_iterator<const_iterator>;
 
 private:
-    template <typename... Args> NodePtr allocAndConstruct(Args&&... args) {
+    template <typename... Args>
+    NodePtr allocAndConstruct(Args&&... args) {
         NodePtr p = this->alloc.allocate(1);
 
         p->color = Color::RED;
@@ -366,7 +373,8 @@ private:
         return getKeyValue(val, tiny_stl::bool_constant<isMap>{});
     }
 
-    template <typename K> NodePtr lowBoundAux(const K& val) const {
+    template <typename K>
+    NodePtr lowBoundAux(const K& val) const {
         NodePtr pos = this->header;
         NodePtr p = pos->parent;
 
@@ -382,7 +390,8 @@ private:
         return pos;
     }
 
-    template <typename K> NodePtr uppBoundAux(const K& val) const {
+    template <typename K>
+    NodePtr uppBoundAux(const K& val) const {
         NodePtr pos = this->header;
         NodePtr p = pos->parent;
 
@@ -676,7 +685,8 @@ public:
         return tiny_stl::distance(range.first, range.second);
     }
 
-    template <typename K> size_type count(const K& key) const {
+    template <typename K>
+    size_type count(const K& key) const {
         pair<const_iterator, const_iterator> range = equal_range(key);
         return tiny_stl::distance(range.first, range.second);
     }
@@ -751,7 +761,8 @@ private:
         return iterator(z);
     }
 
-    template <typename Value> iterator insertEqualAux(Value&& val) {
+    template <typename Value>
+    iterator insertEqualAux(Value&& val) {
         NodePtr z = allocAndConstruct(tiny_stl::forward<Value>(val));
         return insertAux(z);
     }
@@ -778,7 +789,8 @@ protected:
         return insertEqualAux(tiny_stl::move(val));
     }
 
-    template <typename InIter> void insert_equal(InIter first, InIter last) {
+    template <typename InIter>
+    void insert_equal(InIter first, InIter last) {
         for (; first != last; ++first)
             insertEqualAux(*first);
     }
@@ -791,12 +803,14 @@ protected:
         return insertUniqueAux(tiny_stl::move(val));
     }
 
-    template <typename InIter> void insert_unique(InIter first, InIter last) {
+    template <typename InIter>
+    void insert_unique(InIter first, InIter last) {
         for (; first != last; ++first)
             insertUniqueAux(*first);
     }
 
-    template <typename... Args> iterator emplace_equal(Args&&... args) {
+    template <typename... Args>
+    iterator emplace_equal(Args&&... args) {
         return insertEqualAux(tiny_stl::forward<Args>(args)...);
     }
 
@@ -965,7 +979,7 @@ public:
         this->m_count = 0;
     }
 
-    void swap(RBTree& rhs) noexcept(AlTraits::is_always_equal::value &&
+    void swap(RBTree& rhs) noexcept(AlTraits::is_always_equal::value&&
                                         is_nothrow_swappable<Compare>::value) {
         assert(this->alloc == rhs.alloc);
 

@@ -25,7 +25,8 @@ namespace tiny_stl {
 //           node
 //
 
-template <typename T> struct DequeConstIterator {
+template <typename T>
+struct DequeConstIterator {
     using iterator_category = random_access_iterator_tag;
     using value_type = T;
     using pointer = const T*;
@@ -190,7 +191,8 @@ operator+(typename DequeConstIterator<T>::difference_type n,
     return iter += n;
 }
 
-template <typename T> struct DequeIterator : DequeConstIterator<T> {
+template <typename T>
+struct DequeIterator : DequeConstIterator<T> {
     using iterator_category = random_access_iterator_tag;
     using value_type = T;
     using pointer = T*;
@@ -287,7 +289,8 @@ inline DequeIterator<T> operator+(typename DequeIterator<T>::difference_type n,
     return iter += n;
 }
 
-template <typename T, typename Alloc> class DequeBase {
+template <typename T, typename Alloc>
+class DequeBase {
 public:
     using value_type = T;
     using allocator_type = Alloc;
@@ -521,7 +524,8 @@ private:
         rhs.finish = iterator();
     }
 
-    template <typename Iter> void constructHelper(Iter first, Iter last) {
+    template <typename Iter>
+    void constructHelper(Iter first, Iter last) {
         while (first != last)
             emplace_back(*first);
     }
@@ -852,7 +856,8 @@ private:
             reallocateMap(num_add, false_type{});
     }
 
-    template <typename... Args> void emplaceFrontAux(Args&&... args) {
+    template <typename... Args>
+    void emplaceFrontAux(Args&&... args) {
         reserveMapAtFront(1);
 
         try {
@@ -866,7 +871,8 @@ private:
         }
     }
 
-    template <typename... Args> void emplaceBackAux(Args&&... args) {
+    template <typename... Args>
+    void emplaceBackAux(Args&&... args) {
         reserveMapAtBack(1);
 
         try {
@@ -883,7 +889,8 @@ private:
     }
 
 public:
-    template <typename... Args> void emplace_back(Args&&... args) {
+    template <typename... Args>
+    void emplace_back(Args&&... args) {
         assert(size() < max_size() - 1);
         try {
             if (finish.cur != finish.last - 1) { // There are two or more spaces
@@ -906,7 +913,8 @@ public:
         emplace_back(tiny_stl::move(val));
     }
 
-    template <typename... Args> void emplace_front(Args&&... args) {
+    template <typename... Args>
+    void emplace_front(Args&&... args) {
         assert(size() < max_size() - 1);
         if (start.cur != start.first) {
             this->alloc.construct(start.cur - 1,

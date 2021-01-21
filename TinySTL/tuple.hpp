@@ -4,9 +4,11 @@
 
 namespace tiny_stl {
 
-template <typename... Ts> class tuple;
+template <typename... Ts>
+class tuple;
 
-template <> class tuple<> {
+template <>
+class tuple<> {
 public:
     constexpr tuple() noexcept {
     }
@@ -127,14 +129,16 @@ public:
         return *this;
     }
 
-    template <typename... Ts> tuple& operator=(const tuple<Ts...>& rhs) {
+    template <typename... Ts>
+    tuple& operator=(const tuple<Ts...>& rhs) {
         get_head() = rhs.get_head();
         get_tail() = rhs.get_tail();
 
         return *this;
     }
 
-    template <typename... Ts> tuple& operator=(tuple<Ts...>&& rhs) {
+    template <typename... Ts>
+    tuple& operator=(tuple<Ts...>&& rhs) {
         get_head() =
             tiny_stl::forward<typename tuple<Ts...>::First>(rhs.get_head());
         get_tail() =
@@ -151,7 +155,8 @@ public:
         return *this;
     }
 
-    template <typename U1, typename U2> tuple& operator=(pair<U1, U2>&& rhs) {
+    template <typename U1, typename U2>
+    tuple& operator=(pair<U1, U2>&& rhs) {
         get_head() = tiny_stl::forward<U1>(rhs.first);
         get_tail().get_head() = tiny_stl::forward<U2>(rhs.second);
 
@@ -203,11 +208,13 @@ inline void swap(tuple<Ts...>& lhs,
     lhs.swap(rhs);
 }
 
-template <typename... Args> inline auto make_tuple(Args... args) {
+template <typename... Args>
+inline auto make_tuple(Args... args) {
     return tuple<UnRefWrap<Args>...>(tiny_stl::forward<Args>(args)...);
 }
 
-template <typename... Ts> constexpr tuple<Ts&...> tie(Ts&... ts) noexcept {
+template <typename... Ts>
+constexpr tuple<Ts&...> tie(Ts&... ts) noexcept {
     using TupleType = tuple<Ts&...>;
     return TupleType(ts...);
 }

@@ -9,7 +9,8 @@
 
 namespace tiny_stl {
 
-template <typename T> inline T* allocateHelper(ptrdiff_t size, T* /* p */) {
+template <typename T>
+inline T* allocateHelper(ptrdiff_t size, T* /* p */) {
     std::set_new_handler(nullptr);
     T* tmp = reinterpret_cast<T*>(
         ::operator new(static_cast<size_t>(size * sizeof(T))));
@@ -20,7 +21,8 @@ template <typename T> inline T* allocateHelper(ptrdiff_t size, T* /* p */) {
     return tmp;
 }
 
-template <typename T> inline void deallocateHelper(T* buffer) noexcept {
+template <typename T>
+inline void deallocateHelper(T* buffer) noexcept {
     ::operator delete(buffer);
 }
 
@@ -30,11 +32,13 @@ inline void constructHelper(T* p, Args&&... args) {
         T(tiny_stl::forward<Args>(args)...); // placement new, ctor T
 }
 
-template <typename T> inline void destroy_at(T* ptr) {
+template <typename T>
+inline void destroy_at(T* ptr) {
     ptr->~T();
 }
 
-template <typename T> class allocator {
+template <typename T>
+class allocator {
 public:
     using value_type = T;
     using pointer = T*;
@@ -55,7 +59,8 @@ public:
     allocator(const allocator<T>&) noexcept {
     }
 
-    template <typename Other> allocator(const allocator<Other>&) noexcept {
+    template <typename Other>
+    allocator(const allocator<Other>&) noexcept {
     }
 
     template <typename Other>
@@ -64,7 +69,10 @@ public:
         return *this;
     }
 
-    template <typename U> struct rebind { using other = allocator<U>; };
+    template <typename U>
+    struct rebind {
+        using other = allocator<U>;
+    };
 
     pointer allocate(size_type n) {
         return allocateHelper(static_cast<difference_type>(n),
@@ -88,7 +96,8 @@ public:
         constructHelper(p, tiny_stl::forward<Args>(args)...);
     }
 
-    template <typename Obj> void destroy(Obj* ptr) {
+    template <typename Obj>
+    void destroy(Obj* ptr) {
         destroy_at(ptr);
     }
 
@@ -97,13 +106,17 @@ public:
     }
 }; // class allocator<T>
 
-template <> class allocator<void> {
+template <>
+class allocator<void> {
 public:
     using value_type = void;
     using pointer = void*;
     using const_pointer = const void*;
 
-    template <class U> struct rebind { using other = allocator<U>; };
+    template <class U>
+    struct rebind {
+        using other = allocator<U>;
+    };
 
 public:
     allocator() noexcept {
@@ -111,7 +124,8 @@ public:
     allocator(const allocator<void>&) noexcept {
     }
 
-    template <typename Other> allocator(const allocator<Other>&) noexcept {
+    template <typename Other>
+    allocator(const allocator<Other>&) noexcept {
     }
 
     template <typename Other>
@@ -142,7 +156,8 @@ inline void swapAllocHelper(Alloc& lhs, Alloc& rhs, false_type) {
     assert(lhs == rhs);
 }
 
-template <typename Alloc> struct allocator_traits;
+template <typename Alloc>
+struct allocator_traits;
 
 template <typename Alloc>
 inline void swapAlloc(Alloc& lhs, Alloc& rhs) noexcept {

@@ -6,14 +6,16 @@
 
 namespace tiny_stl {
 
-template <typename T> struct LNode {
+template <typename T>
+struct LNode {
     T data;
 
     LNode<T>* prev;
     LNode<T>* next;
 };
 
-template <typename T> struct ListConstIterator {
+template <typename T>
+struct ListConstIterator {
     using iterator_category = bidirectional_iterator_tag;
     using value_type = T;
     using difference_type = ptrdiff_t;
@@ -70,7 +72,8 @@ template <typename T> struct ListConstIterator {
     }
 }; // class ListConstIterator<T>
 
-template <typename T> struct ListIterator : ListConstIterator<T> {
+template <typename T>
+struct ListIterator : ListConstIterator<T> {
     using iterator_category = bidirectional_iterator_tag;
     using value_type = T;
     using difference_type = ptrdiff_t;
@@ -117,7 +120,8 @@ template <typename T> struct ListIterator : ListConstIterator<T> {
     }
 }; // class ListIterator
 
-template <typename T, typename Alloc> class ListBase {
+template <typename T, typename Alloc>
+class ListBase {
 public:
     using value_type = T;
     using allocator_type = Alloc; // In face, will be not be used
@@ -209,7 +213,8 @@ public:
     using AlNodeTraits = allocator_traits<AlNode>;
 
 private:
-    template <typename... Args> NodePtr allocAndConstruct(Args&&... args) {
+    template <typename... Args>
+    NodePtr allocAndConstruct(Args&&... args) {
         assert(this->count < max_size() - 1);
 
         NodePtr p = nullptr;
@@ -240,7 +245,8 @@ private:
         }
     }
 
-    template <typename InIter> void constructRange(InIter first, InIter last) {
+    template <typename InIter>
+    void constructRange(InIter first, InIter last) {
         try {
             insert(begin(), first, last);
         } catch (...) {
@@ -327,7 +333,8 @@ public:
         }
     }
 
-    template <typename Arg> void reuseNode(iterator pos, Arg&& arg) {
+    template <typename Arg>
+    void reuseNode(iterator pos, Arg&& arg) {
         AlNodeTraits::destroy(this->alloc, tiny_stl::addressof(pos.ptr->data));
 
         try {
@@ -619,11 +626,13 @@ public:
         return makeIter(last);
     }
 
-    template <typename... Args> void emplace_back(Args&&... args) {
+    template <typename... Args>
+    void emplace_back(Args&&... args) {
         insertAux(end(), tiny_stl::forward<Args>(args)...);
     }
 
-    template <typename... Args> void emplace_front(Args&&... args) {
+    template <typename... Args>
+    void emplace_front(Args&&... args) {
         insertAux(begin(), tiny_stl::forward<Args>(args)...);
     }
 
@@ -695,7 +704,8 @@ private:
         }
     }
 
-    template <typename Cmp> void mergeAux(list& rhs, const Cmp& cmp) {
+    template <typename Cmp>
+    void mergeAux(list& rhs, const Cmp& cmp) {
         if (this != tiny_stl::addressof(rhs)) {
             const_iterator first1 = this->begin(), last1 = this->end();
             const_iterator first2 = rhs.begin(), last2 = rhs.end();
@@ -733,11 +743,13 @@ public:
         mergeAux(rhs, tiny_stl::less<>{});
     }
 
-    template <typename Cmp> void merge(list& rhs, Cmp cmp) {
+    template <typename Cmp>
+    void merge(list& rhs, Cmp cmp) {
         mergeAux(rhs, cmp);
     }
 
-    template <typename Cmp> void merge(list&& rhs, Cmp cmp) {
+    template <typename Cmp>
+    void merge(list&& rhs, Cmp cmp) {
         mergeAux(rhs, cmp);
     }
 
@@ -803,7 +815,8 @@ public:
         }
     }
 
-    template <typename UnaryPred> void remove_if(UnaryPred pred) {
+    template <typename UnaryPred>
+    void remove_if(UnaryPred pred) {
         for (iterator first = begin(); first != end();) {
             if (pred(*first)) // remove element
                 first = erase(first);
@@ -832,7 +845,8 @@ public:
         unique(tiny_stl::equal_to<>{});
     }
 
-    template <typename BinPred> void unique(BinPred pred) {
+    template <typename BinPred>
+    void unique(BinPred pred) {
         iterator first = begin();
         iterator next = first;
 
@@ -888,7 +902,8 @@ public:
         sort(tiny_stl::less<>{});
     }
 
-    template <typename Cmp> void sort(Cmp cmp) {
+    template <typename Cmp>
+    void sort(Cmp cmp) {
         sortAux(begin(), end(), cmp, this->count);
     }
 
