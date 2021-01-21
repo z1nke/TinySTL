@@ -6,7 +6,8 @@
 
 namespace tiny_stl {
 
-template <typename T> struct StringConstIterator {
+template <typename T>
+struct StringConstIterator {
     using iterator_category = random_access_iterator_tag;
     using value_type = T;
     using pointer = const T*;
@@ -103,7 +104,8 @@ template <typename T> struct StringConstIterator {
     }
 }; // StringConstIterator<T>
 
-template <typename T> struct StringIterator : StringConstIterator<T> {
+template <typename T>
+struct StringIterator : StringConstIterator<T> {
     using iterator_category = random_access_iterator_tag;
     using value_type = T;
     using pointer = T*;
@@ -463,7 +465,8 @@ private:
     void moveAllocAux(AllocX& lhs, AllocX& rhs, false_type) noexcept {
     }
 
-    template <typename AllocX> void moveAlloc(AllocX& lhs, AllocX& rhs) {
+    template <typename AllocX>
+    void moveAlloc(AllocX& lhs, AllocX& rhs) {
         typename allocator_traits<
             AllocX>::propagate_on_container_move_assignment tag{};
         moveAllocAux(lhs, rhs, tag);

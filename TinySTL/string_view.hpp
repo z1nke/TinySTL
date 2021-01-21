@@ -9,7 +9,8 @@
 
 namespace tiny_stl {
 
-template <typename CharT> struct StringViewIterator {
+template <typename CharT>
+struct StringViewIterator {
     using iterator_category = random_access_iterator_tag;
     using value_type = CharT;
     using pointer = const CharT*;

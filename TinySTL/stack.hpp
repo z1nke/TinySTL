@@ -4,7 +4,8 @@
 
 namespace tiny_stl {
 
-template <typename T, typename Container = tiny_stl::deque<T>> class stack {
+template <typename T, typename Container = tiny_stl::deque<T>>
+class stack {
 public:
     using container_type = Container;
     using value_type = typename Container::value_type;
@@ -101,7 +102,8 @@ public:
         cont.pop_back();
     }
 
-    template <typename... Args> void emplace(Args&&... args) {
+    template <typename... Args>
+    void emplace(Args&&... args) {
         cont.emplace_back(tiny_stl::forward<Args>(args)...);
     }
 

@@ -84,9 +84,11 @@ struct piecewise_construct_t {
 
 constexpr piecewise_construct_t piecewise_construct{};
 
-template <typename...> class tuple;
+template <typename...>
+class tuple;
 
-template <typename T1, typename T2> struct pair {
+template <typename T1, typename T2>
+struct pair {
     using first_type = T1;
     using second_type = T2;
 
@@ -220,7 +222,8 @@ template <typename T1, typename T2> struct pair {
         return *this;
     }
 
-    template <typename U1, typename U2> pair& operator=(pair<U1, U2>&& rhs) {
+    template <typename U1, typename U2>
+    pair& operator=(pair<U1, U2>&& rhs) {
         first = tiny_stl::forward<T1>(rhs.first);
         second = tiny_stl::forward<T2>(rhs.second);
     }
@@ -283,7 +286,8 @@ inline void swap(pair<T1, T2>& lhs,
     lhs.swap(rhs);
 }
 
-template <typename T> struct tuple_size;
+template <typename T>
+struct tuple_size;
 
 // tuple_size to pair
 template <typename T1, typename T2>
@@ -305,12 +309,15 @@ struct tuple_size<const volatile T>
     : integral_constant<size_t, tuple_size<T>::value> {};
 
 // tuple element
-template <typename T> struct AlwaysFalse : false_type {};
+template <typename T>
+struct AlwaysFalse : false_type {};
 
-template <size_t Idx, typename Tuple> struct tuple_element;
+template <size_t Idx, typename Tuple>
+struct tuple_element;
 
 // tuple_element to tuple
-template <size_t Idx> struct tuple_element<Idx, tuple<>> {
+template <size_t Idx>
+struct tuple_element<Idx, tuple<>> {
     static_assert(AlwaysFalse<integral_constant<size_t, Idx>>::value,
                   "tuple index out of range");
 };
@@ -344,11 +351,13 @@ struct tuple_element<Idx, const volatile Tuple> : tuple_element<Idx, Tuple> {
 };
 
 // tuple_element to pair
-template <typename T1, typename T2> struct tuple_element<0, pair<T1, T2>> {
+template <typename T1, typename T2>
+struct tuple_element<0, pair<T1, T2>> {
     using type = T1;
 };
 
-template <typename T1, typename T2> struct tuple_element<1, pair<T1, T2>> {
+template <typename T1, typename T2>
+struct tuple_element<1, pair<T1, T2>> {
     using type = T2;
 };
 
@@ -484,7 +493,8 @@ public:
     }
 };
 
-template <typename T1, typename T2> class compress_pair<T1, T2, false> {
+template <typename T1, typename T2>
+class compress_pair<T1, T2, false> {
 public:
     using first_type = T1;
     using second_type = T2;
@@ -521,7 +531,8 @@ public:
 
 } // namespace extra
 
-template <typename T> struct TidyRAII { // strong exception guarantee
+template <typename T>
+struct TidyRAII { // strong exception guarantee
     T* obj;
     ~TidyRAII() {
         if (obj) {
@@ -535,16 +546,20 @@ struct in_place_t {
 };
 constexpr in_place_t in_place{};
 
-template <typename T> struct in_place_type_t {
+template <typename T>
+struct in_place_type_t {
     explicit in_place_type_t() = default;
 };
 
-template <typename T> constexpr in_place_type_t<T> in_place_type{};
+template <typename T>
+constexpr in_place_type_t<T> in_place_type{};
 
-template <std::size_t I> struct in_place_index_t {
+template <std::size_t I>
+struct in_place_index_t {
     explicit in_place_index_t() = default;
 };
 
-template <std::size_t I> constexpr in_place_index_t<I> in_place_index{};
+template <std::size_t I>
+constexpr in_place_index_t<I> in_place_index{};
 
 } // namespace tiny_stl

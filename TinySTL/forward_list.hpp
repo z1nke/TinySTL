@@ -6,7 +6,8 @@
 
 namespace tiny_stl {
 
-template <typename T> struct FLNode {
+template <typename T>
+struct FLNode {
     T data;
     FLNode<T>* next;
 
@@ -16,7 +17,8 @@ template <typename T> struct FLNode {
     }
 };
 
-template <typename T> struct FListConstIterator {
+template <typename T>
+struct FListConstIterator {
     using iterator_category = forward_iterator_tag;
     using value_type = T;
     using difference_type = ptrdiff_t;
@@ -61,7 +63,8 @@ template <typename T> struct FListConstIterator {
     }
 }; // class FListConstIterator<T>
 
-template <typename T> struct FListIterator : FListConstIterator<T> {
+template <typename T>
+struct FListIterator : FListConstIterator<T> {
     using iterator_category = forward_iterator_tag;
     using value_type = T;
     using difference_type = ptrdiff_t;
@@ -97,7 +100,8 @@ template <typename T> struct FListIterator : FListConstIterator<T> {
     }
 }; // class FListIterator<T>
 
-template <typename T, typename Alloc> class FListBase {
+template <typename T, typename Alloc>
+class FListBase {
 public:
     using Node = FLNode<T>;
     using NodePtr = FLNode<T>*;
@@ -148,7 +152,8 @@ public:
         }
     }
 
-    template <typename... U> NodePtr createNode(NodePtr nextNode, U&&... val) {
+    template <typename... U>
+    NodePtr createNode(NodePtr nextNode, U&&... val) {
         auto& alloc = getAlloc();
         NodePtr p = nullptr;
         try {
@@ -545,7 +550,8 @@ private:
         first.ptr->next = last.ptr;
     }
 
-    template <typename Cmp> void mergeAux(forward_list& rhs, const Cmp& cmp) {
+    template <typename Cmp>
+    void mergeAux(forward_list& rhs, const Cmp& cmp) {
         if (this != tiny_stl::addressof(rhs)) {
             // no prev pointer
             const_iterator first1 = this->before_begin(), next1 = this->begin(),
@@ -618,11 +624,13 @@ public:
         mergeAux(rhs, tiny_stl::less<>{});
     }
 
-    template <typename Cmp> void merge(forward_list& rhs, Cmp cmp) {
+    template <typename Cmp>
+    void merge(forward_list& rhs, Cmp cmp) {
         mergeAux(rhs, cmp);
     }
 
-    template <typename Cmp> void merge(forward_list&& rhs, Cmp cmp) {
+    template <typename Cmp>
+    void merge(forward_list&& rhs, Cmp cmp) {
         mergeAux(rhs, cmp);
     }
 
@@ -670,7 +678,8 @@ public:
         splice_after(pos, rhs, first, last);
     }
 
-    template <typename UnaryPred> void remove_if(UnaryPred pred) {
+    template <typename UnaryPred>
+    void remove_if(UnaryPred pred) {
         iterator before = before_begin();
 
         for (iterator first = begin(); first != end();) {
@@ -701,7 +710,8 @@ public:
         }
     }
 
-    template <typename BinPred> void unique(BinPred pred) {
+    template <typename BinPred>
+    void unique(BinPred pred) {
         if (empty())
             return;
         const_iterator first = begin();
@@ -719,7 +729,8 @@ public:
         unique(tiny_stl::equal_to<>{});
     }
 
-    template <typename Cmp> void sort(Cmp cmp) {
+    template <typename Cmp>
+    void sort(Cmp cmp) {
         sortAux(before_begin(), end(), cmp, this->sizeAux());
     }
 

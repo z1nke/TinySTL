@@ -5,7 +5,8 @@
 
 namespace tiny_stl {
 
-template <typename T> struct VectorConstIterator {
+template <typename T>
+struct VectorConstIterator {
     using iterator_category = random_access_iterator_tag;
     using value_type = T;
     using difference_type = ptrdiff_t;
@@ -111,7 +112,8 @@ operator+(typename VectorConstIterator<T>::difference_type offset,
     return iter += offset;
 }
 
-template <typename T> struct VectorIterator : VectorConstIterator<T> {
+template <typename T>
+struct VectorIterator : VectorConstIterator<T> {
     using iterator_category = random_access_iterator_tag;
     using value_type = T;
     using difference_type = ptrdiff_t;
@@ -192,7 +194,8 @@ operator+(typename VectorIterator<T>::difference_type offset,
     return iter += offset;
 }
 
-template <typename T, typename Alloc> class VectorBase {
+template <typename T, typename Alloc>
+class VectorBase {
 public:
     using value_type = T;
     using size_type = typename Alloc::size_type;
@@ -804,7 +807,8 @@ public:
         this->last = this->first;
     }
 
-    template <typename... Args> void emplace_back(Args&&... args) {
+    template <typename... Args>
+    void emplace_back(Args&&... args) {
         if (this->last != this->end_of_storage) { // has unused capacity
             allocator_traits<Alloc>::construct(
                 this->alloc, this->last, tiny_stl::forward<Args>(args)...);

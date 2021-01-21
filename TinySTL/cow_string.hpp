@@ -7,7 +7,8 @@
 
 namespace tiny_stl {
 
-template <typename T> struct CowStringConstIterator {
+template <typename T>
+struct CowStringConstIterator {
     using iterator_category = random_access_iterator_tag;
     using value_type = T;
     using pointer = const T*;
@@ -104,7 +105,8 @@ template <typename T> struct CowStringConstIterator {
     }
 }; // StringConstIterator<T>
 
-template <typename T> struct CowStringIterator : CowStringConstIterator<T> {
+template <typename T>
+struct CowStringIterator : CowStringConstIterator<T> {
     using iterator_category = random_access_iterator_tag;
     using value_type = T;
     using pointer = T*;
@@ -217,7 +219,8 @@ public:
 };
 
 // like smart pointer
-template <typename RCObj> class RCPtr {
+template <typename RCObj>
+class RCPtr {
 private:
     RCObj* pointee;
     void init() {

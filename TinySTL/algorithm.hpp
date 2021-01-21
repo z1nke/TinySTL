@@ -135,7 +135,8 @@ inline InIter find_if_not(InIter first, InIter last, UnaryPred pred) {
     return last;
 }
 
-template <typename FwdIter, typename T> struct FillMemsetIsSafeHelper {
+template <typename FwdIter, typename T>
+struct FillMemsetIsSafeHelper {
     using ValueType = typename iterator_traits<FwdIter>::value_type;
     using type = typename conjunction<
         is_pointer<FwdIter>,
@@ -335,7 +336,8 @@ constexpr const T& min(const T& a, const T& b, Cmp cmp) {
     return cmp(a, b) ? a : b;
 }
 
-template <typename T> constexpr const T& min(const T& a, const T& b) {
+template <typename T>
+constexpr const T& min(const T& a, const T& b) {
     return a < b ? a : b;
 }
 
@@ -344,7 +346,8 @@ constexpr T min(std::initializer_list<T> ilist, Cmp cmp) {
     return *min_element(ilist.begin(), ilist.end(), cmp);
 }
 
-template <typename T> constexpr T min(std::initializer_list<T> ilist) {
+template <typename T>
+constexpr T min(std::initializer_list<T> ilist) {
     return tiny_stl::min(ilist, tiny_stl::less<>{});
 }
 
@@ -371,7 +374,8 @@ constexpr const T& max(const T& a, const T& b, Cmp cmp) {
     return cmp(a, b) ? b : a;
 }
 
-template <typename T> constexpr const T& max(const T& a, const T& b) {
+template <typename T>
+constexpr const T& max(const T& a, const T& b) {
     return a < b ? b : a;
 }
 
@@ -380,7 +384,8 @@ constexpr T max(std::initializer_list<T> ilist, Cmp cmp) {
     return *max_element(ilist.begin(), ilist.end(), cmp);
 }
 
-template <typename T> constexpr T max(std::initializer_list<T> ilist) {
+template <typename T>
+constexpr T max(std::initializer_list<T> ilist) {
     return tiny_stl::max(ilist, tiny_stl::less<>{});
 }
 
@@ -444,7 +449,8 @@ inline pair<FwdIter, FwdIter> minmax_element(FwdIter first, FwdIter last) {
     return minmax_element(first, last, tiny_stl::less<>{});
 }
 
-template <typename T> inline pair<T, T> minmax(std::initializer_list<T> ilist) {
+template <typename T>
+inline pair<T, T> minmax(std::initializer_list<T> ilist) {
     auto p = minmax_element(ilist.begin(), ilist.end(), tiny_stl::less<>{});
     return make_pair(*p.first, *p.second);
 }
@@ -514,7 +520,8 @@ inline FwdIter rotate(FwdIter first, FwdIter mid, FwdIter last) {
     return ret;
 }
 
-template <typename BidIter> inline void reverse(BidIter first, BidIter last) {
+template <typename BidIter>
+inline void reverse(BidIter first, BidIter last) {
     for (; first != last && first != --last; ++first)
         tiny_stl::iter_swap(first, last);
 }
@@ -544,7 +551,8 @@ inline void push_heap(RanIter first, RanIter last, Cmp cmp) {
 }
 
 // O(logn)
-template <typename RanIter> inline void push_heap(RanIter first, RanIter last) {
+template <typename RanIter>
+inline void push_heap(RanIter first, RanIter last) {
     tiny_stl::push_heap(first, last, tiny_stl::less<>{});
 }
 
@@ -594,7 +602,8 @@ inline void pop_heap(RanIter first, RanIter last, Cmp cmp) {
     popHeapHelper(first, last, last, tiny_stl::move(val), cmp);
 }
 
-template <typename RanIter> inline void pop_heap(RanIter first, RanIter last) {
+template <typename RanIter>
+inline void pop_heap(RanIter first, RanIter last) {
     pop_heap(first, last, tiny_stl::less<>{});
 }
 
@@ -604,7 +613,8 @@ inline void sort_heap(RanIter first, RanIter last, Cmp cmp) {
         pop_heap(first, last);
 }
 
-template <typename RanIter> inline void sort_heap(RanIter first, RanIter last) {
+template <typename RanIter>
+inline void sort_heap(RanIter first, RanIter last) {
     sort_heap(first, last, tiny_stl::less<>{});
 }
 
@@ -625,7 +635,8 @@ inline void make_heap(RanIter first, RanIter last, Cmp cmp) {
     }
 }
 
-template <typename RanIter> inline void make_heap(RanIter first, RanIter last) {
+template <typename RanIter>
+inline void make_heap(RanIter first, RanIter last) {
     make_heap(first, last, tiny_stl::less<>{});
 }
 
@@ -653,7 +664,8 @@ inline bool is_heap(RanIter first, RanIter last, Cmp cmp) {
     return is_heap_until(first, last, cmp) == last;
 }
 
-template <typename RanIter> inline bool is_heap(RanIter first, RanIter last) {
+template <typename RanIter>
+inline bool is_heap(RanIter first, RanIter last) {
     return is_heap(first, last, tiny_stl::less<>{});
 }
 
@@ -677,7 +689,8 @@ inline bool is_sorted(FwdIter first, FwdIter last, Cmp cmp) {
     return tiny_stl::is_sorted_until(first, last, cmp) == last;
 }
 
-template <typename FwdIter> inline bool is_sorted(FwdIter first, FwdIter last) {
+template <typename FwdIter>
+inline bool is_sorted(FwdIter first, FwdIter last) {
     return tiny_stl::is_sorted_until(first, last) == last;
 }
 
@@ -701,7 +714,8 @@ inline void insertSort(RanIter first, RanIter last, Compare& cmp) {
 }
 
 // quick_sort
-template <typename RanIter> inline auto getRandom(RanIter first, RanIter last) {
+template <typename RanIter>
+inline auto getRandom(RanIter first, RanIter last) {
     using Diff = typename iterator_traits<RanIter>::difference_type;
     static std::mt19937 e;
     std::uniform_int_distribution<Diff> u{0, (last - first - 1)};
@@ -764,7 +778,8 @@ inline void sort(RanIter first, RanIter last, Compare cmp) {
     }
 }
 
-template <typename RanIter> inline void sort(RanIter first, RanIter last) {
+template <typename RanIter>
+inline void sort(RanIter first, RanIter last) {
     sort(first, last, tiny_stl::less<>{});
 }
 

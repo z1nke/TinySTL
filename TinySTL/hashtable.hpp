@@ -5,9 +5,11 @@
 
 namespace tiny_stl {
 
-template <typename T, typename HashTableType> struct HashIterator;
+template <typename T, typename HashTableType>
+struct HashIterator;
 
-template <typename T, typename HashTableType> struct HashConstIterator {
+template <typename T, typename HashTableType>
+struct HashConstIterator {
     using iterator_category = forward_iterator_tag;
     using value_type = T;
     using difference_type = ptrdiff_t;
@@ -74,7 +76,8 @@ template <typename T, typename HashTableType> struct HashConstIterator {
     }
 };
 
-template <typename T, typename HashTableType> struct HashIterator {
+template <typename T, typename HashTableType>
+struct HashIterator {
     using iterator_category = forward_iterator_tag;
     using value_type = T;
     using difference_type = ptrdiff_t;
@@ -360,7 +363,8 @@ public:
     }
 
 private:
-    template <typename Value> iterator insertEqualAux(Value&& val) {
+    template <typename Value>
+    iterator insertEqualAux(Value&& val) {
         if (load_factor() > max_load_factor())
             rehash(stlNextPrime(size()));
 
@@ -416,7 +420,8 @@ protected:
         return insertEqualAux(tiny_stl::move(val));
     }
 
-    template <typename InIter> void insert_equal(InIter first, InIter last) {
+    template <typename InIter>
+    void insert_equal(InIter first, InIter last) {
         for (; first != last; ++first)
             insertEqualAux(*first);
     }
@@ -429,12 +434,14 @@ protected:
         return insertUniqueAux(tiny_stl::move(val));
     }
 
-    template <typename InIter> void insert_unique(InIter first, InIter last) {
+    template <typename InIter>
+    void insert_unique(InIter first, InIter last) {
         for (; first != last; ++first)
             insertUniqueAux(*first);
     }
 
-    template <typename... Args> iterator emplace_equal(Args&&... args) {
+    template <typename... Args>
+    iterator emplace_equal(Args&&... args) {
         T val(tiny_stl::forward<Args>(args)...);
         return insertEqualAux(tiny_stl::move(val));
     }
