@@ -32,14 +32,14 @@ public:
         friend map;
 
     protected:
-        Compare m_cmp;
+        Compare mCmp;
 
-        value_compare(Compare c) : m_cmp(c) {
+        value_compare(Compare c) : mCmp(c) {
         }
 
     public:
         bool operator()(const value_type& lhs, const value_type& rhs) const {
-            return m_cmp(lhs.first, rhs.first);
+            return mCmp(lhs.first, rhs.first);
         }
     };
 
@@ -220,14 +220,14 @@ public:
         friend multimap;
 
     protected:
-        Compare m_cmp;
+        Compare mCmp;
 
-        value_compare(Compare c) : m_cmp(c) {
+        value_compare(Compare c) : mCmp(c) {
         }
 
     public:
         bool operator()(const value_type& lhs, const value_type& rhs) const {
-            return m_cmp(lhs.first, rhs.first);
+            return mCmp(lhs.first, rhs.first);
         }
     };
 

@@ -247,12 +247,12 @@ private:
 
 protected:
     NodePtr header;
-    size_type m_count;
+    size_type mCount;
     AlNode alloc;
     Compare compare;
 
 public:
-    RBTreeBase() : m_count(0), alloc(), compare() {
+    RBTreeBase() : mCount(0), alloc(), compare() {
         createHeaderNode();
     }
 
@@ -260,7 +260,7 @@ public:
         typename Any_alloc,
         typename = enable_if_t<!is_same<decay_t<Any_alloc>, RBTreeBase>::value>>
     RBTreeBase(const Compare& cmp, Any_alloc&& anyAlloc)
-        : m_count(0), alloc(tiny_stl::forward<Any_alloc>(anyAlloc)),
+        : mCount(0), alloc(tiny_stl::forward<Any_alloc>(anyAlloc)),
           compare(cmp) {
         createHeaderNode();
     }
@@ -434,7 +434,7 @@ private:
 
     void copyAux(const RBTree& rhs) {
         getRoot() = copyNodes(rhs.getRoot(), this->header);
-        this->m_count = rhs.m_count;
+        this->mCount = rhs.mCount;
 
         if (!getRoot()->isNil) {
             this->header->left = rbTreeMinValue(getRoot());
@@ -448,7 +448,7 @@ private:
     void moveAux(RBTree&& rhs) {
         tiny_stl::swapADL(this->compare, rhs.compare);
         tiny_stl::swapADL(this->header, rhs.header);
-        tiny_stl::swapADL(this->m_count, rhs.m_count);
+        tiny_stl::swapADL(this->mCount, rhs.mCount);
     }
 
     void rbTreeFixupForInsert(NodePtr& root, NodePtr z) {
@@ -608,7 +608,7 @@ public:
     }
 
     size_type size() const noexcept {
-        return this->m_count;
+        return this->mCount;
     }
 
     bool empty() const noexcept {
@@ -756,7 +756,7 @@ private:
 
         rbTreeFixupForInsert(getRoot(), z);
 
-        ++this->m_count;
+        ++this->mCount;
 
         return iterator(z);
     }
@@ -874,7 +874,7 @@ private:
             rbTreeFixupForErase(root, x);
 
         destroyAndFree(z);
-        --this->m_count;
+        --this->mCount;
 
         this->header->parent = root;
         root->parent = this->header;
@@ -976,7 +976,7 @@ public:
         this->header->left = this->header;
         this->header->right = this->header;
         this->header->parent = this->header;
-        this->m_count = 0;
+        this->mCount = 0;
     }
 
     void swap(RBTree& rhs) noexcept(AlTraits::is_always_equal::value&&
@@ -988,7 +988,7 @@ public:
 
         tiny_stl::swapADL(this->header, rhs.header);
         tiny_stl::swapADL(this->compare, rhs.compare);
-        tiny_stl::swapADL(this->m_count, rhs.m_count);
+        tiny_stl::swapADL(this->mCount, rhs.mCount);
     }
 
 }; // RBTree
