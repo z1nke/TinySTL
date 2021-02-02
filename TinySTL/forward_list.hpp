@@ -109,33 +109,33 @@ public:
         typename allocator_traits<Alloc>::template rebind_alloc<Node>;
 
 protected:
-    extra::compress_pair<AlNode, NodePtr> m_pair;
+    extra::compress_pair<AlNode, NodePtr> mPair;
 
     AlNode& getAlloc() noexcept {
-        return m_pair.get_first();
+        return mPair.get_first();
     }
 
     const AlNode& getAlloc() const noexcept {
-        return m_pair.get_first();
+        return mPair.get_first();
     }
 
     NodePtr& getHead() noexcept {
-        return m_pair.get_second();
+        return mPair.get_second();
     }
 
     const NodePtr& getHead() const noexcept {
-        return m_pair.get_second();
+        return mPair.get_second();
     }
 
 public:
-    FListBase() : m_pair() {
+    FListBase() : mPair() {
         createHeadNode();
     }
 
     template <
         typename Any_alloc,
         typename = enable_if_t<!is_same<decay_t<Any_alloc>, FListBase>::value>>
-    FListBase(Any_alloc&& a) : m_pair(tiny_stl::forward<Any_alloc>(a)) {
+    FListBase(Any_alloc&& a) : mPair(tiny_stl::forward<Any_alloc>(a)) {
         createHeadNode();
     }
 

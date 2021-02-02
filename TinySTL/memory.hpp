@@ -741,26 +741,26 @@ public:
     using delete_type = Deleter;
 
 private:
-    extra::compress_pair<Deleter, pointer> m_pair;
+    extra::compress_pair<Deleter, pointer> mPair;
 
     pointer& getPtr() noexcept {
-        return m_pair.get_second();
+        return mPair.get_second();
     }
 
     const pointer& getPtr() const noexcept {
-        return m_pair.get_second();
+        return mPair.get_second();
     }
 
 public:
     // (1)
-    constexpr unique_ptr(std::nullptr_t p = nullptr) noexcept : m_pair() {
+    constexpr unique_ptr(std::nullptr_t p = nullptr) noexcept : mPair() {
         static_assert(is_default_constructible<Deleter>::value &&
                           !is_pointer<Deleter>::value,
                       "unique construct error");
     }
 
     // (2)
-    explicit unique_ptr(pointer p) noexcept : m_pair(Deleter(), p) {
+    explicit unique_ptr(pointer p) noexcept : mPair(Deleter(), p) {
         static_assert(is_default_constructible<Deleter>::value &&
                           !is_pointer<Deleter>::value,
                       "unique construct error");
@@ -770,18 +770,18 @@ public:
     unique_ptr(pointer p, conditional_t<is_reference<Deleter>::value, Deleter,
                                         const remove_reference_t<Deleter>&>
                               del) noexcept
-        : m_pair(tiny_stl::forward<decltype(del)>(del), p) {
+        : mPair(tiny_stl::forward<decltype(del)>(del), p) {
     }
 
     // (4)
     unique_ptr(pointer p, remove_reference_t<Deleter>&& del) noexcept
-        : m_pair(tiny_stl::forward<decltype(del)>(del), p) {
+        : mPair(tiny_stl::forward<decltype(del)>(del), p) {
         static_assert(!is_reference<Deleter>::value, "unique construct error");
     }
 
     // (5)
     unique_ptr(unique_ptr&& rhs) noexcept
-        : m_pair(tiny_stl::forward<delete_type>(rhs.get_deleter()),
+        : mPair(tiny_stl::forward<delete_type>(rhs.get_deleter()),
                  rhs.release()) {
     }
 
@@ -796,7 +796,7 @@ public:
                                (!is_reference<Deleter>::value &&
                                 is_convertible<D, Deleter>::value))>>
     unique_ptr(unique_ptr<U, D>&& rhs) noexcept
-        : m_pair(tiny_stl::forward<D>(rhs.get_deleter()), rhs.release()) {
+        : mPair(tiny_stl::forward<D>(rhs.get_deleter()), rhs.release()) {
     }
 
     unique_ptr(const unique_ptr&) = delete;
@@ -827,11 +827,11 @@ public:
     }
 
     delete_type& get_deleter() noexcept {
-        return m_pair.get_first();
+        return mPair.get_first();
     }
 
     const delete_type& get_deleter() const noexcept {
-        return m_pair.get_first();
+        return mPair.get_first();
     }
 
     pointer get() const noexcept {
@@ -846,7 +846,7 @@ public:
 
     void reset(pointer ptr = pointer()) noexcept {
         auto old = get();
-        m_pair.get_second() = ptr;
+        mPair.get_second() = ptr;
         if (old != nullptr)
             get_deleter()(old);
     }
@@ -883,14 +883,14 @@ public:
     using delete_type = Deleter;
 
 private:
-    extra::compress_pair<Deleter, pointer> m_pair;
+    extra::compress_pair<Deleter, pointer> mPair;
 
     pointer& getPtr() noexcept {
-        return m_pair.get_second();
+        return mPair.get_second();
     }
 
     const pointer& getPtr() const noexcept {
-        return m_pair.get_second();
+        return mPair.get_second();
     }
 
     template <typename U, typename Is_nullptr = is_same<U, std::nullptr_t>>
@@ -901,7 +901,7 @@ private:
 
 public:
     // (1)
-    constexpr unique_ptr(std::nullptr_t p = nullptr) noexcept : m_pair() {
+    constexpr unique_ptr(std::nullptr_t p = nullptr) noexcept : mPair() {
         static_assert(is_default_constructible<Deleter>::value &&
                           !is_pointer<Deleter>::value,
                       "unique construct error");
@@ -909,7 +909,7 @@ public:
 
     // (2)
     template <typename U, typename = EnableCtor<U>>
-    explicit unique_ptr(U p) noexcept : m_pair(delete_type(), p) {
+    explicit unique_ptr(U p) noexcept : mPair(delete_type(), p) {
         static_assert(is_default_constructible<Deleter>::value &&
                           !is_pointer<Deleter>::value,
                       "unique construct error");
@@ -920,20 +920,20 @@ public:
     unique_ptr(U p, conditional_t<is_reference<Deleter>::value, Deleter,
                                   const remove_const_t<Deleter>&>
                         del) noexcept
-        : m_pair(tiny_stl::forward<decltype(del)>(del), p) {
+        : mPair(tiny_stl::forward<decltype(del)>(del), p) {
     }
 
     // (4)
     template <typename U, typename = EnableCtor<U>>
     unique_ptr(U p, remove_reference_t<Deleter>&& del) noexcept
-        : m_pair(tiny_stl::forward<decltype(del)>(del), p) {
+        : mPair(tiny_stl::forward<decltype(del)>(del), p) {
         static_assert(!is_reference<Deleter>::value,
                       "unique_ptr construct error");
     }
 
     // (5)
     unique_ptr(unique_ptr&& rhs) noexcept
-        : m_pair(tiny_stl::forward<Deleter>(rhs.get_deleter()), rhs.release()) {
+        : mPair(tiny_stl::forward<Deleter>(rhs.get_deleter()), rhs.release()) {
     }
 
     // (6)
@@ -949,7 +949,7 @@ public:
              (!is_reference<Deleter>::value &&
               is_convertible<D, Deleter>::value))>>
     unique_ptr(unique_ptr<U, D>&& rhs) noexcept
-        : m_pair(tiny_stl::forward<D>(rhs.get_deleter()), rhs.release()) {
+        : mPair(tiny_stl::forward<D>(rhs.get_deleter()), rhs.release()) {
     }
 
     unique_ptr(const unique_ptr&) = delete;
@@ -984,11 +984,11 @@ public:
     }
 
     delete_type& get_deleter() noexcept {
-        return m_pair.get_first();
+        return mPair.get_first();
     }
 
     const delete_type& get_deleter() const noexcept {
-        return m_pair.get_first();
+        return mPair.get_first();
     }
 
     pointer get() const noexcept {
