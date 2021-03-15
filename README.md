@@ -68,4 +68,5 @@
     - `equal`
     - `lexicographical_compare`
 
-    
+# License
+MIT License

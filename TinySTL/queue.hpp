@@ -1,4 +1,8 @@
-﻿#pragma once
+﻿// Copyright (C) 2021 syn1w
+// Distributed under the MIT software license, see the accompanying
+// file LICENSE or http://www.opensource.org/licenses/mit-license.php.
+
+#pragma once
 
 #include "deque.hpp"
 #include "vector.hpp"
