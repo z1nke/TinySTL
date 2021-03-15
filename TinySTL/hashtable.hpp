@@ -1,4 +1,7 @@
-﻿#pragma once
+// Distributed under the MIT software license, see the accompanying
+// file LICENSE or http://www.opensource.org/licenses/mit-license.php.
+
+#pragma once
 
 #include "forward_list.hpp"
 #include "vector.hpp"
