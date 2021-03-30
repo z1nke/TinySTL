@@ -219,7 +219,7 @@ public:
 private:
     template <typename... Args>
     NodePtr allocAndConstruct(Args&&... args) {
-        assert(this->count < max_size() - 1);
+        assert(Base::count < max_size() - 1);
 
         NodePtr p = nullptr;
 
@@ -261,7 +261,7 @@ private:
 
     void constructMove(list&& rhs, true_type) {
         tiny_stl::swap(this->head, rhs.head);
-        tiny_stl::swap(this->count, rhs.count);
+        tiny_stl::swap(Base::count, rhs.count);
     }
 
     void constructMove(list&& rhs, false_type) {
@@ -500,7 +500,7 @@ public:
     }
 
     size_type size() const noexcept {
-        return this->count;
+        return Base::count;
     }
 
     size_type max_size() const noexcept {
@@ -511,7 +511,7 @@ public:
         NodePtr p = this->head->next;
         this->head->next = this->head;
         this->head->prev = this->head;
-        this->count = 0;
+        Base::count = 0;
 
         for (NodePtr pNext = p->next; p != this->head;
              p = pNext, pNext = p->next)
@@ -521,10 +521,10 @@ public:
 private:
     void increaseCount(size_type n) {
 #ifndef NDEBUG // DEBUG
-        if (this->count > max_size() - n - 1)
+        if (Base::count > max_size() - n - 1)
             xLength();
 #endif // !NDEBUG
-        this->count += n;
+        Base::count += n;
     }
 
     template <typename... Args>
@@ -614,7 +614,7 @@ public:
         pos.ptr->next->prev = pos.ptr->prev;
         pos.ptr->prev->next = pos.ptr->next;
         destroyAndFree(pos.ptr);
-        --this->count;
+        --Base::count;
         return ret;
     }
 
@@ -666,21 +666,21 @@ public:
 
     void resize(size_type newSize) {
         // add the nodes at the tail
-        if (this->count < newSize) {
-            while (this->count < newSize)
+        if (Base::count < newSize) {
+            while (Base::count < newSize)
                 insertAux(end());
         } else { // remove the nodes at the tail
-            while (this->count > newSize)
+            while (Base::count > newSize)
                 pop_back();
         }
     }
 
     void resize(size_type newSize, const T& val) {
         // add the nodes at the tail
-        if (this->count < newSize) {
-            insertN(end(), newSize - this->count, val);
+        if (Base::count < newSize) {
+            insertN(end(), newSize - Base::count, val);
         } else { // remove the nodes at the tail
-            while (this->count > newSize)
+            while (Base::count > newSize)
                 pop_back();
         }
     }
@@ -690,7 +690,7 @@ public:
         allocator_traits<allocator_type>::is_always_equal::value)) {
         swapAlloc(this->alloc, rhs.alloc);
         swapADL(this->head, rhs.head);
-        tiny_stl::swap(this->count, rhs.count);
+        tiny_stl::swap(Base::count, rhs.count);
     }
 
 private:
@@ -734,7 +734,7 @@ private:
                 this->transfer(last1, first2, last2);
         }
 
-        this->count += rhs.count;
+        Base::count += rhs.count;
         rhs.count = 0;
     }
 
@@ -763,7 +763,7 @@ public:
         assert(this != tiny_stl::addressof(rhs));
         if (!rhs.empty()) {
             this->transfer(pos, rhs.begin(), rhs.end()); // modify pointer
-            this->count += rhs.count;
+            Base::count += rhs.count;
             rhs.count = 0;
         }
     }
@@ -781,7 +781,7 @@ public:
             const_iterator last = iter;
             ++last;
             this->transfer(pos, iter, last);
-            ++this->count;
+            ++Base::count;
             --rhs.count;
         }
     }
@@ -800,7 +800,7 @@ public:
 
         if (!rhs.empty()) {
             this->transfer(pos, first, last);
-            this->count += n;
+            Base::count += n;
             rhs.count -= n;
         }
     }
@@ -908,7 +908,7 @@ public:
 
     template <typename Cmp>
     void sort(Cmp cmp) {
-        sortAux(begin(), end(), cmp, this->count);
+        sortAux(begin(), end(), cmp, Base::count);
     }
 
 private:
