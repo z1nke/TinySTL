@@ -1,4 +1,6 @@
 # TinySTL
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fsyn1w%2FTinySTL.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fsyn1w%2FTinySTL?ref=badge_shield)
+
 
 基于 `C++14 ` 的 TinySTL。  
 编译环境：VS2017, VS2019, 支持 C++14 的 clang++ 和 g++ 编译器
@@ -70,3 +72,5 @@
 
 # License
 MIT License
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fsyn1w%2FTinySTL.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fsyn1w%2FTinySTL?ref=badge_large)
