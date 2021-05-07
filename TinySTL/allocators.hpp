@@ -5,7 +5,9 @@
 
 #include <cassert>
 #include <cstddef>
+#include <cstdio>
 #include <cstdlib>
+#include <limits>
 #include <new>
 
 #include "utility.hpp"
@@ -13,10 +15,10 @@
 namespace tiny_stl {
 
 template <typename T>
-inline T* allocateHelper(ptrdiff_t size, T* /* p */) {
+inline T* allocateHelper(std::ptrdiff_t size, T* /* p */) {
     std::set_new_handler(nullptr);
     T* tmp = reinterpret_cast<T*>(
-        ::operator new(static_cast<size_t>(size * sizeof(T))));
+        ::operator new(static_cast<std::size_t>(size * sizeof(T))));
     if (tmp == nullptr) {
         printf("out of memery");
         exit(EXIT_FAILURE);
@@ -48,8 +50,8 @@ public:
     using const_pointer = const T*;
     using reference = T&;
     using const_reference = const T&;
-    using size_type = size_t;
-    using difference_type = ptrdiff_t;
+    using size_type = std::size_t;
+    using difference_type = std::ptrdiff_t;
 
     using propagate_on_container_move_assignment = tiny_stl::true_type; // c++14
     using is_always_equal = tiny_stl::true_type;                        // c++17
@@ -82,7 +84,7 @@ public:
                               reinterpret_cast<pointer>(0));
     }
 
-    void deallocate(pointer p, size_t n) noexcept {
+    void deallocate(pointer p, std::size_t n) noexcept {
         deallocateHelper(p);
     }
 
@@ -105,7 +107,7 @@ public:
     }
 
     size_type max_size() const noexcept {
-        return (UINT_MAX / sizeof(T));
+        return (std::numeric_limits<std::size_t>::max() / sizeof(T));
     }
 }; // class allocator<T>
 

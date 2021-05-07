@@ -49,7 +49,7 @@ public:
     using First = Head;
     using Base = tuple<Tail...>;
 
-    static constexpr size_t size = 1 + sizeof...(Tail);
+    static constexpr std::size_t size = 1 + sizeof...(Tail);
 
 protected:
     Head mHead;
@@ -228,13 +228,13 @@ constexpr tuple<Ts&&...> forward_as_tuple(Ts&&... ts) noexcept {
     return TupleType(tiny_stl::forward<Ts>(ts)...);
 }
 
-template <size_t Idx, typename... Ts>
+template <std::size_t Idx, typename... Ts>
 constexpr tuple_element_t<Idx, tuple<Ts...>>& get(tuple<Ts...>& t) noexcept {
     using TupleType = typename tuple_element<Idx, tuple<Ts...>>::TupleType;
     return reinterpret_cast<TupleType&>(t).get_head();
 }
 
-template <size_t Idx, typename... Ts>
+template <std::size_t Idx, typename... Ts>
 constexpr tuple_element_t<Idx, tuple<Ts...>>&& get(tuple<Ts...>&& t) noexcept {
     using TupleType = typename tuple_element<Idx, tuple<Ts...>>::TupleType;
     using RetType = tuple_element_t<Idx, tuple<Ts...>>&&;
@@ -243,14 +243,14 @@ constexpr tuple_element_t<Idx, tuple<Ts...>>&& get(tuple<Ts...>&& t) noexcept {
         reinterpret_cast<TupleType&>(t).get_head());
 }
 
-template <size_t Idx, typename... Ts>
+template <std::size_t Idx, typename... Ts>
 constexpr const tuple_element_t<Idx, tuple<Ts...>>&
 get(const tuple<Ts...>& t) noexcept {
     using TupleType = typename tuple_element<Idx, tuple<Ts...>>::TupleType;
     return reinterpret_cast<TupleType&>(t).get_head();
 }
 
-template <size_t Idx, typename... Ts>
+template <std::size_t Idx, typename... Ts>
 constexpr const tuple_element_t<Idx, tuple<Ts...>>&&
 get(const tuple<Ts...>&& t) noexcept {
     using TupleType = typename tuple_element<Idx, tuple<Ts...>>::TupleType;

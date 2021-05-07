@@ -103,7 +103,7 @@ template <typename T>
 struct RBTreeConstIterator {
     using iterator_category = bidirectional_iterator_tag;
     using value_type = T;
-    using difference_type = ptrdiff_t;
+    using difference_type = std::ptrdiff_t;
     using pointer = const T*;
     using reference = const T&;
 
@@ -188,7 +188,7 @@ template <typename T>
 struct RBTreeIterator : RBTreeConstIterator<T> {
     using iterator_category = bidirectional_iterator_tag;
     using value_type = T;
-    using difference_type = ptrdiff_t;
+    using difference_type = std::ptrdiff_t;
     using pointer = T*;
     using reference = T&;
 
@@ -296,8 +296,8 @@ public:
     using value_type = T;
     using key_compare = Compare; // if it is map, compare pair
     using allocator_type = Alloc;
-    using size_type = size_t;
-    using difference_type = ptrdiff_t;
+    using size_type = std::size_t;
+    using difference_type = std::ptrdiff_t;
     using reference = value_type&;
     using const_reference = const value_type&;
     using pointer = value_type*;

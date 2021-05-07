@@ -16,7 +16,7 @@ struct CowStringConstIterator {
     using value_type = T;
     using pointer = const T*;
     using reference = const T&;
-    using difference_type = ptrdiff_t;
+    using difference_type = std::ptrdiff_t;
     using Self = CowStringConstIterator<T>;
 
     T* ptr;
@@ -114,7 +114,7 @@ struct CowStringIterator : CowStringConstIterator<T> {
     using value_type = T;
     using pointer = T*;
     using reference = T&;
-    using difference_type = ptrdiff_t;
+    using difference_type = std::ptrdiff_t;
     using Base = CowStringConstIterator<T>;
     using Self = CowStringIterator<T>;
 
@@ -190,7 +190,7 @@ namespace extra {
 // Improved the original
 class RCObject {
 private:
-    size_t ref_count;
+    std::size_t ref_count;
 
 protected: // Derived class call
     RCObject() : ref_count(0) {
@@ -216,7 +216,7 @@ public:
         return ref_count > 1;
     }
 
-    size_t get_ref_count() const noexcept {
+    std::size_t get_ref_count() const noexcept {
         return ref_count;
     }
 };
@@ -1022,14 +1022,14 @@ public:
     }
 
     iterator insert(const_iterator pos, CharT ch) {
-        size_t offset = pos - begin();
+        std::size_t offset = pos - begin();
         insert(offset, 1, ch);
 
         return begin() + offset;
     }
 
     iterator insert(const_iterator pos, size_type count, CharT ch) {
-        size_t offset = pos - begin();
+        std::size_t offset = pos - begin();
         insert(offset, count, ch);
 
         return begin() + offset;
@@ -1385,7 +1385,7 @@ private:
         return value->is_shared();
     }
 
-    size_t getRefCount() const noexcept {
+    std::size_t getRefCount() const noexcept {
         return value->get_ref_count();
     }
 
@@ -1661,10 +1661,11 @@ operator>>(std::basic_istream<CharT, Traits>& is,
 template <typename CharT, typename Traits, typename Alloc>
 struct hash<cow_basic_string<CharT, Traits, Alloc>> {
     using argument_type = cow_basic_string<CharT, Traits, Alloc>;
-    using result_type = size_t;
+    using result_type = std::size_t;
 
-    size_t operator()(
-        const cow_basic_string<CharT, Traits, Alloc>& str) const noexcept {
+    std::size_t
+    operator()(const cow_basic_string<CharT, Traits, Alloc>& str) const
+        noexcept {
         return tiny_stl::hashFNV(str.c_str(), str.size());
     }
 };
