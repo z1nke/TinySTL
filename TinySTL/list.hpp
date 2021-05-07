@@ -22,7 +22,7 @@ template <typename T>
 struct ListConstIterator {
     using iterator_category = bidirectional_iterator_tag;
     using value_type = T;
-    using difference_type = ptrdiff_t;
+    using difference_type = std::ptrdiff_t;
     using pointer = const T*;
     using reference = const T&;
     using Ptr = LNode<T>*;
@@ -80,7 +80,7 @@ template <typename T>
 struct ListIterator : ListConstIterator<T> {
     using iterator_category = bidirectional_iterator_tag;
     using value_type = T;
-    using difference_type = ptrdiff_t;
+    using difference_type = std::ptrdiff_t;
     using pointer = T*;
     using reference = T&;
     using Ptr = LNode<T>*;
@@ -129,8 +129,8 @@ class ListBase {
 public:
     using value_type = T;
     using allocator_type = Alloc; // In face, will be not be used
-    using size_type = size_t;
-    using difference_type = ptrdiff_t;
+    using size_type = std::size_t;
+    using difference_type = std::ptrdiff_t;
     using reference = T&;
     using const_reference = const T&;
     using pointer = typename allocator_traits<Alloc>::pointer;

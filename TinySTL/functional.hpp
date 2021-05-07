@@ -467,11 +467,11 @@ struct greater_equal<void> {
 };
 
 template <typename T>
-inline size_t hashFNV(const T* p, size_t count) noexcept {
+inline std::size_t hashFNV(const T* p, std::size_t count) noexcept {
     static_assert(is_arithmetic_v<T>, "T must be arithmetic type");
-    size_t ret = 2166136261U;
-    for (size_t i = 0u; i < count; ++i) {
-        ret ^= static_cast<size_t>(p[i]);
+    std::size_t ret = 2166136261U;
+    for (std::size_t i = 0u; i < count; ++i) {
+        ret ^= static_cast<std::size_t>(p[i]);
         ret *= 16777619U;
     }
 
@@ -481,9 +481,9 @@ inline size_t hashFNV(const T* p, size_t count) noexcept {
 template <typename Key>
 struct hash {
     using argument_type = Key;
-    using result_type = size_t;
+    using result_type = std::size_t;
 
-    size_t operator()(const Key& key) const noexcept {
+    std::size_t operator()(const Key& key) const noexcept {
         return hashFNV(&reinterpret_cast<const unsigned char&>(key),
                        sizeof(Key));
     }

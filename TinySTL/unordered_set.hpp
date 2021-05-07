@@ -170,8 +170,8 @@ class unordered_multiset : public HashTable<Key, Hash, KeyEqual, Alloc, false> {
 public:
     using key_type = Key;
     using value_type = Key;
-    using size_type = size_t;
-    using difference_type = ptrdiff_t;
+    using size_type = std::size_t;
+    using difference_type = std::ptrdiff_t;
     using hasher = Hash;
     using key_equal = KeyEqual;
     using allocator_type = Alloc;

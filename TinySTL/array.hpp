@@ -10,24 +10,24 @@
 
 namespace tiny_stl {
 
-template <typename T, size_t Size>
+template <typename T, std::size_t Size>
 class ArrayConstIterator {
 public:
     using iterator_category = random_access_iterator_tag;
     using value_type = T;
-    using difference_type = ptrdiff_t;
+    using difference_type = std::ptrdiff_t;
     using pointer = const T*;
     using reference = const T&;
 
 public:
 #ifndef NDEBUG // DEBUG
     pointer ptr;
-    size_t idx;
+    std::size_t idx;
 
     constexpr ArrayConstIterator() : ptr(nullptr), idx(0) {
     }
 
-    constexpr explicit ArrayConstIterator(pointer p, size_t offset = 0)
+    constexpr explicit ArrayConstIterator(pointer p, std::size_t offset = 0)
         : ptr(p), idx(offset) {
     }
 
@@ -64,32 +64,32 @@ public:
         return tmp;
     }
 
-    constexpr ArrayConstIterator& operator+=(ptrdiff_t offset) {
+    constexpr ArrayConstIterator& operator+=(std::ptrdiff_t offset) {
         assert(idx + offset <= Size);
         idx += offset;
         return *this;
     }
 
-    constexpr ArrayConstIterator operator+(ptrdiff_t offset) const {
+    constexpr ArrayConstIterator operator+(std::ptrdiff_t offset) const {
         ArrayConstIterator tmp = *this;
         return tmp += offset;
     }
 
-    constexpr ArrayConstIterator& operator-=(ptrdiff_t offset) {
+    constexpr ArrayConstIterator& operator-=(std::ptrdiff_t offset) {
         return (*this += (-offset));
     }
 
-    constexpr ArrayConstIterator operator-(ptrdiff_t offset) const {
+    constexpr ArrayConstIterator operator-(std::ptrdiff_t offset) const {
         ArrayConstIterator tmp = *this;
         return *this -= offset;
     }
 
-    constexpr ptrdiff_t operator-(const ArrayConstIterator& rhs) const {
+    constexpr std::ptrdiff_t operator-(const ArrayConstIterator& rhs) const {
         assert(ptr == rhs.ptr);
-        return static_cast<ptrdiff_t>(idx - rhs.idx);
+        return static_cast<std::ptrdiff_t>(idx - rhs.idx);
     }
 
-    constexpr reference operator[](ptrdiff_t offset) const {
+    constexpr reference operator[](std::ptrdiff_t offset) const {
         return *(*this + offset);
     }
 
@@ -124,7 +124,7 @@ public:
     constexpr ArrayConstIterator() : ptr(nullptr) {
     }
 
-    constexpr explicit ArrayConstIterator(pointer p, size_t offset = 0)
+    constexpr explicit ArrayConstIterator(pointer p, std::size_t offset = 0)
         : ptr(p + offset) {
     }
 
@@ -158,30 +158,30 @@ public:
         return tmp;
     }
 
-    constexpr ArrayConstIterator& operator+=(ptrdiff_t offset) {
+    constexpr ArrayConstIterator& operator+=(std::ptrdiff_t offset) {
         ptr += offset;
         return *this;
     }
 
-    constexpr ArrayConstIterator operator+(ptrdiff_t offset) const {
+    constexpr ArrayConstIterator operator+(std::ptrdiff_t offset) const {
         ArrayConstIterator tmp = *this;
         return tmp += offset;
     }
 
-    constexpr ArrayConstIterator& operator-=(ptrdiff_t offset) {
+    constexpr ArrayConstIterator& operator-=(std::ptrdiff_t offset) {
         return (*this += (-offset));
     }
 
-    constexpr ArrayConstIterator operator-(ptrdiff_t offset) const {
+    constexpr ArrayConstIterator operator-(std::ptrdiff_t offset) const {
         ArrayConstIterator tmp = *this;
         return *this -= offset;
     }
 
-    constexpr ptrdiff_t operator-(const ArrayConstIterator& rhs) const {
+    constexpr std::ptrdiff_t operator-(const ArrayConstIterator& rhs) const {
         return ptr - rhs.ptr;
     }
 
-    constexpr reference operator[](ptrdiff_t offset) const {
+    constexpr reference operator[](std::ptrdiff_t offset) const {
         return *(*this + offset);
     }
 
@@ -212,13 +212,13 @@ public:
 #endif // !NDEBUG
 };     // class ArrayConstIterator<T>
 
-template <typename T, size_t Size>
+template <typename T, std::size_t Size>
 constexpr ArrayConstIterator<T, Size>
-operator+(ptrdiff_t offset, ArrayConstIterator<T, Size> rhs) {
+operator+(std::ptrdiff_t offset, ArrayConstIterator<T, Size> rhs) {
     return rhs += offset;
 }
 
-template <typename T, size_t Size>
+template <typename T, std::size_t Size>
 class ArrayIterator : public ArrayConstIterator<T, Size> {
 private:
     using Base = ArrayConstIterator<T, Size>;
@@ -230,7 +230,7 @@ public:
     constexpr ArrayIterator() {
     }
 
-    constexpr explicit ArrayIterator(pointer p, ptrdiff_t offset)
+    constexpr explicit ArrayIterator(pointer p, std::ptrdiff_t offset)
         : Base(p, offset) {
     }
 
@@ -264,49 +264,49 @@ public:
         return tmp;
     }
 
-    constexpr ArrayIterator& operator+=(ptrdiff_t offset) {
+    constexpr ArrayIterator& operator+=(std::ptrdiff_t offset) {
         *static_cast<Base*>(this) += offset;
         return *this;
     }
 
-    constexpr ArrayIterator operator+(ptrdiff_t offset) const {
+    constexpr ArrayIterator operator+(std::ptrdiff_t offset) const {
         ArrayIterator tmp = *this;
         return tmp += offset;
     }
 
-    constexpr ArrayIterator& operator-=(ptrdiff_t offset) {
+    constexpr ArrayIterator& operator-=(std::ptrdiff_t offset) {
         return (*this += (-offset));
     }
 
-    constexpr ArrayIterator operator-(ptrdiff_t offset) const {
+    constexpr ArrayIterator operator-(std::ptrdiff_t offset) const {
         ArrayIterator tmp = *this;
         return tmp -= offset;
     }
 
-    constexpr ptrdiff_t operator-(const Base& rhs) const {
+    constexpr std::ptrdiff_t operator-(const Base& rhs) const {
         return *(static_cast<const Base*>(this)) - rhs;
     }
 
-    constexpr reference operator[](ptrdiff_t offset) const {
+    constexpr reference operator[](std::ptrdiff_t offset) const {
         return *(*this + offset);
     }
 }; // class ArrayIterator
 
-template <typename T, size_t Size>
-constexpr ArrayIterator<T, Size> operator+(ptrdiff_t offset,
+template <typename T, std::size_t Size>
+constexpr ArrayIterator<T, Size> operator+(std::ptrdiff_t offset,
                                            ArrayIterator<T, Size> rhs) {
     return rhs += offset;
 }
 
-template <typename T, size_t Size>
+template <typename T, std::size_t Size>
 class array {
 public:
     T elements[Size];
 
 public:
     using value_type = T;
-    using size_type = size_t;
-    using difference_type = ptrdiff_t;
+    using size_type = std::size_t;
+    using difference_type = std::ptrdiff_t;
     using pointer = T*;
     using const_pointer = const T*;
     using reference = T&;
@@ -449,8 +449,8 @@ public:
 
 public:
     using value_type = T;
-    using size_type = size_t;
-    using difference_type = ptrdiff_t;
+    using size_type = std::size_t;
+    using difference_type = std::ptrdiff_t;
     using pointer = T*;
     using const_pointer = const T*;
     using reference = T&;
@@ -579,62 +579,62 @@ public:
 }; // array<T, 0>
 
 // array non-member function
-template <typename T, size_t Size>
+template <typename T, std::size_t Size>
 bool operator==(const array<T, Size>& lhs, const array<T, Size>& rhs) {
     return tiny_stl::equal(lhs.begin(), lhs.end(), rhs.begin());
 }
 
-template <typename T, size_t Size>
+template <typename T, std::size_t Size>
 bool operator!=(const array<T, Size>& lhs, const array<T, Size>& rhs) {
     return (!(lhs == rhs));
 }
 
-template <typename T, size_t Size>
+template <typename T, std::size_t Size>
 bool operator<(const array<T, Size>& lhs, const array<T, Size>& rhs) {
     return tiny_stl::lexicographical_compare(lhs.begin(), lhs.end(),
                                              rhs.begin(), rhs.end());
 }
 
-template <typename T, size_t Size>
+template <typename T, std::size_t Size>
 bool operator>(const array<T, Size>& lhs, const array<T, Size>& rhs) {
     return rhs < lhs;
 }
 
-template <typename T, size_t Size>
+template <typename T, std::size_t Size>
 bool operator<=(const array<T, Size>& lhs, const array<T, Size>& rhs) {
     return !(rhs < lhs);
 }
 
-template <typename T, size_t Size>
+template <typename T, std::size_t Size>
 bool operator>=(const array<T, Size>& lhs, const array<T, Size>& rhs) {
     return !(lhs < rhs);
 }
 
-template <size_t Idx, typename T, size_t Size>
+template <std::size_t Idx, typename T, std::size_t Size>
 constexpr T& get(array<T, Size>& arr) noexcept {
     static_assert(Idx < Size, "array index out of ranges");
     return arr.elements[Idx];
 }
 
-template <size_t Idx, typename T, size_t Size>
+template <std::size_t Idx, typename T, std::size_t Size>
 constexpr T&& get(array<T, Size>&& arr) noexcept {
     static_assert(Idx < Size, "array index out of ranges");
     return tiny_stl::move(arr.elements[Idx]);
 }
 
-template <size_t Idx, typename T, size_t Size>
+template <std::size_t Idx, typename T, std::size_t Size>
 constexpr const T& get(const array<T, Size>& arr) noexcept {
     static_assert(Idx < Size, "array index out of ranges");
     return arr.elements[Idx];
 }
 
-template <size_t Idx, typename T, size_t Size>
+template <std::size_t Idx, typename T, std::size_t Size>
 constexpr const T&& get(const array<T, Size>&& arr) noexcept {
     static_assert(Idx < Size, "array index out of ranges");
     return tiny_stl::move(arr.elements[Idx]);
 }
 
-template <typename T, size_t Size,
+template <typename T, std::size_t Size,
           typename = enable_if_t<Size == 0 || is_swappable<T>::value>>
 void swap(array<T, Size>& lhs,
           array<T, Size>& rhs) noexcept(noexcept(lhs.swap(rhs))) {
@@ -642,11 +642,11 @@ void swap(array<T, Size>& lhs,
 }
 
 // tuple_size to array
-template <typename T, size_t Size>
-struct tuple_size<array<T, Size>> : integral_constant<size_t, Size> {};
+template <typename T, std::size_t Size>
+struct tuple_size<array<T, Size>> : integral_constant<std::size_t, Size> {};
 
 // tuple_element to array
-template <size_t Idx, typename T, size_t Size>
+template <std::size_t Idx, typename T, std::size_t Size>
 struct tuple_element<Idx, array<T, Size>> {
     static_assert(Idx < Size, "array index out of range");
     using type = T;

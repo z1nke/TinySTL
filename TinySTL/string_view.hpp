@@ -19,15 +19,15 @@ struct StringViewIterator {
     using value_type = CharT;
     using pointer = const CharT*;
     using reference = const CharT&;
-    using difference_type = ptrdiff_t;
+    using difference_type = std::ptrdiff_t;
     using Self = StringViewIterator<CharT>;
 
 #ifndef NDEBUG // DEBUG
     constexpr StringViewIterator() noexcept : ptr(nullptr), size(0), index(0) {
     }
 
-    constexpr StringViewIterator(const pointer p, const size_t s,
-                                 const size_t idx) noexcept
+    constexpr StringViewIterator(const pointer p, const std::size_t s,
+                                 const std::size_t idx) noexcept
         : ptr(p), size(s), index(idx) {
     }
 
@@ -72,7 +72,7 @@ struct StringViewIterator {
     constexpr Self& operator+=(const difference_type off) noexcept {
         assert(ptr != nullptr);
         if (off < 0) {
-            assert(index >= static_cast<size_t>(-off));
+            assert(index >= static_cast<std::size_t>(-off));
         } else if (off > 0) {
             assert(index + off <= size);
         }
@@ -90,9 +90,9 @@ struct StringViewIterator {
     constexpr Self operator-=(const difference_type off) noexcept {
         assert(ptr != nullptr);
         if (off > 0) {
-            assert(index >= static_cast<size_t>(off));
+            assert(index >= static_cast<std::size_t>(off));
         } else if (off < 0) {
-            assert(index + static_cast<size_t>(-off) <= size);
+            assert(index + static_cast<std::size_t>(-off) <= size);
         }
 
         index -= off;
@@ -125,8 +125,8 @@ struct StringViewIterator {
     }
 
     pointer ptr;
-    size_t size;
-    size_t index;
+    std::size_t size;
+    std::size_t index;
 
 #else
     constexpr StringViewIterator() : ptr(nullptr) {
@@ -635,10 +635,10 @@ operator<<(std::basic_ostream<CharT, Traits>& os,
 template <typename CharT, typename Traits>
 struct hash<basic_string_view<CharT, Traits>> {
     using argument_type = basic_string_view<CharT, Traits>;
-    using result_type = size_t;
+    using result_type = std::size_t;
 
-    size_t
-    operator()(const basic_string_view<CharT, Traits>& str) const noexcept {
+    std::size_t operator()(const basic_string_view<CharT, Traits>& str) const
+        noexcept {
         return tiny_stl::hashFNV(str.data(), str.size());
     }
 };
@@ -657,21 +657,22 @@ namespace literals {
 
 namespace string_view_literals {
 
-constexpr string_view operator""_sv(const char* str, size_t len) noexcept {
+constexpr string_view operator""_sv(const char* str, std::size_t len) noexcept {
     return string_view{str, len};
 }
 
-constexpr wstring_view operator""_sv(const wchar_t* str, size_t len) noexcept {
+constexpr wstring_view operator""_sv(const wchar_t* str,
+                                     std::size_t len) noexcept {
     return wstring_view{str, len};
 }
 
 constexpr u16string_view operator""_sv(const char16_t* str,
-                                       size_t len) noexcept {
+                                       std::size_t len) noexcept {
     return u16string_view{str, len};
 }
 
 constexpr u32string_view operator""_sv(const char32_t* str,
-                                       size_t len) noexcept {
+                                       std::size_t len) noexcept {
     return u32string_view{str, len};
 }
 

@@ -60,7 +60,7 @@ struct random_access_iterator {
     using reference = T&;
 };
 
-template <typename Category, typename T, typename Distance = ptrdiff_t,
+template <typename Category, typename T, typename Distance = std::ptrdiff_t,
           typename Pointer = T*, typename Reference = T&>
 struct iterator {
     using iterator_category = Category;
@@ -90,7 +90,7 @@ template <typename T, bool = is_object<T>::value>
 struct IteratorTraitsPointerBase {
     using iterator_category = random_access_iterator_tag;
     using value_type = remove_cv_t<T>;
-    using difference_type = ptrdiff_t;
+    using difference_type = std::ptrdiff_t;
     using pointer = T*;
     using reference = T&;
 };

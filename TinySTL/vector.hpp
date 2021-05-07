@@ -13,7 +13,7 @@ template <typename T>
 struct VectorConstIterator {
     using iterator_category = random_access_iterator_tag;
     using value_type = T;
-    using difference_type = ptrdiff_t;
+    using difference_type = std::ptrdiff_t;
     using pointer = const T*;
     using reference = const T&;
     using Self = VectorConstIterator<T>;
@@ -120,7 +120,7 @@ template <typename T>
 struct VectorIterator : VectorConstIterator<T> {
     using iterator_category = random_access_iterator_tag;
     using value_type = T;
-    using difference_type = ptrdiff_t;
+    using difference_type = std::ptrdiff_t;
     using pointer = T*;
     using reference = T&;
 
@@ -186,7 +186,7 @@ struct VectorIterator : VectorConstIterator<T> {
         return this->ptr - rhs.ptr;
     }
 
-    reference operator[](ptrdiff_t offset) const {
+    reference operator[](std::ptrdiff_t offset) const {
         return *(*this + offset);
     }
 }; // class VectorIterator<T>
@@ -225,11 +225,11 @@ public:
     VectorBase(const Alloc& a) : alloc(a), first(), last(), end_of_storage() {
     }
 
-    T* allocateAux(size_t n) {
+    T* allocateAux(std::size_t n) {
         return alloc.allocate(n);
     }
 
-    void deallocateAux(T* p, size_t n) {
+    void deallocateAux(T* p, std::size_t n) {
         if (p != pointer())
             alloc.deallocate(p, n);
     }
@@ -255,8 +255,8 @@ public:
 
 public:
     using value_type = T;
-    using size_type = size_t;
-    using difference_type = ptrdiff_t;
+    using size_type = std::size_t;
+    using difference_type = std::ptrdiff_t;
     using pointer = T*;
     using const_pointer = const T*;
     using reference = T&;

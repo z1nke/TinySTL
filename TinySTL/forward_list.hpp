@@ -25,7 +25,7 @@ template <typename T>
 struct FListConstIterator {
     using iterator_category = forward_iterator_tag;
     using value_type = T;
-    using difference_type = ptrdiff_t;
+    using difference_type = std::ptrdiff_t;
     using pointer = const T*;
     using reference = const T&;
     using Ptr = FLNode<T>*;
@@ -71,7 +71,7 @@ template <typename T>
 struct FListIterator : FListConstIterator<T> {
     using iterator_category = forward_iterator_tag;
     using value_type = T;
-    using difference_type = ptrdiff_t;
+    using difference_type = std::ptrdiff_t;
     using pointer = T*;
     using reference = T&;
     using Ptr = FLNode<T>*;

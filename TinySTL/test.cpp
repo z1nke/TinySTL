@@ -874,10 +874,10 @@ void testCowString() {
 
     tiny_stl::cow_string s12 = "123456";
     UNIT_TEST(3, s12.find('4', 0));
-    UNIT_TEST(static_cast<size_t>(-1), s12.find('a', 0));
+    UNIT_TEST(static_cast<std::size_t>(-1), s12.find('a', 0));
     UNIT_TEST(4, s12.substr(2).size());
     UNIT_TEST(2, s12.find("3456", 2));
-    UNIT_TEST(static_cast<size_t>(-1), s12.find("42", 0, 2));
+    UNIT_TEST(static_cast<std::size_t>(-1), s12.find("42", 0, 2));
     UNIT_TEST(3, s12.find("42", 0, 1));
     s12 = "this is a string";
     UNIT_TEST(5, s12.rfind("is", 5));

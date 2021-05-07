@@ -35,8 +35,8 @@ struct DequeConstIterator {
     using value_type = T;
     using pointer = const T*;
     using reference = const T&;
-    using size_type = size_t;
-    using difference_type = ptrdiff_t;
+    using size_type = std::size_t;
+    using difference_type = std::ptrdiff_t;
 
     using MapPtr = T**;
     using Self = DequeConstIterator<T>;
@@ -201,8 +201,8 @@ struct DequeIterator : DequeConstIterator<T> {
     using value_type = T;
     using pointer = T*;
     using reference = T&;
-    using size_type = size_t;
-    using difference_type = ptrdiff_t;
+    using size_type = std::size_t;
+    using difference_type = std::ptrdiff_t;
 
     using MapPtr = T**;
     using Base = DequeConstIterator<T>;
@@ -298,8 +298,8 @@ class DequeBase {
 public:
     using value_type = T;
     using allocator_type = Alloc;
-    using size_type = size_t;
-    using difference_type = ptrdiff_t;
+    using size_type = std::size_t;
+    using difference_type = std::ptrdiff_t;
     using pointer = T*;
     using const_pointer = const T*;
     using reference = T&;

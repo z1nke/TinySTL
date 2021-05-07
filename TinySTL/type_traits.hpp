@@ -146,7 +146,7 @@ struct remove_extent<T[]> {
     using type = T;
 };
 
-template <typename T, size_t N>
+template <typename T, std::size_t N>
 struct remove_extent<T[N]> {
     using type = T;
 };
@@ -367,7 +367,7 @@ constexpr bool is_void_v = is_void<T>::value;
 template <typename T>
 struct is_array : false_type {};
 
-template <typename T, size_t n>
+template <typename T, std::size_t n>
 struct is_array<T[n]> : true_type {};
 
 template <typename T>

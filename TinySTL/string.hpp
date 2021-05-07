@@ -16,7 +16,7 @@ struct StringConstIterator {
     using value_type = T;
     using pointer = const T*;
     using reference = const T&;
-    using difference_type = ptrdiff_t;
+    using difference_type = std::ptrdiff_t;
     using Self = StringConstIterator<T>;
 
     const T* ptr;
@@ -114,7 +114,7 @@ struct StringIterator : StringConstIterator<T> {
     using value_type = T;
     using pointer = T*;
     using reference = T&;
-    using difference_type = ptrdiff_t;
+    using difference_type = std::ptrdiff_t;
     using Base = StringConstIterator<T>;
     using Self = StringIterator<T>;
 
@@ -1724,10 +1724,10 @@ operator>>(std::basic_istream<CharT, Traits>& is,
 template <typename CharT, typename Traits, typename Alloc>
 struct hash<basic_string<CharT, Traits, Alloc>> {
     using argument_type = basic_string<CharT, Traits, Alloc>;
-    using result_type = size_t;
+    using result_type = std::size_t;
 
-    size_t
-    operator()(const basic_string<CharT, Traits, Alloc>& str) const noexcept {
+    std::size_t operator()(const basic_string<CharT, Traits, Alloc>& str) const
+        noexcept {
         return tiny_stl::hashFNV(str.c_str(), str.size());
     }
 };

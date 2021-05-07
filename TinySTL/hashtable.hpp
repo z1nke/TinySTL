@@ -16,16 +16,17 @@ template <typename T, typename HashTableType>
 struct HashConstIterator {
     using iterator_category = forward_iterator_tag;
     using value_type = T;
-    using difference_type = ptrdiff_t;
+    using difference_type = std::ptrdiff_t;
     using reference = const T&;
     using pointer = const T*;
 
-    size_t idx_bucket;
+    std::size_t idx_bucket;
     FListConstIterator<T> iter;
     HashTableType* hashtable;
 
     HashConstIterator() = default;
-    HashConstIterator(size_t idx, FListConstIterator<T> it, HashTableType* ht)
+    HashConstIterator(std::size_t idx, FListConstIterator<T> it,
+                      HashTableType* ht)
         : idx_bucket(idx), iter(it), hashtable(ht) {
     }
 
@@ -84,16 +85,16 @@ template <typename T, typename HashTableType>
 struct HashIterator {
     using iterator_category = forward_iterator_tag;
     using value_type = T;
-    using difference_type = ptrdiff_t;
+    using difference_type = std::ptrdiff_t;
     using reference = T&;
     using pointer = T*;
 
-    size_t idx_bucket;
+    std::size_t idx_bucket;
     FListIterator<T> iter;
     HashTableType* hashtable;
 
     HashIterator() = default;
-    HashIterator(size_t idx, FListIterator<T> it, HashTableType* ht)
+    HashIterator(std::size_t idx, FListIterator<T> it, HashTableType* ht)
         : idx_bucket(idx), iter(it), hashtable(ht) {
     }
 
@@ -142,17 +143,17 @@ struct HashIterator {
 
 // FIXME: write a helper class for prime
 static const int stlPrimesSize = 28;
-static const size_t stlPrimesArray[stlPrimesSize] = {
+static const std::size_t stlPrimesArray[stlPrimesSize] = {
     53,        97,         193,         389,        769,       1543,
     3079,      6151,       12289,       24593,      49157,     98317,
     196613,    393241,     786433,      1572869,    3145739,   6291469,
     12582917,  25165843,   50331653,    100663319,  201326611, 402653189,
     805306457, 1610612741, 3221225473U, 4294967291U};
 
-inline size_t stlNextPrime(size_t n) {
-    const size_t* first = stlPrimesArray;
-    const size_t* last = stlPrimesArray + stlPrimesSize;
-    const size_t* pos = lower_bound(first, last, n);
+inline std::size_t stlNextPrime(std::size_t n) {
+    const std::size_t* first = stlPrimesArray;
+    const std::size_t* last = stlPrimesArray + stlPrimesSize;
+    const std::size_t* pos = lower_bound(first, last, n);
 
     return pos == last ? *(last - 1) : *pos;
 }
@@ -359,7 +360,7 @@ public:
     }
 
     size_type max_size() const noexcept {
-        return static_cast<size_t>(-1);
+        return static_cast<std::size_t>(-1);
     }
 
     void clear() noexcept {

@@ -58,7 +58,7 @@ inline void iter_swap(FwdIter1 lhs, FwdIter2 rhs) {
 }
 
 // swap array lhs and rhs
-template <typename T, size_t N>
+template <typename T, std::size_t N>
 inline void swap(T (&lhs)[N],
                  T (&rhs)[N]) noexcept(is_nothrow_swappable<T>::value) {
     if (&lhs != &rhs) {
@@ -295,34 +295,36 @@ struct tuple_size;
 
 // tuple_size to pair
 template <typename T1, typename T2>
-struct tuple_size<pair<T1, T2>> : integral_constant<size_t, 2> {};
+struct tuple_size<pair<T1, T2>> : integral_constant<std::size_t, 2> {};
 
 // tuple_size to tuple
 template <typename... Ts>
-struct tuple_size<tuple<Ts...>> : integral_constant<size_t, sizeof...(Ts)> {};
+struct tuple_size<tuple<Ts...>>
+    : integral_constant<std::size_t, sizeof...(Ts)> {};
 
 template <typename T>
-struct tuple_size<const T> : integral_constant<size_t, tuple_size<T>::value> {};
+struct tuple_size<const T>
+    : integral_constant<std::size_t, tuple_size<T>::value> {};
 
 template <typename T>
 struct tuple_size<volatile T>
-    : integral_constant<size_t, tuple_size<T>::value> {};
+    : integral_constant<std::size_t, tuple_size<T>::value> {};
 
 template <typename T>
 struct tuple_size<const volatile T>
-    : integral_constant<size_t, tuple_size<T>::value> {};
+    : integral_constant<std::size_t, tuple_size<T>::value> {};
 
 // tuple element
 template <typename T>
 struct AlwaysFalse : false_type {};
 
-template <size_t Idx, typename Tuple>
+template <std::size_t Idx, typename Tuple>
 struct tuple_element;
 
 // tuple_element to tuple
-template <size_t Idx>
+template <std::size_t Idx>
 struct tuple_element<Idx, tuple<>> {
-    static_assert(AlwaysFalse<integral_constant<size_t, Idx>>::value,
+    static_assert(AlwaysFalse<integral_constant<std::size_t, Idx>>::value,
                   "tuple index out of range");
 };
 
@@ -332,23 +334,23 @@ struct tuple_element<0, tuple<Head, Tail...>> {
     using TupleType = tuple<Head, Tail...>;
 };
 
-template <size_t Idx, typename Head, typename... Tail>
+template <std::size_t Idx, typename Head, typename... Tail>
 struct tuple_element<Idx, tuple<Head, Tail...>>
     : tuple_element<Idx - 1, tuple<Tail...>> {};
 
-template <size_t Idx, typename Tuple>
+template <std::size_t Idx, typename Tuple>
 struct tuple_element<Idx, const Tuple> : tuple_element<Idx, Tuple> {
     using BaseType = tuple_element<Idx, Tuple>;
     using type = add_const_t<typename BaseType::type>;
 };
 
-template <size_t Idx, typename Tuple>
+template <std::size_t Idx, typename Tuple>
 struct tuple_element<Idx, volatile Tuple> : tuple_element<Idx, Tuple> {
     using BaseType = tuple_element<Idx, Tuple>;
     using type = add_volatile_t<typename BaseType::type>;
 };
 
-template <size_t Idx, typename Tuple>
+template <std::size_t Idx, typename Tuple>
 struct tuple_element<Idx, const volatile Tuple> : tuple_element<Idx, Tuple> {
     using BaseType = tuple_element<Idx, Tuple>;
     using type = add_cv_t<typename BaseType::type>;
@@ -365,44 +367,46 @@ struct tuple_element<1, pair<T1, T2>> {
     using type = T2;
 };
 
-template <size_t Idx, typename T>
+template <std::size_t Idx, typename T>
 using tuple_element_t = typename tuple_element<Idx, T>::type;
 
 template <typename Ret, typename Pair>
-constexpr Ret pairGetHelper(Pair& p, integral_constant<size_t, 0>) noexcept {
+constexpr Ret pairGetHelper(Pair& p,
+                            integral_constant<std::size_t, 0>) noexcept {
     return (p.first);
 }
 
 template <typename Ret, typename Pair>
-constexpr Ret pairGetHelper(Pair& p, integral_constant<size_t, 1>) noexcept {
+constexpr Ret pairGetHelper(Pair& p,
+                            integral_constant<std::size_t, 1>) noexcept {
     return (p.second);
 }
 
 // get<Idx>(pair<T1, T2>)
 // (1) C++ 14
-template <size_t Idx, typename T1, typename T2>
+template <std::size_t Idx, typename T1, typename T2>
 constexpr tuple_element_t<Idx, pair<T1, T2>>& get(pair<T1, T2>& p) noexcept {
     using Ret = tuple_element_t<Idx, pair<T1, T2>>&;
-    return pairGetHelper<Ret>(p, integral_constant<size_t, Idx>{});
+    return pairGetHelper<Ret>(p, integral_constant<std::size_t, Idx>{});
 }
 
 // (2) C++ 14
-template <size_t Idx, typename T1, typename T2>
+template <std::size_t Idx, typename T1, typename T2>
 constexpr const tuple_element_t<Idx, pair<T1, T2>>&
 get(const pair<T1, T2>& p) noexcept {
     using Ret = const tuple_element_t<Idx, pair<T1, T2>>&;
-    return pairGetHelper<Ret>(p, integral_constant<size_t, Idx>{});
+    return pairGetHelper<Ret>(p, integral_constant<std::size_t, Idx>{});
 }
 
 // (3) C++ 14
-template <size_t Idx, typename T1, typename T2>
+template <std::size_t Idx, typename T1, typename T2>
 constexpr tuple_element_t<Idx, pair<T1, T2>>&& get(pair<T1, T2>&& p) noexcept {
     using Ret = tuple_element_t<Idx, pair<T1, T2>>&&;
     return tiny_stl::forward<Ret>(get<Idx>(p));
 }
 
 // (4) C++ 17
-template <size_t Idx, typename T1, typename T2>
+template <std::size_t Idx, typename T1, typename T2>
 constexpr const tuple_element_t<Idx, pair<T1, T2>>&&
 get(const pair<T1, T2>&& p) noexcept {
     using Ret = const tuple_element_t<Idx, pair<T1, T2>>&&;

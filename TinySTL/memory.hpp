@@ -127,12 +127,12 @@ inline FwdIter uninitialized_copy_n(InIter first, Size n, FwdIter dst) {
                                  integral_constant<bool, is_pod_v<T>>{});
 }
 
-inline char* uninitialized_copy_n(const char* first, size_t n, char* dst) {
+inline char* uninitialized_copy_n(const char* first, std::size_t n, char* dst) {
     memmove(dst, first, n);
     return dst + n;
 }
 
-inline wchar_t* uninitialized_copy_n(const wchar_t* first, size_t n,
+inline wchar_t* uninitialized_copy_n(const wchar_t* first, std::size_t n,
                                      wchar_t* dst) {
     memmove(dst, first, n * sizeof(wchar_t));
     return dst + n;
@@ -365,7 +365,7 @@ struct GetElementType<T, void_t<typename T::element_type>> {
 
 template <typename T, typename = void>
 struct GetPtrDifferenceType {
-    using type = ptrdiff_t;
+    using type = std::ptrdiff_t;
 };
 
 template <typename T>
@@ -414,7 +414,7 @@ template <typename T>
 struct pointer_traits<T*> {
     using element_type = T;
     using pointer = T*;
-    using difference_type = ptrdiff_t;
+    using difference_type = std::ptrdiff_t;
 
     template <typename Other>
     using rebind = Other*;
@@ -1031,7 +1031,7 @@ public:
             this->get_deleter()(get());
     }
 
-    T& operator[](size_t i) const {
+    T& operator[](std::size_t i) const {
         return get()[i];
     }
 }; // class unique_ptr<T[], Deleter>
@@ -1044,7 +1044,7 @@ inline unique_ptr<T> make_unique(Args&&... args) {
 
 template <typename T, typename = enable_if_t<is_array<T>::value &&
                                              std::extent<T>::value == 0>>
-inline unique_ptr<T> make_unique(size_t size) {
+inline unique_ptr<T> make_unique(std::size_t size) {
     using E = std::remove_extent_t<T>;
     return unique_ptr<T>(new E[size]);
 }
@@ -1056,9 +1056,9 @@ void make_unique(Args&&...) = delete;
 template <typename T, typename D>
 struct hash<unique_ptr<T, D>> {
     using argument_type = unique_ptr<T, D>;
-    using result_type = size_t;
+    using result_type = std::size_t;
 
-    size_t operator()(const unique_ptr<T, D>& up) const noexcept {
+    std::size_t operator()(const unique_ptr<T, D>& up) const noexcept {
         return hash<T>{}(*up);
     }
 };
