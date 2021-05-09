@@ -1,5 +1,7 @@
 # TinySTL
 
+[![build](https://github.com/syn1w/TinySTL/actions/workflows/build.yml/badge.svg)](https://github.com/syn1w/TinySTL/actions/workflows/build.yml)
+
 基于 `C++14 ` 的 TinySTL。  
 编译环境：VS2017, VS2019, 支持 C++14 的 clang++ 和 g++ 编译器
 
