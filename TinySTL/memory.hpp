@@ -1303,13 +1303,13 @@ private:
 
 // handle refernece counting for object with deleter and allocator
 template <typename T, typename D, typename Alloc>
-class RefCountResourceAlloc : public RefCountBase {
+class refCountResourceAlloc : public RefCountBase {
 private:
     // allocator<_Ref_count_resource_alloc>
-    using AllocType = GetAllocBindType<Alloc, RefCountResourceAlloc>;
+    using AllocType = GetAllocBindType<Alloc, refCountResourceAlloc>;
 
 public:
-    RefCountResourceAlloc(T p, D d, const Alloc& alloc) : RefCountBase() {
+    refCountResourceAlloc(T p, D d, const Alloc& alloc) : RefCountBase() {
     }
 
     virtual void*
@@ -1701,7 +1701,7 @@ private:
 
     template <typename UptrOrNullptr, typename D, typename Alloc>
     void setPtrDelAlloc(UptrOrNullptr ptr, D d, Alloc alloc) {
-        using RcObj = RefCountResourceAlloc<UptrOrNullptr, D, Alloc>;
+        using RcObj = refCountResourceAlloc<UptrOrNullptr, D, Alloc>;
         using Al_alloc =
             typename allocator_traits<Alloc>::template rebind_alloc<RcObj>;
         using Al_traits = allocator_traits<Al_alloc>;
