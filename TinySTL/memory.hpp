@@ -1306,7 +1306,7 @@ private:
 template <typename T, typename D, typename Alloc>
 class RefCountResourceAlloc : public RefCountBase {
 private:
-    // allocator<_Ref_count_resource_alloc>
+    // allocator<RefCountResourceAlloc>
     using AllocType = GetAllocBindType<Alloc, RefCountResourceAlloc>;
 
 public:
@@ -1352,8 +1352,8 @@ struct IsFunctionObject<
 
 // derived class is convertible to base class
 template <typename T>
-struct CanEnableShared<T, void_t<typename T::Esft_unique_type>>
-    : is_convertible<remove_cv_t<T>*, typename T::Esft_unique_type*>::type {};
+struct CanEnableShared<T, void_t<typename T::EsftUniqueType>>
+    : is_convertible<remove_cv_t<T>*, typename T::EsftUniqueType*>::type {};
 
 template <typename Other, typename U>
 void enableSharedFromThisBase(const shared_ptr<Other>& sp, U* ptr, true_type) {
@@ -2108,7 +2108,7 @@ protected:
 
 private:
     // helper type to determine if TYPE has inherited enable_from_this
-    using Esft_unique_type = enable_shared_from_this;
+    using EsftUniqueType = enable_shared_from_this;
 
     template <typename Other, typename U>
     friend void enableSharedFromThis(const shared_ptr<Other>& sp, U* ptr);

@@ -191,10 +191,10 @@ namespace extra {
 // Improved the original
 class RCObject {
 private:
-    std::size_t ref_count;
+    std::size_t mRefCount;
 
 protected: // Derived class call
-    RCObject() : ref_count(0) {
+    RCObject() : mRefCount(0) {
     }
     RCObject(const RCObject& rhs) = default;
     RCObject& operator=(const RCObject& rhs) {
@@ -204,21 +204,21 @@ protected: // Derived class call
     }
 
 public:
-    void add_reference() noexcept {
-        ++ref_count;
+    void retain() noexcept {
+        ++mRefCount;
     }
 
-    void remove_reference() noexcept {
-        if (--ref_count == 0)
+    void release() noexcept {
+        if (--mRefCount == 0)
             delete this;
     }
 
-    bool is_shared() const noexcept {
-        return ref_count > 1;
+    bool isShared() const noexcept {
+        return mRefCount > 1;
     }
 
-    std::size_t get_ref_count() const noexcept {
-        return ref_count;
+    std::size_t getRefCount() const noexcept {
+        return mRefCount;
     }
 };
 
@@ -231,7 +231,7 @@ private:
         if (pointee == nullptr)
             return;
 
-        pointee->add_reference();
+        pointee->retain();
     }
 
 public:
@@ -249,13 +249,13 @@ public:
 
     ~RCPtr() noexcept {
         if (pointee != nullptr)
-            pointee->remove_reference();
+            pointee->release();
     }
 
     RCPtr& operator=(const RCPtr& rhs) {
         if (pointee != rhs.pointee) {
             if (pointee != nullptr)
-                pointee->remove_reference();
+                pointee->release();
             pointee = rhs.pointee;
             init();
         }
@@ -266,7 +266,7 @@ public:
     RCPtr& operator=(RCPtr&& rhs) noexcept {
         if (pointee != rhs.pointee) {
             if (pointee != nullptr)
-                pointee->remove_reference();
+                pointee->release();
             pointee = rhs.pointee;
             rhs.pointee = nullptr;
         }
@@ -535,7 +535,7 @@ public:
         if (pos >= size())
             xRange();
 #endif
-        if (value->is_shared())
+        if (value->isShared())
             value = new StringValue(value->data); // copy when reference access
 
         return *(value->data + pos);
@@ -553,7 +553,7 @@ public:
     reference operator[](size_type pos) {
         assert(pos <= size());
 
-        if (value->is_shared())
+        if (value->isShared())
             value = new StringValue(value->data); // copy when reference access
 
         // ub: modify this->operator[size()]
@@ -591,7 +591,7 @@ public:
     }
 
     pointer data() noexcept {
-        if (value->is_shared())
+        if (value->isShared())
             value = new StringValue(value->data);
 
         return value->data;
@@ -606,7 +606,7 @@ public:
     }
 
     iterator begin() noexcept {
-        if (value->is_shared())
+        if (value->isShared())
             value = new StringValue(value->data);
 
         return iterator(value->data);
@@ -621,7 +621,7 @@ public:
     }
 
     iterator end() noexcept {
-        if (value->is_shared())
+        if (value->isShared())
             value = new StringValue(value->data);
 
         return iterator(value->data + value->size);
@@ -1383,11 +1383,11 @@ public:
 
 private:
     bool isShared() const noexcept {
-        return value->is_shared();
+        return value->isShared();
     }
 
     std::size_t getRefCount() const noexcept {
-        return value->get_ref_count();
+        return value->getRefCount();
     }
 
     [[noreturn]] static void xLength() {
