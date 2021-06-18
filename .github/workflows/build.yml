@@ -36,5 +36,5 @@ jobs:
 
     - name: Unit Test
       working-directory: ${{github.workspace}}/build
-      run: cmake --build ${{github.workspace}}/build --target utest -C ${{env.BUILD_TYPE}}
+      run: cmake --build ${{github.workspace}}/build --target utest
       
