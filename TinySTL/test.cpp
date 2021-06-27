@@ -885,7 +885,7 @@ void testCowString() {
     UNIT_TEST(10, s12.rfind('s'));
     UNIT_TEST(tiny_stl::cow_string::npos, s12.rfind("that"));
 
-    tiny_stl::cow_string s13 = "12345";
+    //tiny_stl::cow_string s13 = "12345";
 
     // cout << (s13.replace(1, 2, 3, 'a')) << endl;
 

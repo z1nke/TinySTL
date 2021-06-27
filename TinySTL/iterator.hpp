@@ -111,6 +111,8 @@ struct is_iterator<T, void_t<typename iterator_traits<T>::iterator_category>>
 template <typename T>
 constexpr bool is_iterator_v = is_iterator<T>::value;
 
+namespace details {
+
 template <typename Iter>
 inline typename iterator_traits<Iter>::category iterator_category(const Iter&) {
     using category = typename iterator_traits<Iter>::iterator_category;
@@ -130,8 +132,6 @@ inline typename iterator_traits<Iter>::value_type* value_type(const Iter&) {
 
 template <typename Iter>
 using IteratorValueType = typename iterator_traits<Iter>::value_type;
-
-namespace {
 
 template <typename Iter>
 constexpr Iter operator_arrow(Iter target, true_type /*is a pointer*/) {

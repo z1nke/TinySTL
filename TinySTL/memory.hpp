@@ -222,8 +222,9 @@ inline void destroyRangeAux(FwdIter first, FwdIter last, false_type) {
 
 template <typename FwdIter>
 inline void destroyRange(FwdIter first, FwdIter last) {
-    destroyRangeAux(first, last,
-                    is_trivially_destructible<IteratorValueType<FwdIter>>{});
+    destroyRangeAux(
+        first, last,
+        is_trivially_destructible<details::IteratorValueType<FwdIter>>{});
 }
 
 template <typename FwdIter>
@@ -268,9 +269,9 @@ inline FwdIter uninitializedAllocFillN(
 
 template <typename FwdIter>
 using UseMemsetValueConstructType = typename conjunction<
-    is_pointer<FwdIter>, is_scalar<IteratorValueType<FwdIter>>,
-    negation<is_volatile<IteratorValueType<FwdIter>>>,
-    negation<is_member_pointer<IteratorValueType<FwdIter>>>>::type;
+    is_pointer<FwdIter>, is_scalar<details::IteratorValueType<FwdIter>>,
+    negation<is_volatile<details::IteratorValueType<FwdIter>>>,
+    negation<is_member_pointer<details::IteratorValueType<FwdIter>>>>::type;
 
 template <typename FwdIter>
 inline FwdIter zeroMemsetRangeAux(FwdIter first, FwdIter last) {
@@ -786,7 +787,7 @@ public:
     // (5)
     unique_ptr(unique_ptr&& rhs) noexcept
         : mPair(tiny_stl::forward<delete_type>(rhs.get_deleter()),
-                 rhs.release()) {
+                rhs.release()) {
     }
 
     // (6)
