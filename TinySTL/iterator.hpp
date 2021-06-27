@@ -352,7 +352,7 @@ public:
         return *this;
     }
 
-    constexpr move_iterator& operator++(int) {
+    constexpr move_iterator operator++(int) {
         move_iterator tmp = *this;
         ++current;
         return tmp;
@@ -363,7 +363,7 @@ public:
         return *this;
     }
 
-    constexpr move_iterator& operator--(int) {
+    constexpr move_iterator operator--(int) {
         move_iterator tmp = *this;
         --current;
         return tmp;
