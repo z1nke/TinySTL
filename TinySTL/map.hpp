@@ -11,8 +11,30 @@ namespace tiny_stl {
 template <typename Key, typename T, typename Compare = less<Key>,
           typename Alloc = allocator<pair<Key, T>>>
 class map : public RBTree<pair<Key, T>, Compare, Alloc, true> {
+public:
+    using allocator_type = Alloc;
+
 private:
     using Base = RBTree<pair<Key, T>, Compare, Alloc, true>;
+    using AlTraits = allocator_traits<allocator_type>;
+    using AlNode = typename Base::AlNode;
+    using AlNodeTraits = typename Base::AlNodeTraits;
+
+public:
+    using key_type = Key;
+    using mapped_type = T;
+    using value_type = pair<const Key, T>;
+    using size_type = typename Alloc::size_type;
+    using difference_type = typename Alloc::difference_type;
+    using key_compare = Compare;
+    using reference = value_type&;
+    using const_reference = const value_type&;
+    using pointer = typename AlTraits::pointer;
+    using const_pointer = typename AlTraits::const_pointer;
+    using iterator = typename Base::iterator;
+    using const_iterator = typename Base::const_iterator;
+    using reverse_iterator = typename Base::reverse_iterator;
+    using const_reverse_iterator = typename Base::const_reverse_iterator;
 
 public:
     class value_compare {
@@ -182,8 +204,30 @@ swap(map<Key, T, Cmp, Alloc>& lhs,
 template <typename Key, typename T, typename Compare = less<Key>,
           typename Alloc = allocator<pair<Key, T>>>
 class multimap : public RBTree<pair<Key, T>, Compare, Alloc, true> {
+public:
+    using allocator_type = Alloc;
+
 private:
     using Base = RBTree<pair<Key, T>, Compare, Alloc, true>;
+    using AlNode = typename Base::AlNode;
+    using AlNodeTraits = typename Base::AlNodeTraits;
+    using AlTraits = allocator_traits<allocator_type>;
+
+public:
+    using key_type = Key;
+    using mapped_type = T;
+    using value_type = pair<const Key, T>;
+    using size_type = std::size_t;
+    using difference_type = std::ptrdiff_t;
+    using key_compare = Compare;
+    using reference = value_type&;
+    using const_reference = const value_type&;
+    using pointer = typename AlTraits::pointer;
+    using const_pointer = typename AlTraits::const_pointer;
+    using iterator = typename Base::iterator;
+    using const_iterator = typename Base::const_iterator;
+    using reverse_iterator = typename Base::reverse_iterator;
+    using const_reverse_iterator = typename Base::const_reverse_iterator;
 
 public:
     class value_compare {

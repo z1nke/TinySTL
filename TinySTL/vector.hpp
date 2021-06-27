@@ -256,6 +256,19 @@ public:
 private:
     using Base = VectorBase<T, Alloc>;
 
+public:
+    using allocator_type = typename Base::allocator_type;
+    using size_type = typename Base::size_type;
+    using difference_type = typename Base::difference_type;
+    using pointer = typename Base::pointer;
+    using const_pointer = typename Base::const_pointer;
+    using reference = typename Base::reference;
+    using const_reference = typename Base::const_reference;
+    using iterator = typename Base::iterator;
+    using const_iterator = typename Base::const_iterator;
+    using reverse_iterator = tiny_stl::reverse_iterator<iterator>;
+    using const_reverse_iterator = tiny_stl::reverse_iterator<const_iterator>;
+
 private:
     using Base::alloc;
     using Base::end_of_storage;
