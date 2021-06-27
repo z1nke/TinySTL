@@ -70,5 +70,9 @@
     - `equal`
     - `lexicographical_compare`
 
-# License
+
+
+## License
+
 MIT License
+

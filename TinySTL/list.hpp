@@ -54,13 +54,13 @@ struct ListConstIterator {
         return *this;
     }
 
-    ListConstIterator& operator++(int) {
+    ListConstIterator operator++(int) {
         ListConstIterator tmp = *this;
         ptr = ptr->next;
         return tmp;
     }
 
-    ListConstIterator& operator--(int) {
+    ListConstIterator operator--(int) {
         ListConstIterator tmp = *this;
         ptr = ptr->prev;
         return tmp;
