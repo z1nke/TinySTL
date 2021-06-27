@@ -413,7 +413,8 @@ public:
     }
 
     XCONSTEXPR14 bool starts_with(basic_string_view rhs) const noexcept {
-        return mSize >= rhs.mSize && compare(0, rhs.mSize, rhs) == 0;
+        return mSize >= rhs.mSize && 
+            Traits::compare(this->mData, rhs.mData, rhs.mSize) == 0;
     }
 
     XCONSTEXPR14 bool starts_with(CharT ch) const noexcept {
@@ -425,8 +426,12 @@ public:
     }
 
     XCONSTEXPR14 bool ends_with(basic_string_view rhs) const noexcept {
-        return mSize >= rhs.mSize &&
-               compare(mSize - rhs.mSize, rhs.mSize, rhs) == 0;
+        const size_type rightSize = rhs.mSize;
+        if (mSize < rightSize) {
+            return false;
+        }
+        return Traits::compare(mData + (mSize - rightSize), 
+                               rhs.mData, rightSize) == 0;
     }
 
     XCONSTEXPR14 bool ends_with(CharT ch) const noexcept {

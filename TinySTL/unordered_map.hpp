@@ -13,25 +13,8 @@ template <typename Key, typename T, typename Hash = hash<Key>,
           typename Alloc = allocator<pair<Key, T>>>
 class unordered_map
     : public HashTable<pair<Key, T>, Hash, KeyEqual, Alloc, true> {
-public:
-    using key_type = Key;
-    using mapped_type = T;
-    using value_type = pair<const Key, T>;
-    using size_type = typename Alloc::size_type;
-    using difference_type = typename Alloc::difference_type;
-    using hasher = Hash;
-    using key_equal = KeyEqual;
-    using allocator_type = Alloc;
-    using reference = value_type&;
-    using const_reference = const value_type&;
-    using AlTraits = allocator_traits<allocator_type>;
-    using pointer = typename AlTraits::pointer;
-    using const_pointer = typename AlTraits::const_pointer;
+private:
     using Base = HashTable<pair<Key, T>, Hash, KeyEqual, Alloc, true>;
-    using iterator = typename Base::iterator;
-    using const_iterator = typename Base::const_iterator;
-    using local_iterator = typename Base::local_iterator;
-    using const_local_iterator = typename Base::const_local_iterator;
 
 public:
     // (1)
@@ -206,25 +189,8 @@ template <typename Key, typename T, typename Hash = hash<Key>,
           typename Alloc = allocator<pair<Key, T>>>
 class unordered_multimap
     : public HashTable<pair<Key, T>, Hash, KeyEqual, Alloc, true> {
-public:
-    using key_type = Key;
-    using mapped_type = T;
-    using value_type = pair<const Key, T>;
-    using size_type = std::size_t;
-    using difference_type = std::ptrdiff_t;
-    using hasher = Hash;
-    using key_equal = KeyEqual;
-    using allocator_type = Alloc;
-    using reference = value_type&;
-    using const_reference = const value_type&;
-    using AlTraits = allocator_traits<allocator_type>;
-    using pointer = typename AlTraits::pointer;
-    using const_pointer = typename AlTraits::const_pointer;
+private:
     using Base = HashTable<pair<Key, T>, Hash, KeyEqual, Alloc, true>;
-    using iterator = typename Base::iterator;
-    using const_iterator = typename Base::const_iterator;
-    using local_iterator = typename Base::local_iterator;
-    using const_local_iterator = typename Base::const_local_iterator;
 
 public:
     // (1)

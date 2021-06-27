@@ -253,20 +253,6 @@ public:
     static_assert(tiny_stl::is_same_v<T, typename Alloc::value_type>,
                   "Alloc::value_type is not the same as T");
 
-public:
-    using value_type = T;
-    using size_type = std::size_t;
-    using difference_type = std::ptrdiff_t;
-    using pointer = T*;
-    using const_pointer = const T*;
-    using reference = T&;
-    using const_reference = const T&;
-    using iterator = VectorIterator<T>;
-    using const_iterator = VectorConstIterator<T>;
-    using reverse_iterator = tiny_stl::reverse_iterator<iterator>;
-    using const_reverse_iterator = tiny_stl::reverse_iterator<const_iterator>;
-    using allocator_type = Alloc;
-
 private:
     using Base = VectorBase<T, Alloc>;
 

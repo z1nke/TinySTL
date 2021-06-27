@@ -81,7 +81,7 @@ public:
 
     constexpr ArrayConstIterator operator-(std::ptrdiff_t offset) const {
         ArrayConstIterator tmp = *this;
-        return *this -= offset;
+        return tmp -= offset;
     }
 
     constexpr std::ptrdiff_t operator-(const ArrayConstIterator& rhs) const {

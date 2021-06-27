@@ -13,25 +13,9 @@ template <typename Key, typename Compare = tiny_stl::less<Key>,
           typename Alloc = tiny_stl::allocator<Key>>
 class set : public RBTree<Key, Compare, Alloc, false> {
 public:
-    using key_type = Key;
-    using value_type = Key;
-    using size_type = typename Alloc::size_type;
-    using difference_type = typename Alloc::difference_type;
-    using key_compare = Compare;
     using value_compare = Compare;
-    using allocator_type = Alloc;
-    using reference = value_type&;
-    using const_reference = const value_type&;
-    using AlTraits = allocator_traits<allocator_type>;
-    using pointer = typename AlTraits::pointer;
-    using const_pointer = typename AlTraits::const_pointer;
+private:
     using Base = RBTree<Key, Compare, allocator_type, false>;
-    using AlNode = typename Base::AlNode;
-    using AlNodeTraits = typename Base::AlNodeTraits;
-    using iterator = typename Base::iterator;
-    using const_iterator = typename Base::const_iterator;
-    using reverse_iterator = typename Base::reverse_iterator;
-    using const_reverse_iterator = typename Base::const_reverse_iterator;
 
 public:
     set() : set(Compare()) {
@@ -143,25 +127,9 @@ template <typename Key, typename Compare = tiny_stl::less<Key>,
           typename Alloc = tiny_stl::allocator<Key>>
 class multiset : public RBTree<Key, Compare, Alloc, false> {
 public:
-    using key_type = Key;
-    using value_type = Key;
-    using size_type = std::size_t;
-    using difference_type = std::ptrdiff_t;
-    using key_compare = Compare;
     using value_compare = Compare;
-    using allocator_type = Alloc;
-    using reference = value_type&;
-    using const_reference = const value_type&;
-    using AlTraits = allocator_traits<allocator_type>;
-    using pointer = typename AlTraits::pointer;
-    using const_pointer = typename AlTraits::const_pointer;
+private:
     using Base = RBTree<Key, Compare, allocator_type, false>;
-    using AlNode = typename Base::AlNode;
-    using AlNodeTraits = typename Base::AlNodeTraits;
-    using iterator = typename Base::iterator;
-    using const_iterator = typename Base::const_iterator;
-    using reverse_iterator = typename Base::reverse_iterator;
-    using const_reverse_iterator = typename Base::const_reverse_iterator;
 
 public:
     multiset() : multiset(Compare()) {
