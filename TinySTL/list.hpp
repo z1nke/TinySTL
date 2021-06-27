@@ -110,13 +110,13 @@ struct ListIterator : ListConstIterator<T> {
         return *this;
     }
 
-    ListIterator& operator++(int) {
+    ListIterator operator++(int) {
         ListIterator tmp = *this;
         Base::ptr = Base::ptr->next;
         return tmp;
     }
 
-    ListIterator& operator--(int) {
+    ListIterator operator--(int) {
         ListIterator tmp = *this;
         Base::ptr = Base::ptr->prev;
         return tmp;
