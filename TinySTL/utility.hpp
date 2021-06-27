@@ -230,6 +230,7 @@ struct pair {
     pair& operator=(pair<U1, U2>&& rhs) {
         first = tiny_stl::forward<T1>(rhs.first);
         second = tiny_stl::forward<T2>(rhs.second);
+        return *this;
     }
 
     void

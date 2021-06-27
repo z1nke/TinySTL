@@ -197,9 +197,7 @@ protected: // Derived class call
     RCObject() : mRefCount(0) {
     }
     RCObject(const RCObject& rhs) = default;
-    RCObject& operator=(const RCObject& rhs) {
-        return *this;
-    }
+    RCObject& operator=(const RCObject& rhs) = default;
     virtual ~RCObject() {
     }
 

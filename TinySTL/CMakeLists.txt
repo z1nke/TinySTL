@@ -1,4 +1,29 @@
 add_executable(main
+    algorithm.hpp
+    allocators.hpp
+    array.hpp
+    cow_string.hpp
+    deque.hpp
+    forward_list.hpp
+    functional.hpp
+    hashtable.hpp
+    iterator.hpp
+    list.hpp
+    map.hpp
+    memory.hpp
+    queue.hpp
+    rbtree.hpp
+    set.hpp
+    stack.hpp
+    string.hpp
+    string_view.hpp
+    tuple.hpp
+    type_traits.hpp
+    unordered_map.hpp
+    unordered_set.hpp
+    utility.hpp
+    vector.hpp
+
     test.cpp
 )
 
