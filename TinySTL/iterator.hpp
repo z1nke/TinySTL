@@ -143,7 +143,7 @@ constexpr decltype(auto) operator_arrow(Iter&& target,
     return (tiny_stl::forward<Iter>(target).operator->());
 }
 
-} // namespace
+} // namespace details
 
 //  rend                           rbegin
 // |v |p                            |v |p     v is value, p is position
@@ -445,6 +445,8 @@ constexpr move_iterator<Iter> make_move_iterator(Iter iter) {
     return move_iterator<Iter>(iter);
 }
 
+namespace details {
+
 template <typename InIter, typename Distance>
 inline void advanceAux(InIter& iter, Distance n, input_iterator_tag) {
     while (n--)
@@ -491,9 +493,11 @@ distanceAux(RandomAccessIterator first, RandomAccessIterator last,
     return last - first;
 }
 
+} // namespace details
+
 template <typename InIter, typename Distance>
 inline void advance(InIter& iter, Distance n) {
-    advanceAux(
+    details::advanceAux(
         iter, n,
         typename iterator_traits<remove_const_t<InIter>>::iterator_category{});
 }
@@ -502,13 +506,13 @@ template <typename InIter>
 inline typename iterator_traits<InIter>::difference_type distance(InIter first,
                                                                   InIter last) {
     using category = typename iterator_traits<InIter>::iterator_category;
-    return distanceAux(first, last, category{});
+    return details::distanceAux(first, last, category{});
 }
 
 template <typename InIter>
 constexpr InIter next(InIter iter,
                       typename iterator_traits<InIter>::difference_type n = 1) {
-    advance(iter, n);
+    tiny_stl::advance(iter, n);
     return iter;
 }
 
