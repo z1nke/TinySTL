@@ -110,13 +110,13 @@ inline FwdIter uninitialized_copy(InIter first, InIter last, FwdIter dst) {
 // const char* and const wchar_t* version
 inline char* uninitialized_copy(const char* first, const char* last,
                                 char* dst) {
-    memmove(dst, first, sizeof(char) * (last - first));
+    std::memmove(dst, first, sizeof(char) * (last - first));
     return dst + (last - first);
 }
 
 inline wchar_t* uninitialized_copy(const wchar_t* first, const wchar_t* last,
                                    wchar_t* dst) {
-    memmove(dst, first, sizeof(wchar_t) * (last - first));
+    std::memmove(dst, first, sizeof(wchar_t) * (last - first));
     return dst + (last - first);
 }
 
@@ -128,13 +128,13 @@ inline FwdIter uninitialized_copy_n(InIter first, Size n, FwdIter dst) {
 }
 
 inline char* uninitialized_copy_n(const char* first, std::size_t n, char* dst) {
-    memmove(dst, first, n);
+    std::memmove(dst, first, n);
     return dst + n;
 }
 
 inline wchar_t* uninitialized_copy_n(const wchar_t* first, std::size_t n,
                                      wchar_t* dst) {
-    memmove(dst, first, n * sizeof(wchar_t));
+    std::memmove(dst, first, n * sizeof(wchar_t));
     return dst + n;
 }
 
@@ -262,7 +262,7 @@ inline FwdIter uninitializedAllocFillN(
     return uninitAllocFillNAux(
         first, n, val, alloc,
         typename conjunction<
-            decltype(tiny_stl::fillMemsetIsSafe(first, val)),
+            decltype(tiny_stl::details::fillMemsetIsSafe(first, val)),
             UseDefaultConstruct<Alloc, decltype(tiny_stl::addressof(*first)),
                                 decltype(val)>>::type{});
 }

@@ -86,7 +86,7 @@ inline pair<InIter1, InIter2> mismatch(InIter1 first1, InIter1 last1,
         ++first2;
     }
 
-    return make_pair(first1, first2);
+    return tiny_stl::make_pair(first1, first2);
 }
 
 template <typename InIter1, typename InIter2, typename BinPred>
@@ -98,7 +98,7 @@ inline pair<InIter1, InIter2> mismatch(InIter1 first1, InIter1 last1,
         ++first2;
     }
 
-    return make_pair(first1, first2);
+    return tiny_stl::make_pair(first1, first2);
 }
 
 template <typename InIter1, typename InIter2>
@@ -109,7 +109,7 @@ inline pair<InIter1, InIter2> mismatch(InIter1 first1, InIter1 last1,
         ++first2;
     }
 
-    return make_pair(first1, first2);
+    return tiny_stl::make_pair(first1, first2);
 }
 
 template <typename InIter, typename T>
@@ -149,6 +149,8 @@ struct FillMemsetIsSafeHelper {
         type;
 };
 
+namespace details {
+
 template <typename FwdIter, typename T>
 inline typename FillMemsetIsSafeHelper<FwdIter, T>::type
 fillMemsetIsSafe(const FwdIter&, const T&) {
@@ -173,11 +175,6 @@ inline OutIter fillNHelper(OutIter dst, Diff n, const T& val,
     return dst;
 }
 
-template <typename OutIter, typename Diff, typename T>
-inline OutIter fill_n(OutIter dst, Diff n, const T& val) {
-    return fillNHelper(dst, n, val, fillMemsetIsSafe(dst, val));
-}
-
 template <typename FwdIter, typename T>
 inline void fillHelper(FwdIter first, FwdIter last, const T& val, true_type) {
     std::memset(first, last - first, val);
@@ -189,9 +186,18 @@ inline void fillHelper(FwdIter first, FwdIter last, const T& val, false_type) {
         *first = val;
 }
 
+} // namespace details
+
+template <typename OutIter, typename Diff, typename T>
+inline OutIter fill_n(OutIter dst, Diff n, const T& val) {
+    return details::fillNHelper(dst, n, val,
+                                details::fillMemsetIsSafe(dst, val));
+}
+
 template <typename FwdIter, typename T>
 inline void fill(FwdIter first, FwdIter last, const T& val) {
-    fillHelper(first, last, val, fillMemsetIsSafe(first, val));
+    details::fillHelper(first, last, val,
+                        details::fillMemsetIsSafe(first, val));
 }
 
 template <typename FwdIter, typename Func>
@@ -297,7 +303,7 @@ inline bool equal(InIter1 first1, InIter1 last1, InIter2 first2, BinPred pred) {
 
 template <typename InIter1, typename InIter2>
 inline bool equal(InIter1 first1, InIter1 last1, InIter2 first2) {
-    return equal(first1, last1, first2, tiny_stl::equal_to<>());
+    return tiny_stl::equal(first1, last1, first2, tiny_stl::equal_to<>());
 }
 
 template <typename InIter1, typename InIter2, typename BinPred>
@@ -314,7 +320,8 @@ inline bool equal(InIter1 first1, InIter1 last1, InIter2 first2, InIter2 last2,
 template <typename InIter1, typename InIter2>
 inline bool equal(InIter1 first1, InIter1 last1, InIter2 first2,
                   InIter2 last2) {
-    return equal(first1, last1, first2, last2, tiny_stl::equal_to<>{});
+    return tiny_stl::equal(first1, last1, first2, last2,
+                           tiny_stl::equal_to<>{});
 }
 
 template <typename FwdIter, typename Cmp>
@@ -332,7 +339,7 @@ constexpr FwdIter min_element(FwdIter first, FwdIter last, Cmp cmp) {
 
 template <typename FwdIter>
 constexpr FwdIter min_element(FwdIter first, FwdIter last) {
-    return min_element(first, last, tiny_stl::less<>{});
+    return tiny_stl::min_element(first, last, tiny_stl::less<>{});
 }
 
 template <typename T, typename Cmp>
@@ -347,7 +354,7 @@ constexpr const T& min(const T& a, const T& b) {
 
 template <typename T, typename Cmp>
 constexpr T min(std::initializer_list<T> ilist, Cmp cmp) {
-    return *min_element(ilist.begin(), ilist.end(), cmp);
+    return *tiny_stl::min_element(ilist.begin(), ilist.end(), cmp);
 }
 
 template <typename T>
@@ -370,7 +377,7 @@ constexpr FwdIter max_element(FwdIter first, FwdIter last, Cmp cmp) {
 
 template <typename FwdIter>
 constexpr FwdIter max_element(FwdIter first, FwdIter last) {
-    return max_element(first, last, tiny_stl::less<>{});
+    return tiny_stl::max_element(first, last, tiny_stl::less<>{});
 }
 
 template <typename T, typename Cmp>
@@ -385,7 +392,7 @@ constexpr const T& max(const T& a, const T& b) {
 
 template <typename T, typename Cmp>
 constexpr T max(std::initializer_list<T> ilist, Cmp cmp) {
-    return *max_element(ilist.begin(), ilist.end(), cmp);
+    return *tiny_stl::max_element(ilist.begin(), ilist.end(), cmp);
 }
 
 template <typename T>
@@ -401,7 +408,7 @@ inline pair<const T&, const T&> minmax(const T& a, const T& b, Compare cmp) {
 
 template <typename T>
 inline pair<const T&, const T&> minmax(const T& a, const T& b) {
-    return minmax(a, b, tiny_stl::less<>{});
+    return tiny_stl::minmax(a, b, tiny_stl::less<>{});
 }
 
 template <typename FwdIter, typename Compare>
@@ -450,20 +457,23 @@ inline pair<FwdIter, FwdIter> minmax_element(FwdIter first, FwdIter last,
 
 template <typename FwdIter>
 inline pair<FwdIter, FwdIter> minmax_element(FwdIter first, FwdIter last) {
-    return minmax_element(first, last, tiny_stl::less<>{});
+    return tiny_stl::minmax_element(first, last, tiny_stl::less<>{});
 }
 
 template <typename T>
 inline pair<T, T> minmax(std::initializer_list<T> ilist) {
-    auto p = minmax_element(ilist.begin(), ilist.end(), tiny_stl::less<>{});
-    return make_pair(*p.first, *p.second);
+    auto p = tiny_stl::minmax_element(ilist.begin(), ilist.end(),
+                                      tiny_stl::less<>{});
+    return tiny_stl::make_pair(*p.first, *p.second);
 }
 
 template <typename T, typename Compare>
 inline pair<T, T> minmax(std::initializer_list<T> ilist, Compare cmp) {
-    auto p = minmax_element(ilist.begin(), ilist.end(), cmp);
-    return make_pair(*p.first, *p.second);
+    auto p = tiny_stl::minmax_element(ilist.begin(), ilist.end(), cmp);
+    return tiny_stl::make_pair(*p.first, *p.second);
 }
+
+namespace details {
 
 template <typename InIter1, typename InIter2, typename BinPred>
 inline bool lexicographicalCompareHelper(InIter1 first1, InIter1 last1,
@@ -481,11 +491,14 @@ inline bool lexicographicalCompareHelper(InIter1 first1, InIter1 last1,
     return (first1 == last1 && first2 != last2);
 }
 
+} // namespace details
+
 template <typename InIter1, typename InIter2, typename BinPred>
 inline bool lexicographical_compare(InIter1 first1, InIter1 last1,
                                     InIter2 first2, InIter2 last2,
                                     BinPred pred) {
-    return lexicographicalCompareHelper(first1, last1, first2, last2, pred);
+    return details::lexicographicalCompareHelper(first1, last1, first2, last2,
+                                                 pred);
 }
 
 template <typename InIter1, typename InIter2>
@@ -505,7 +518,7 @@ inline FwdIter rotate(FwdIter first, FwdIter mid, FwdIter last) {
 
     FwdIter next = mid;
     do { // left
-        iter_swap(first++, next++);
+        tiny_stl::iter_swap(first++, next++);
         if (first == mid)
             mid = next;
     } while (next != last);
@@ -514,7 +527,7 @@ inline FwdIter rotate(FwdIter first, FwdIter mid, FwdIter last) {
 
     // right
     for (next = mid; next != last;) {
-        iter_swap(first++, next++);
+        tiny_stl::iter_swap(first++, next++);
         if (first == mid)
             mid = next;
         else if (next == last)
@@ -530,6 +543,8 @@ inline void reverse(BidIter first, BidIter last) {
         tiny_stl::iter_swap(first, last);
 }
 
+namespace details {
+
 template <typename RanIter, typename Diff, typename T, typename Cmp>
 inline void pushHeapHelper(RanIter first, Diff hole, Diff top, T&& val,
                            Cmp& cmp) {
@@ -541,23 +556,6 @@ inline void pushHeapHelper(RanIter first, Diff hole, Diff top, T&& val,
     }
 
     *(first + hole) = tiny_stl::move(val); // move val to the hole
-}
-
-template <typename RanIter, typename Cmp>
-inline void push_heap(RanIter first, RanIter last, Cmp cmp) {
-    using Diff = typename iterator_traits<RanIter>::difference_type;
-    Diff count = last - first;
-    if (count >= 2) {
-        auto val = tiny_stl::move(*--last);
-        pushHeapHelper(first, --count, static_cast<Diff>(0),
-                       tiny_stl::move(val), cmp);
-    }
-}
-
-// O(logn)
-template <typename RanIter>
-inline void push_heap(RanIter first, RanIter last) {
-    tiny_stl::push_heap(first, last, tiny_stl::less<>{});
 }
 
 template <typename RanIter, typename Diff, typename T, typename Cmp>
@@ -586,7 +584,7 @@ inline void adjustHeapHelper(RanIter first, Diff hole, Diff len, T&& val,
     }
 
     // val is the origin last element. move it to hole
-    pushHeapHelper(first, hole, top, tiny_stl::move(val), cmp);
+    details::pushHeapHelper(first, hole, top, tiny_stl::move(val), cmp);
 }
 
 template <typename RanIter, typename T, typename Cmp>
@@ -599,27 +597,46 @@ inline void popHeapHelper(RanIter first, RanIter last, RanIter dst, T&& val,
                      static_cast<Diff>(last - first), tiny_stl::move(val), cmp);
 }
 
+} // namespace details
+
+template <typename RanIter, typename Cmp>
+inline void push_heap(RanIter first, RanIter last, Cmp cmp) {
+    using Diff = typename iterator_traits<RanIter>::difference_type;
+    Diff count = last - first;
+    if (count >= 2) {
+        auto val = tiny_stl::move(*--last);
+        details::pushHeapHelper(first, --count, static_cast<Diff>(0),
+                                tiny_stl::move(val), cmp);
+    }
+}
+
+// O(logn)
+template <typename RanIter>
+inline void push_heap(RanIter first, RanIter last) {
+    tiny_stl::push_heap(first, last, tiny_stl::less<>{});
+}
+
 template <typename RanIter, typename Cmp>
 inline void pop_heap(RanIter first, RanIter last, Cmp cmp) {
     --last;
     auto val = tiny_stl::move(*last);
-    popHeapHelper(first, last, last, tiny_stl::move(val), cmp);
+    details::popHeapHelper(first, last, last, tiny_stl::move(val), cmp);
 }
 
 template <typename RanIter>
 inline void pop_heap(RanIter first, RanIter last) {
-    pop_heap(first, last, tiny_stl::less<>{});
+    tiny_stl::pop_heap(first, last, tiny_stl::less<>{});
 }
 
 template <typename RanIter, typename Cmp>
 inline void sort_heap(RanIter first, RanIter last, Cmp cmp) {
     for (; last - first > 1; --last)
-        pop_heap(first, last);
+        tiny_stl::pop_heap(first, last);
 }
 
 template <typename RanIter>
 inline void sort_heap(RanIter first, RanIter last) {
-    sort_heap(first, last, tiny_stl::less<>{});
+    tiny_stl::sort_heap(first, last, tiny_stl::less<>{});
 }
 
 template <typename RanIter, typename Cmp>
@@ -633,7 +650,7 @@ inline void make_heap(RanIter first, RanIter last, Cmp cmp) {
 
     while (true) {
         auto val = tiny_stl::move(*(first + parent));
-        adjustHeapHelper(first, parent, len, val, cmp);
+        details::adjustHeapHelper(first, parent, len, val, cmp);
         if (parent-- == 0)
             return;
     }
@@ -641,7 +658,7 @@ inline void make_heap(RanIter first, RanIter last, Cmp cmp) {
 
 template <typename RanIter>
 inline void make_heap(RanIter first, RanIter last) {
-    make_heap(first, last, tiny_stl::less<>{});
+    tiny_stl::make_heap(first, last, tiny_stl::less<>{});
 }
 
 template <typename RanIter, typename Cmp>
@@ -660,17 +677,17 @@ inline RanIter is_heap_until(RanIter first, RanIter last, Cmp cmp) {
 
 template <typename RanIter, typename Cmp>
 inline RanIter is_heap_until(RanIter first, RanIter last) {
-    return is_heap_until(first, last, tiny_stl::less<>{});
+    return tiny_stl::is_heap_until(first, last, tiny_stl::less<>{});
 }
 
 template <typename RanIter, typename Cmp>
 inline bool is_heap(RanIter first, RanIter last, Cmp cmp) {
-    return is_heap_until(first, last, cmp) == last;
+    return tiny_stl::is_heap_until(first, last, cmp) == last;
 }
 
 template <typename RanIter>
 inline bool is_heap(RanIter first, RanIter last) {
-    return is_heap(first, last, tiny_stl::less<>{});
+    return tiny_stl::is_heap(first, last, tiny_stl::less<>{});
 }
 
 template <typename FwdIter, typename Cmp>
@@ -698,7 +715,7 @@ inline bool is_sorted(FwdIter first, FwdIter last) {
     return tiny_stl::is_sorted_until(first, last) == last;
 }
 
-namespace {
+namespace details {
 
 // insert_sort
 template <typename RanIter, typename Compare>
@@ -731,16 +748,16 @@ template <typename RanIter, typename Compare>
 inline RanIter quickSortPartition(RanIter first, RanIter last, Compare& cmp) {
     using Diff = typename iterator_traits<RanIter>::difference_type;
     Diff randomPos = getRandom(first, last);
-    iter_swap(first + randomPos, last - 1);
+    tiny_stl::iter_swap(first + randomPos, last - 1);
     auto key = *(last - 1);
 
     RanIter i = first;
     for (RanIter j = first; j < last - 1; ++j) {
         if (cmp(*j, key)) {
-            iter_swap(i++, j);
+            tiny_stl::iter_swap(i++, j);
         }
     }
-    iter_swap(i, last - 1);
+    tiny_stl::iter_swap(i, last - 1);
 
     return i;
 }
@@ -764,8 +781,8 @@ inline void quickSort(RanIter first, RanIter last, IterDiffType<RanIter> diff,
     }
 
     if (count > INSERT_SORT_MAX) {
-        make_heap(first, last, cmp);
-        sort_heap(first, last, cmp);
+        tiny_stl::make_heap(first, last, cmp);
+        tiny_stl::sort_heap(first, last, cmp);
     }
 
     else if (count >= 2) {
@@ -773,12 +790,12 @@ inline void quickSort(RanIter first, RanIter last, IterDiffType<RanIter> diff,
     }
 }
 
-} // namespace
+} // namespace details
 
 template <typename RanIter, typename Compare>
 inline void sort(RanIter first, RanIter last, Compare cmp) {
     if (last - first - 1 > 0) {
-        quickSort(first, last, last - first, cmp);
+        details::quickSort(first, last, last - first, cmp);
     }
 }
 
@@ -794,13 +811,13 @@ inline FwdIter lower_bound(FwdIter first, FwdIter last, const T& val,
 
     FwdIter ret = first;
     using Diff = typename iterator_traits<FwdIter>::difference_type;
-    Diff size = distance(first, last);
+    Diff size = tiny_stl::distance(first, last);
     Diff step = 0;
 
     while (size > 0) {
         ret = first;
         step = size >> 1;
-        advance(ret, step);
+        tiny_stl::advance(ret, step);
 
         if (!cmp(*ret, val)) { // left
             size = step;
@@ -815,7 +832,7 @@ inline FwdIter lower_bound(FwdIter first, FwdIter last, const T& val,
 
 template <typename FwdIter, typename T>
 inline FwdIter lower_bound(FwdIter first, FwdIter last, const T& val) {
-    return lower_bound(first, last, val, tiny_stl::less<>{});
+    return tiny_stl::lower_bound(first, last, val, tiny_stl::less<>{});
 }
 
 template <typename FwdIter, typename T, typename Compare>
@@ -825,13 +842,13 @@ inline FwdIter upper_bound(FwdIter first, FwdIter last, const T& val,
 
     FwdIter ret = first;
     using Diff = typename iterator_traits<FwdIter>::difference_type;
-    Diff size = distance(first, last);
+    Diff size = tiny_stl::distance(first, last);
     Diff step = 0;
 
     while (size > 0) {
         ret = first;
         step = size >> 1;
-        advance(ret, step);
+        tiny_stl::advance(ret, step);
         if (cmp(val, *ret)) { // left
             size = step;
         } else { // right
@@ -845,34 +862,34 @@ inline FwdIter upper_bound(FwdIter first, FwdIter last, const T& val,
 
 template <typename FwdIter, typename T>
 inline FwdIter upper_bound(FwdIter first, FwdIter last, const T& val) {
-    return upper_bound(first, last, val, tiny_stl::less<>{});
+    return tiny_stl::upper_bound(first, last, val, tiny_stl::less<>{});
 }
 
 template <typename FwdIter, typename T, typename Compare>
 inline FwdIter binary_search(FwdIter first, FwdIter last, const T& val,
                              Compare cmp) {
-    first = lower_bound(first, last, val, cmp);
+    first = tiny_stl::lower_bound(first, last, val, cmp);
     return (!(first == last)) && !(cmp(val, *first));
 }
 
 template <typename FwdIter, typename T>
 inline FwdIter binary_search(FwdIter first, FwdIter last, const T& val) {
-    first = lower_bound(first, last, val);
+    first = tiny_stl::lower_bound(first, last, val);
     return (!(first == last)) && !(val < *first);
 }
 
 template <typename FwdIter, typename T, typename Compare>
 inline pair<FwdIter, FwdIter> equal_range(FwdIter first, FwdIter last,
                                           const T& val, Compare cmp) {
-    return make_pair(lower_bound(first, last, val, cmp),
-                     upper_bound(first, last, val, cmp));
+    return tiny_stl::make_pair(lower_bound(first, last, val, cmp),
+                               upper_bound(first, last, val, cmp));
 }
 
 template <typename FwdIter, typename T>
 inline pair<FwdIter, FwdIter> equal_range(FwdIter first, FwdIter last,
                                           const T& val) {
-    return make_pair(lower_bound(first, last, val),
-                     upper_bound(first, last, val));
+    return tiny_stl::make_pair(lower_bound(first, last, val),
+                               upper_bound(first, last, val));
 }
 
 } // namespace tiny_stl

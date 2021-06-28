@@ -1691,7 +1691,7 @@ inline cow_basic_string<CharT> IntegerToCowStringAux(T val, const CharT* zero) {
         *ptr++ = cow_basic_string<CharT>::traits_type::to_char_type('-');
     }
     *ptr = cow_basic_string<CharT>::traits_type::to_char_type('\0');
-    reverse(buffer, ptr);
+    tiny_stl::reverse(buffer, ptr);
     return cow_basic_string<CharT>{buffer};
 }
 

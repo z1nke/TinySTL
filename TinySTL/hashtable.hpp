@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "array.hpp"
 #include "forward_list.hpp"
 #include "vector.hpp"
 
@@ -141,22 +142,26 @@ struct HashIterator {
     }
 };
 
-// FIXME: write a helper class for prime
-static const int stlPrimesSize = 28;
-static const std::size_t stlPrimesArray[stlPrimesSize] = {
-    53,        97,         193,         389,        769,       1543,
-    3079,      6151,       12289,       24593,      49157,     98317,
-    196613,    393241,     786433,      1572869,    3145739,   6291469,
-    12582917,  25165843,   50331653,    100663319,  201326611, 402653189,
-    805306457, 1610612741, 3221225473U, 4294967291U};
+namespace details {
+
+struct PrimeNumbers {
+    static constexpr std::size_t size = 28;
+    static constexpr tiny_stl::array<std::size_t, size> arr = {
+        53,        97,         193,         389,        769,       1543,
+        3079,      6151,       12289,       24593,      49157,     98317,
+        196613,    393241,     786433,      1572869,    3145739,   6291469,
+        12582917,  25165843,   50331653,    100663319,  201326611, 402653189,
+        805306457, 1610612741, 3221225473U, 4294967291U };
+};
 
 inline std::size_t stlNextPrime(std::size_t n) {
-    const std::size_t* first = stlPrimesArray;
-    const std::size_t* last = stlPrimesArray + stlPrimesSize;
-    const std::size_t* pos = lower_bound(first, last, n);
+  auto pbegin = details::PrimeNumbers::arr.begin();
+  auto pend = details::PrimeNumbers::arr.end();
+  auto pos = tiny_stl::lower_bound(pbegin, pend, n);
 
-    return pos == last ? *(last - 1) : *pos;
+  return (pos == pend) ? details::PrimeNumbers::arr.back() : *pos;
 }
+} // namespace details
 
 template <typename T, typename Hash, typename KeyEqual, typename Alloc,
           bool isMap>
@@ -222,7 +227,7 @@ private:
     }
 
     void init(size_type n) {
-        const size_type num_bucket = stlNextPrime(n);
+        const size_type num_bucket = details::stlNextPrime(n);
         buckets.reserve(num_bucket);
         buckets.assign(num_bucket, List{});
         maxfactor = 1.0f;
@@ -371,7 +376,7 @@ private:
     template <typename Value>
     iterator insertEqualAux(Value&& val) {
         if (load_factor() > max_load_factor())
-            rehash(stlNextPrime(size()));
+            rehash(details::stlNextPrime(size()));
 
         ++num_elements;
 
@@ -406,7 +411,7 @@ private:
         // not exist
         ++num_elements;
         if (load_factor() > max_load_factor()) {
-            rehash(stlNextPrime(size()));
+            rehash(details::stlNextPrime(size()));
             idx = getNthBucket(val);
         }
 
@@ -654,7 +659,7 @@ public:
     void rehash(size_type n) {
         if (n <= size() / max_load_factor())
             return;
-        HashTable tmp(stlNextPrime(n));
+        HashTable tmp(details::stlNextPrime(n));
         for (const auto& val : *this)
             tmp.insert_equal(val);
         this->swap(tmp);

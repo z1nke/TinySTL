@@ -15,6 +15,8 @@
 
 namespace tiny_stl {
 
+namespace details {
+
 template <typename T>
 inline T* allocateHelper(std::ptrdiff_t size, T* /* p */) {
     std::set_new_handler(nullptr);
@@ -37,6 +39,8 @@ inline void constructHelper(T* p, Args&&... args) {
     new (const_cast<void*>(static_cast<const volatile void*>(p)))
         T(tiny_stl::forward<Args>(args)...); // placement new, ctor T
 }
+
+} // namespace details
 
 template <typename T>
 inline void destroy_at(T* ptr) {
@@ -81,12 +85,12 @@ public:
     };
 
     pointer allocate(size_type n) {
-        return allocateHelper(static_cast<difference_type>(n),
-                              reinterpret_cast<pointer>(0));
+        return details::allocateHelper(static_cast<difference_type>(n),
+                                       reinterpret_cast<pointer>(0));
     }
 
     void deallocate(pointer p, std::size_t n) noexcept {
-        deallocateHelper(p);
+        details::deallocateHelper(p);
     }
 
     pointer address(reference x) const noexcept {
@@ -99,12 +103,12 @@ public:
 
     template <typename Obj, typename... Args>
     void construct(Obj* p, Args&&... args) {
-        constructHelper(p, tiny_stl::forward<Args>(args)...);
+        details::constructHelper(p, tiny_stl::forward<Args>(args)...);
     }
 
     template <typename Obj>
     void destroy(Obj* ptr) {
-        destroy_at(ptr);
+        tiny_stl::destroy_at(ptr);
     }
 
     size_type max_size() const noexcept {
