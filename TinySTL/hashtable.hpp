@@ -144,7 +144,7 @@ struct HashIterator {
 
 namespace details {
 
-constexpr std::array<std::size_t, 28> stlPrimes() {
+constexpr tiny_stl::array<std::size_t, 28> stlPrimes() {
     return {53,         97,          193,        389,       769,
             1543,       3079,        6151,       12289,     24593,
             49157,      98317,       196613,     393241,    786433,
@@ -155,7 +155,7 @@ constexpr std::array<std::size_t, 28> stlPrimes() {
 
 inline std::size_t stlNextPrime(std::size_t n) {
     constexpr std::size_t size = stlPrimes().size();
-    const auto& primes = stlPrimes();
+    const tiny_stl::array<std::size_t, size>& primes = stlPrimes();
     auto pbegin = primes.begin();
     auto pend = primes.end();
     auto pos = tiny_stl::lower_bound(pbegin, pend, n);
