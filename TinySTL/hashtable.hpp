@@ -144,22 +144,23 @@ struct HashIterator {
 
 namespace details {
 
-struct PrimeNumbers {
-    static constexpr std::size_t size = 28;
-    static constexpr tiny_stl::array<std::size_t, size> arr = {
-        53,        97,         193,         389,        769,       1543,
-        3079,      6151,       12289,       24593,      49157,     98317,
-        196613,    393241,     786433,      1572869,    3145739,   6291469,
-        12582917,  25165843,   50331653,    100663319,  201326611, 402653189,
-        805306457, 1610612741, 3221225473U, 4294967291U };
-};
+constexpr std::array<std::size_t, 28> stlPrimes() {
+    return {53,         97,          193,        389,       769,
+            1543,       3079,        6151,       12289,     24593,
+            49157,      98317,       196613,     393241,    786433,
+            1572869,    3145739,     6291469,    12582917,  25165843,
+            50331653,   100663319,   201326611,  402653189, 805306457,
+            1610612741, 3221225473U, 4294967291U};
+}
 
 inline std::size_t stlNextPrime(std::size_t n) {
-  auto pbegin = details::PrimeNumbers::arr.begin();
-  auto pend = details::PrimeNumbers::arr.end();
-  auto pos = tiny_stl::lower_bound(pbegin, pend, n);
+    constexpr std::size_t size = stlPrimes().size();
+    const auto& primes = stlPrimes();
+    auto pbegin = primes.begin();
+    auto pend = primes.end();
+    auto pos = tiny_stl::lower_bound(pbegin, pend, n);
 
-  return (pos == pend) ? details::PrimeNumbers::arr.back() : *pos;
+    return (pos == pend) ? primes.back() : *pos;
 }
 } // namespace details
 
@@ -628,7 +629,8 @@ public:
     }
 
     size_type max_bucket_count() const noexcept {
-        return stlPrimesArray[stlPrimesSize - 1] >> 2;
+        std::size_t size = details::stlPrimes().size();
+        return details::stlPrimes().back() >> 2;
     }
 
     size_type bucket_size(size_type n) const {
