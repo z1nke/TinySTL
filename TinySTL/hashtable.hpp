@@ -154,8 +154,7 @@ constexpr tiny_stl::array<std::size_t, 28> stlPrimes() {
 }
 
 inline std::size_t stlNextPrime(std::size_t n) {
-    constexpr std::size_t size = stlPrimes().size();
-    const tiny_stl::array<std::size_t, size>& primes = stlPrimes();
+    const auto& primes = stlPrimes();
     auto pbegin = primes.begin();
     auto pend = primes.end();
     auto pos = tiny_stl::lower_bound(pbegin, pend, n);
