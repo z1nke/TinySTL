@@ -5,7 +5,7 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/5524375371a64727b87def22481608fb)](https://www.codacy.com/gh/syn1w/TinySTL/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=syn1w/TinySTL&amp;utm_campaign=Badge_Grade)
 
 基于 `C++14 ` 的 TinySTL。  
-编译环境：VS2017, VS2019, 支持 C++14 的 clang++ 和 g++ 编译器
+编译环境：VS2017，VS2019，VS2022，支持 C++14 的 clang++ 和 g++ 编译器
 
 实现的部分：
 
