@@ -65,6 +65,8 @@ struct DequeConstIterator {
         rhs.node = nullptr;
     }
 
+    DequeConstIterator& operator=(DequeConstIterator&& rhs) noexcept = default;
+
     DequeConstIterator& operator=(const DequeConstIterator&) = default;
 
     void setNode(MapPtr new_node) {

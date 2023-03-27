@@ -109,14 +109,13 @@ struct RBTreeConstIterator {
 
     using Ptr = RBTNode<T>*;
 
-    Ptr ptr;
+    Ptr ptr = nullptr;
 
-    RBTreeConstIterator() : ptr() {
-    }
+    RBTreeConstIterator() = default;
     RBTreeConstIterator(Ptr x) : ptr(x) {
     }
-    RBTreeConstIterator(const RBTreeConstIterator& rhs) : ptr(rhs.ptr) {
-    }
+    RBTreeConstIterator(const RBTreeConstIterator& rhs) = default;
+    RBTreeConstIterator& operator=(const RBTreeConstIterator& rhs) = default;
 
     reference operator*() const {
         return ptr->value;

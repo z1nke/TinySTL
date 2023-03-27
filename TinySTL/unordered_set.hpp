@@ -152,7 +152,7 @@ public:
 
     template <typename... Args>
     pair<iterator, bool> emplace(Args&&... args) {
-        this->emplace_unique(tiny_stl::forward<Args>(args)...);
+        return this->emplace_unique(tiny_stl::forward<Args>(args)...);
     }
 
     void swap(unordered_set& rhs) {
@@ -317,7 +317,7 @@ public:
 
     template <typename... Args>
     iterator emplace(Args&&... args) {
-        this->emplace_equal(tiny_stl::forward<Args>(args)...);
+        return this->emplace_equal(tiny_stl::forward<Args>(args)...);
     }
 
     void swap(unordered_multiset& rhs) {
