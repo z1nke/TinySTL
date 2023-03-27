@@ -27,14 +27,13 @@ struct ListConstIterator {
     using reference = const T&;
     using Ptr = LNode<T>*;
 
-    Ptr ptr;
+    Ptr ptr = nullptr;
 
-    ListConstIterator() : ptr(nullptr) {
-    }
+    ListConstIterator() = default;
     ListConstIterator(Ptr x) : ptr(x) {
     }
-    ListConstIterator(const ListConstIterator& rhs) : ptr(rhs.ptr) {
-    }
+    ListConstIterator(const ListConstIterator& rhs) = default;
+    ListConstIterator& operator=(const ListConstIterator& rhs) = default;
 
     reference operator*() const {
         return ptr->data;

@@ -73,7 +73,7 @@ struct CowStringConstIterator {
 
     Self operator-(difference_type n) const {
         Self tmp = *this;
-        return tmp += n;
+        return tmp -= n;
     }
 
     difference_type operator-(const Self& rhs) const {

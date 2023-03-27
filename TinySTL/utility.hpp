@@ -256,7 +256,7 @@ make_pair(T1&& t1, T2&& t2) {
 
 template <typename T1, typename T2>
 constexpr bool operator==(const pair<T1, T2>& lhs, const pair<T1, T2>& rhs) {
-    return (lhs.first == rhs.first && lhs.second == lhs.second);
+    return (lhs.first == rhs.first && lhs.second == rhs.second);
 }
 
 template <typename T1, typename T2>

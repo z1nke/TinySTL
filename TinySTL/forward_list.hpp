@@ -30,14 +30,13 @@ struct FListConstIterator {
     using reference = const T&;
     using Ptr = FLNode<T>*;
 
-    Ptr ptr;
+    Ptr ptr = nullptr;
 
-    FListConstIterator() : ptr(nullptr) {
-    }
+    FListConstIterator() = default;
     FListConstIterator(Ptr x) : ptr(x) {
     }
-    FListConstIterator(const FListConstIterator& rhs) : ptr(rhs.ptr) {
-    }
+    FListConstIterator(const FListConstIterator& rhs) = default;
+    FListConstIterator& operator=(const FListConstIterator& rhs) = default;
 
     reference operator*() const {
         return ptr->data;

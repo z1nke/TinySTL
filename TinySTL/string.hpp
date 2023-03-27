@@ -45,7 +45,7 @@ struct StringConstIterator {
     }
 
     Self& operator--() {
-        ++ptr;
+        --ptr;
         return *this;
     }
 
@@ -211,13 +211,11 @@ private:
                       "size of value_type is too large");
         static constexpr const size_type kBufferSize = 16 / sizeof(value_type);
         static constexpr const size_type kBufferMask =
-            sizeof(value_type) <= 1
-                ? 15
-                : sizeof(value_type) <= 2
-                      ? 7
-                      : sizeof(value_type) <= 4
-                            ? 3
-                            : sizeof(value_type) <= 8 ? 1 : 0;
+            sizeof(value_type) <= 1   ? 15
+            : sizeof(value_type) <= 2 ? 7
+            : sizeof(value_type) <= 4 ? 3
+            : sizeof(value_type) <= 8 ? 1
+                                      : 0;
 
     public:
         size_type size;
@@ -403,7 +401,7 @@ public:
     }
 
     basic_string& assign(size_type count, value_type ch) {
-        init(count, ch);
+        return init(count, ch);
     }
 
     basic_string& assign(const basic_string& rhs) {
@@ -413,7 +411,7 @@ public:
 
     basic_string& assign(const basic_string& rhs, size_type pos,
                          size_type count = npos) {
-        init(rhs, pos, count);
+        return init(rhs, pos, count);
     }
 
     basic_string& assing(basic_string&& rhs) noexcept(
@@ -424,11 +422,11 @@ public:
     }
 
     basic_string& assign(const value_type* str, size_type count) {
-        init(str, count);
+        return init(str, count);
     }
 
     basic_string& assign(const value_type* str) {
-        init(str);
+        return init(str);
     }
 
     template <typename InIter, typename = enable_if_t<is_iterator_v<InIter>>>
@@ -436,6 +434,7 @@ public:
         // FIXME: if InIter is not [const] value_type*
         constructRange(first, last,
                        typename iterator_traits<InIter>::iterator_category{});
+        return *this;
     }
 
     basic_string& assign(std::initializer_list<value_type> ilist) {
@@ -1726,8 +1725,8 @@ struct hash<basic_string<CharT, Traits, Alloc>> {
     using argument_type = basic_string<CharT, Traits, Alloc>;
     using result_type = std::size_t;
 
-    std::size_t operator()(const basic_string<CharT, Traits, Alloc>& str) const
-        noexcept {
+    std::size_t
+    operator()(const basic_string<CharT, Traits, Alloc>& str) const noexcept {
         return tiny_stl::hashFNV(str.c_str(), str.size());
     }
 };
